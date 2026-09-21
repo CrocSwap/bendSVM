@@ -1,0 +1,66 @@
+name: external-alpha
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  supported-alpha:
+    name: Ubuntu 22.04 / Node 22 / Rust 1.92 / Anza v1.53
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.14.0'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.92.0'
+      - name: Install host build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes clang
+      - name: Install pinned Anza platform-tools
+        env:
+          TOOLS_ROOT: ${{ runner.temp }}/platform-tools-v1.53
+        run: |
+          mkdir -p "$TOOLS_ROOT"
+          curl --fail --location --retry 3 \
+            https://github.com/anza-xyz/platform-tools/releases/download/v1.53/platform-tools-linux-x86_64.tar.bz2 \
+            | tar -xj -C "$TOOLS_ROOT"
+          test -x "$TOOLS_ROOT/llvm/bin/clang"
+          test -x "$TOOLS_ROOT/llvm/bin/ld.lld"
+          test -x "$TOOLS_ROOT/llvm/bin/llvm-readelf"
+          echo "SBF_TOOLS=$TOOLS_ROOT/llvm/bin" >> "$GITHUB_ENV"
+      - name: Provision locked dependencies
+        run: npm run bootstrap:alpha
+      - name: Run prerequisite diagnostics
+        run: npm run doctor
+      - name: Run isolated external-alpha acceptance
+        run: npm run acceptance:alpha
+      - name: Generate fixtures and run complete regression suite
+        run: npm test
+      - name: Run generated-client and packaging checks after fixture generation
+        run: |
+          npm exec -- bun tests/program-client.ts
+          npm exec -- bun tests/project-commands.ts
+          npm exec -- bun tests/client-packaging.ts
+      - name: Upload alpha evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: external-alpha-evidence
+          path: |
+            build/external-alpha/*.json
+            build/*-acceptance.json
+            build/*-benchmark.json
+            build/reproducibility.json
+            build/*.manifest.json
+            build/*.interface.json
+            build/*.resources.json
+            build/*.stack.json
+            build/*.client.js
+            build/*.client.d.ts
+          if-no-files-found: ignore
