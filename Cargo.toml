@@ -1,0 +1,26 @@
+[package]
+name = "bendsvm-poc"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+publish = false
+
+[dev-dependencies]
+litesvm = "=0.7.1"
+solana-account = "2.2"
+solana-instruction = "2.3"
+solana-keypair = "2.2"
+solana-message = "2.4"
+solana-pubkey = "2.4"
+solana-signer = "2.2"
+solana-transaction = "2.2"
+solana-transaction-error = "2.2"
+solana-system-interface = { version = "=1.0.0", features = ["bincode"] }
+spl-token = { version = "=8.0.0", features = ["no-entrypoint"] }
+solana-program-pack = "2.2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[[test]]
+name = "sbf"
+path = "tests/sbf.rs"

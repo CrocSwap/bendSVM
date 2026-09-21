@@ -1,0 +1,15 @@
+.deps/
+node_modules/
+build/
+target/
+*.o
+
+# Fadeno dispatch state and other local operational files.
+.fadeno/
+
+# Local wallet/key material; generated live runs stay under build/ as well.
+*.key
+*.pem
+build/devnet-alpha-payer.json
+build/live-queue-*/
+build/live-validator-ledger/
