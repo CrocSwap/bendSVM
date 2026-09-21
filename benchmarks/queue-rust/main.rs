@@ -1,0 +1,402 @@
+//! Standalone Rust queue SBF baseline. Account validation precedes every token CPI;
+//! state is committed only after all effects succeed, matching the shared ABI.
+#![no_std]
+mod transition;
+mod wire;
+use core::{ptr, slice};
+use transition::{Authority, Effect, Key, State};
+
+#[derive(Clone, Copy)]
+#[repr(C)]
+struct Account {
+    key: *const u8,
+    lamports: *mut u64,
+    data_len: u64,
+    data: *mut u8,
+    owner: *const u8,
+    rent_epoch: u64,
+    signer: bool,
+    writable: bool,
+    executable: bool,
+}
+impl Account {
+    fn key(&self) -> &Key {
+        unsafe { &*self.key.cast() }
+    }
+    fn owner(&self) -> &Key {
+        unsafe { &*self.owner.cast() }
+    }
+    fn bytes(&self) -> &[u8] {
+        unsafe { slice::from_raw_parts(self.data, self.data_len as usize) }
+    }
+}
+#[derive(Clone, Copy)]
+#[repr(C)]
+struct Meta {
+    key: *const u8,
+    writable: bool,
+    signer: bool,
+}
+#[repr(C)]
+struct Cpi {
+    program: *const u8,
+    accounts: *const Meta,
+    count: u64,
+    data: *const u8,
+    length: u64,
+}
+#[repr(C)]
+struct Seed {
+    address: *const u8,
+    length: u64,
+}
+#[repr(C)]
+struct Signer {
+    seeds: *const Seed,
+    count: u64,
+}
+extern "C" {
+    fn sol_try_find_program_address(
+        seeds: *const Seed,
+        count: i32,
+        program: *const u8,
+        key: *mut u8,
+        bump: *mut u8,
+    ) -> u64;
+    fn sol_invoke_signed_c(
+        ix: *const Cpi,
+        accounts: *const Account,
+        count: i32,
+        signers: *const Signer,
+        signer_count: i32,
+    ) -> u64;
+    fn sol_get_clock_sysvar(clock: *mut u8) -> u64;
+    fn sol_set_return_data(data: *const u8, length: u64);
+    fn abort() -> !;
+}
+#[panic_handler]
+fn panic(_: &core::panic::PanicInfo) -> ! {
+    unsafe { abort() }
+}
+const TOKEN: Key = [
+    6, 221, 246, 225, 215, 101, 161, 147, 217, 203, 225, 70, 206, 235, 121, 172, 28, 180, 133, 237,
+    95, 91, 55, 145, 58, 140, 245, 133, 126, 255, 0, 169,
+];
+const PREFIX: &[u8; 4] = b"bend";
+fn number(data: &[u8], start: usize, length: usize) -> u64 {
+    let mut result = 0;
+    for i in 0..length {
+        result |= u64::from(data[start + i]) << (8 * i);
+    }
+    result
+}
+fn authority(value: Authority) -> usize {
+    match value {
+        Authority::Actor => 1,
+        Authority::Custody => 3,
+    }
+}
+fn token_shape(a: &Account) -> bool {
+    a.data_len == 165 && matches!(a.bytes()[108], 1 | 2) && number(a.bytes(), 109, 4) == 0
+}
+fn token_owned(a: &Account, accounts: &[Account]) -> bool {
+    !a.executable && a.owner() == accounts[2].key()
+}
+
+fn validate(effect: &Effect, accounts: &[Account]) -> Result<(), u64> {
+    let Effect::Transfer {
+        source,
+        destination,
+        mint,
+        mint_key,
+        recipient,
+        authority: auth,
+        source_key,
+        destination_key,
+        ..
+    } = effect
+    else {
+        return Ok(());
+    };
+    if *mint < 4 || *mint >= accounts.len() {
+        return Err(12);
+    }
+    let mint_account = &accounts[*mint];
+    if !token_owned(mint_account, accounts) {
+        return Err(13);
+    }
+    if mint_account.data_len != 82 || mint_account.bytes()[45] != 1 {
+        return Err(14);
+    }
+    if mint_account.key() != mint_key {
+        return Err(15);
+    }
+    if *source < 4
+        || *destination < 4
+        || *source >= accounts.len()
+        || *destination >= accounts.len()
+        || source == destination
+        || source == mint
+        || destination == mint
+    {
+        return Err(12);
+    }
+    let src = &accounts[*source];
+    let dst = &accounts[*destination];
+    if !src.writable || !dst.writable {
+        return Err(5);
+    }
+    if !token_owned(src, accounts) || !token_owned(dst, accounts) {
+        return Err(13);
+    }
+    if !token_shape(src) || !token_shape(dst) {
+        return Err(14);
+    }
+    if src.bytes()[..32] != *mint_key || dst.bytes()[..32] != *mint_key {
+        return Err(15);
+    }
+    if source_key.is_some_and(|key| key != *src.key())
+        || destination_key.is_some_and(|key| key != *dst.key())
+    {
+        return Err(25);
+    }
+    if (*auth == Authority::Actor && !accounts[1].signer)
+        || src.bytes()[32..64] != *accounts[authority(*auth)].key()
+    {
+        return Err(16);
+    }
+    let expected = recipient.as_ref().unwrap_or(accounts[3].key());
+    if dst.bytes()[32..64] != *expected {
+        return Err(17);
+    }
+    Ok(())
+}
+fn execute(effect: &Effect, accounts: &[Account], bump: u8) -> u64 {
+    let Effect::Transfer {
+        source,
+        destination,
+        mint,
+        amount,
+        authority: auth,
+        ..
+    } = effect
+    else {
+        return 0;
+    };
+    let metas = [
+        Meta {
+            key: accounts[*source].key,
+            writable: true,
+            signer: false,
+        },
+        Meta {
+            key: accounts[*mint].key,
+            writable: false,
+            signer: false,
+        },
+        Meta {
+            key: accounts[*destination].key,
+            writable: true,
+            signer: false,
+        },
+        Meta {
+            key: accounts[authority(*auth)].key,
+            writable: false,
+            signer: true,
+        },
+    ];
+    let mut data = [0u8; 10];
+    data[0] = 12;
+    data[1..9].copy_from_slice(&amount.to_le_bytes());
+    data[9] = accounts[*mint].bytes()[44];
+    let ix = Cpi {
+        program: accounts[2].key,
+        accounts: metas.as_ptr(),
+        count: 4,
+        data: data.as_ptr(),
+        length: 10,
+    };
+    let seeds = [
+        Seed {
+            address: PREFIX.as_ptr(),
+            length: 4,
+        },
+        Seed {
+            address: accounts[0].key,
+            length: 32,
+        },
+        Seed {
+            address: &bump,
+            length: 1,
+        },
+    ];
+    let signer = Signer {
+        seeds: seeds.as_ptr(),
+        count: 3,
+    };
+    unsafe {
+        sol_invoke_signed_c(
+            &ix,
+            accounts.as_ptr(),
+            accounts.len() as i32,
+            &signer,
+            i32::from(*auth == Authority::Custody),
+        )
+    }
+}
+
+// Only the loader's serialized-buffer bounds are trusted. Account contents and
+// instruction bytes are checked before they are interpreted or changed.
+#[no_mangle]
+pub unsafe extern "C" fn entrypoint(input: *const u8) -> u64 {
+    match run(input) {
+        Ok(()) => 0,
+        Err(code) => code,
+    }
+}
+unsafe fn run(input: *const u8) -> Result<(), u64> {
+    let count = ptr::read_unaligned(input.cast::<u64>()) as usize;
+    if !(5..=12).contains(&count) {
+        return Err(1);
+    }
+    let blank = Account {
+        key: ptr::null(),
+        lamports: ptr::null_mut(),
+        data_len: 0,
+        data: ptr::null_mut(),
+        owner: ptr::null(),
+        rent_epoch: 0,
+        signer: false,
+        writable: false,
+        executable: false,
+    };
+    let mut storage = [blank; 12];
+    let mut p = input.add(8);
+    for i in 0..count {
+        if *p != 255 {
+            return Err(6);
+        }
+        let data_len = ptr::read_unaligned(p.add(80).cast::<u64>());
+        let data = p.add(88) as *mut u8;
+        let rent = ((data.add(data_len as usize + 10240) as usize + 7) & !7) as *const u8;
+        storage[i] = Account {
+            key: p.add(8),
+            owner: p.add(40),
+            lamports: p.add(72) as *mut u64,
+            data_len,
+            data,
+            rent_epoch: ptr::read_unaligned(rent.cast()),
+            signer: *p.add(1) != 0,
+            writable: *p.add(2) != 0,
+            executable: *p.add(3) != 0,
+        };
+        for j in 0..i {
+            if storage[i].key() == storage[j].key() {
+                return Err(6);
+            }
+        }
+        p = rent.add(8);
+    }
+    let accounts = &storage[..count];
+    let length = ptr::read_unaligned(p.cast::<u64>()) as usize;
+    let ix = p.add(8);
+    let program = ix.add(length);
+    if length != wire::INSTRUCTION_BYTES || *ix > 1 {
+        return Err(2);
+    }
+    let state = &accounts[0];
+    if state.owner() != &*program.cast::<Key>() || state.executable {
+        return Err(3);
+    }
+    if !state.writable {
+        return Err(5);
+    }
+    if state.data_len != wire::STATE_BYTES as u64 {
+        return Err(4);
+    }
+    let before = if *ix == 0 {
+        if !state.signer {
+            return Err(7);
+        }
+        if state.bytes().iter().any(|byte| *byte != 0) {
+            return Err(4);
+        }
+        State::Empty
+    } else {
+        wire::state(state.bytes()).ok_or(4u64)?
+    };
+    let collection=&accounts[4];
+    if collection.owner()!=&*program.cast::<Key>()||collection.executable{return Err(3);}
+    if !collection.writable{return Err(5);}
+    if collection.data_len<56{return Err(4);}
+    let payload=collection.data_len-56;
+    if payload%43!=0||payload/43>u32::MAX as u64{return Err(4);}
+    let capacity=(payload/43) as u32;
+    let logical=if *ix==0 {
+        if !collection.signer{return Err(7);}
+        if collection.bytes().iter().any(|b|*b!=0){return Err(4);}0
+    }else{
+        let bytes=collection.bytes();
+        if bytes[..20]!=wire::COLLECTION_HEADER||bytes[24..56]!=*state.key(){return Err(4);}
+        let n=number(bytes,20,4) as u32;if n>capacity{return Err(4);}n
+    };
+    let instruction=wire::instruction(slice::from_raw_parts(ix,length)).ok_or(2u64)?;
+    let mut clock = [0u64; 5];
+    if sol_get_clock_sysvar(clock.as_mut_ptr().cast()) != 0 {
+        return Err(8);
+    }
+    let metadata=transition::Metadata{length:logical,capacity};
+    let (start,reserved)=transition::select(before,instruction,metadata)?;
+    let loaded=reserved.min(logical-start);
+    let mut window=transition::Window{start,length:loaded,items:[transition::Obligation{recipient:[0;32],amount:0};2]};
+    for i in 0..loaded as usize {
+        let offset=56+(start as usize+i)*43;
+        window.items[i]=wire::record(&collection.bytes()[offset..offset+43]).ok_or(4u64)?;
+    }
+    let (after,window,next,effects)=transition::process(accounts[1].signer,*accounts[1].key(),*collection.key(),before,instruction,metadata,window)
+        .map_err(|code|256+u64::from(code))?;
+    if window.start!=start||window.length<loaded||window.length>reserved||next<logical||next>capacity{return Err(9);}
+    let added=window.length-loaded;
+    if (added>0&&logical-start!=loaded)||added!=next-logical{return Err(9);}
+    let encoded=wire::payload(after);
+    let mut records=[[0u8;43];2];for i in 0..window.length as usize{records[i]=wire::encode_record(window.items[i]);}
+    if !accounts[2].executable || *accounts[2].key() != TOKEN {
+        return Err(10);
+    }
+    let seeds = [
+        Seed {
+            address: PREFIX.as_ptr(),
+            length: 4,
+        },
+        Seed {
+            address: accounts[0].key,
+            length: 32,
+        },
+    ];
+    let mut derived = [0; 32];
+    let mut bump = 0;
+    if sol_try_find_program_address(seeds.as_ptr(), 2, program, derived.as_mut_ptr(), &mut bump)
+        != 0
+        || derived != *accounts[3].key()
+    {
+        return Err(11);
+    }
+    for effect in &effects {
+        validate(effect, accounts)?;
+    }
+    for effect in &effects {
+        if execute(effect, accounts, bump) != 0 {
+            return Err(18);
+        }
+    }
+    for i in 0..window.length as usize {
+        ptr::copy_nonoverlapping(records[i].as_ptr(),collection.data.add(56+(start as usize+i)*43),43);
+    }
+    ptr::copy_nonoverlapping(wire::COLLECTION_HEADER.as_ptr(),collection.data,20);
+    ptr::copy_nonoverlapping(next.to_le_bytes().as_ptr(),collection.data.add(20),4);
+    ptr::copy_nonoverlapping(state.key,collection.data.add(24),32);
+    ptr::copy_nonoverlapping(wire::HEADER.as_ptr(), state.data, 20);
+    ptr::copy_nonoverlapping(encoded.as_ptr(), state.data.add(20), wire::PAYLOAD_BYTES);
+    sol_set_return_data(encoded.as_ptr(), wire::PAYLOAD_BYTES as u64);
+    Ok(())
+}

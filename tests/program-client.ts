@@ -1,0 +1,42 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {addressBytes,addressString,programClient} from '../sdk/program-client.ts';
+import {emitClient} from '../compiler/client.ts';
+
+const read=(stem:string,suffix:string)=>JSON.parse(fs.readFileSync(`build/${stem}.${suffix}.json`,'utf8'));
+const key=(n:number)=>addressString(new Uint8Array(32).fill(n));
+for(const n of [0,1,7,128,255])assert.deepEqual(addressBytes(key(n)),new Uint8Array(32).fill(n));
+for(const bad of ['', '0'.repeat(32),'1','1'.repeat(33)])assert.throws(()=>addressBytes(bad));
+const schema=read('collection-store','schema'),layout=read('collection-store','interface');
+const client=programClient(schema,layout,key(9)),accounts={state:key(1),actor:key(2),collection:key(3)};
+const append=client.call('Append',{value:17},accounts,{mode:'initialize'});
+assert.deepEqual([...append.data],[0,0,17,0,0,0,0,0,0,0]);
+assert.deepEqual(append.accounts.map(a=>[a.signer,a.writable]),[[true,true],[true,false],[true,true]]);
+assert.deepEqual(client.call('Append',{value:0},accounts).accounts.map(a=>a.signer),[false,true,false]);
+assert.deepEqual(client.allocationBytes(4096),{state:25,collection:16440});
+for(const value of [-1,4294967296,1.5,'17'])assert.throws(()=>client.call('Append',{value},accounts));
+assert.throws(()=>client.call('Append',{value:17,extra:1},accounts));
+assert.throws(()=>client.call('Missing',{},accounts));
+assert.throws(()=>client.call('Append',{value:1},{...accounts,actor:accounts.state}));
+assert.throws(()=>programClient(schema,{...layout,accounts:['actor','state','collection']},key(9)));
+const bytes=new Uint8Array(16440);bytes.set(layout.collection.header);bytes.set(addressBytes(accounts.state),24);
+new DataView(bytes.buffer).setUint32(20,1,true);new DataView(bytes.buffer).setUint32(56,17,true);
+assert.deepEqual(client.collection(bytes,accounts.state,0,1),{length:1,capacity:4096,entries:[17]});
+assert.throws(()=>client.collection(bytes,key(4),0,1));
+const queue=programClient(read('queue','schema'),read('queue','interface'),key(9));
+const qa={state:key(1),actor:key(2),tokenProgram:key(3),custody:key(4),collection:key(5)};
+const q=queue.call('Append',{recipient:key(6),amount:0xffffffffffffffffn},qa);
+assert.deepEqual([...q.data.subarray(0,44)],[1,1,0,...new Uint8Array(32).fill(6),0,...new Uint8Array(8).fill(255)]);
+assert.equal(q.data.length,68);
+assert.throws(()=>queue.call('Append',{recipient:key(6),amount:1},qa));
+// Existing ABI 1/2 descriptors use the same client factory, including CPI layouts.
+for(const stem of ['vault','multi-storage','multi-storage-3','multi-storage-4','cpi-multi','collection-cpi']) {
+  const s=read(stem,'schema'),l=read(stem,'interface');programClient(s,l,key(9));
+  const file=`build/${stem}.client-test.ts`;fs.writeFileSync(file,emitClient(s,l,file));
+  assert.equal(typeof (await import('../'+file)).createClient(key(9)).instructions,'object');
+}
+const file='build/collection-store.client-test.ts';fs.writeFileSync(file,emitClient(schema,layout,file));
+const generated=(await import('../'+file)).createClient(key(9));
+assert.deepEqual(generated.instructions.Append({value:17},accounts,{mode:'initialize'}),append);
+assert.deepEqual(generated.collection(bytes,accounts.state,0,1),{length:1,capacity:4096,entries:[17]});
+console.log('Program client: ABI 1/2/3 descriptors, generated methods, independent bytes, account flags, friendly keys/u64 and misuse checks passed');

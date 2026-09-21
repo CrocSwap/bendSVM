@@ -1,0 +1,936 @@
+use super::token_fixture::TokenFixture;
+use super::*;
+use solana_program_pack::Pack;
+use spl_token::{
+    instruction as token,
+    state::{Account as TokenAccount, Mint},
+};
+
+struct Amm {
+    f: TokenFixture,
+    quote: Pubkey,
+    user_quote: Pubkey,
+    quote_vault: Pubkey,
+    lp: Pubkey,
+    user_lp: Pubkey,
+}
+
+fn create_token(f: &mut TokenFixture, mint: Pubkey, owner: Pubkey) -> Pubkey {
+    create_token_key(f, mint, owner, Keypair::new())
+}
+fn create_token_key(f: &mut TokenFixture, mint: Pubkey, owner: Pubkey, account: Keypair) -> Pubkey {
+    f.send_extra(
+        &[
+            f.create(account.pubkey(), TokenAccount::LEN, spl_token::id()),
+            token::initialize_account3(&spl_token::id(), &account.pubkey(), &mint, &owner).unwrap(),
+        ],
+        &[&account],
+    )
+    .unwrap();
+    account.pubkey()
+}
+
+impl Amm {
+    fn new() -> Self {
+        Self::with_program(
+            &std::env::var("AMM_TEST_ELF").unwrap_or_else(|_| "build/amm.so".into()),
+            false,
+        )
+    }
+    fn with_program(elf: &str, deterministic: bool) -> Self {
+        let mut f = TokenFixture::with_program_seeded("amm", elf, deterministic);
+        let key = |marker| {
+            if deterministic {
+                Keypair::new_from_array([marker; 32])
+            } else {
+                Keypair::new()
+            }
+        };
+        let quote = key(8);
+        let lp = key(9);
+        for (key, authority) in [(&quote, f.actor.pubkey()), (&lp, f.custody)] {
+            f.send_extra(
+                &[
+                    f.create(key.pubkey(), Mint::LEN, spl_token::id()),
+                    token::initialize_mint2(
+                        &spl_token::id(),
+                        &key.pubkey(),
+                        &authority,
+                        (key.pubkey() == quote.pubkey()).then_some(&authority),
+                        6,
+                    )
+                    .unwrap(),
+                ],
+                &[key],
+            )
+            .unwrap();
+        }
+        let actor = f.actor.pubkey();
+        let custody = f.custody;
+        let user_quote = create_token_key(&mut f, quote.pubkey(), actor, key(10));
+        let quote_vault = create_token_key(&mut f, quote.pubkey(), custody, key(11));
+        let user_lp = create_token_key(&mut f, lp.pubkey(), actor, key(12));
+        f.send(&[
+            token::mint_to(
+                &spl_token::id(),
+                &f.mint.pubkey(),
+                &f.user_token.pubkey(),
+                &actor,
+                &[],
+                999_000,
+            )
+            .unwrap(),
+            token::mint_to(
+                &spl_token::id(),
+                &quote.pubkey(),
+                &user_quote,
+                &actor,
+                &[],
+                1_000_000,
+            )
+            .unwrap(),
+        ])
+        .unwrap();
+        f.max_cu = 0;
+        Self {
+            f,
+            quote: quote.pubkey(),
+            user_quote,
+            quote_vault,
+            lp: lp.pubkey(),
+            user_lp,
+        }
+    }
+    fn keys(&self) -> [Pubkey; 5] {
+        [
+            self.f.mint.pubkey(),
+            self.quote,
+            self.lp,
+            self.f.vault_token.pubkey(),
+            self.quote_vault,
+        ]
+    }
+    fn accounts(&self, initialize: bool) -> Vec<AccountMeta> {
+        vec![
+            AccountMeta::new(self.f.state.pubkey(), initialize),
+            AccountMeta::new_readonly(self.f.actor.pubkey(), true),
+            AccountMeta::new_readonly(spl_token::id(), false),
+            AccountMeta::new_readonly(self.f.custody, false),
+            AccountMeta::new(self.f.user_token.pubkey(), false),
+            AccountMeta::new(self.f.vault_token.pubkey(), false),
+            AccountMeta::new_readonly(self.f.mint.pubkey(), false),
+            AccountMeta::new(self.user_quote, false),
+            AccountMeta::new(self.quote_vault, false),
+            AccountMeta::new_readonly(self.quote, false),
+            AccountMeta::new(self.user_lp, false),
+            AccountMeta::new(self.lp, false),
+        ]
+    }
+    fn instruction(&self, op: u8, values: [u64; 3], direction: bool) -> Instruction {
+        let mut data = vec![u8::from(op != 0), op];
+        if op == 0 {
+            data.push(0); // Config.
+            for key in self.keys() {
+                data.push(0);
+                data.extend_from_slice(key.as_ref());
+            }
+        }
+        if op == 3 {
+            data.push(u8::from(direction));
+        }
+        for value in values.iter().take(if op == 3 { 2 } else { 3 }) {
+            data.push(0);
+            data.extend_from_slice(&value.to_le_bytes());
+        }
+        data.resize(195, 0);
+        Instruction {
+            program_id: self.f.program,
+            accounts: self.accounts(op == 0),
+            data,
+        }
+    }
+    fn initialize(&mut self, x: u64, y: u64, shares: u64) {
+        self.f
+            .send(&[
+                self.f
+                    .create(self.f.state.pubkey(), self.f.size, self.f.program),
+                self.instruction(0, [x, y, shares], false),
+            ])
+            .unwrap();
+    }
+    fn balance(&self, key: Pubkey) -> u64 {
+        TokenAccount::unpack(&self.f.svm.get_account(&key).unwrap().data)
+            .unwrap()
+            .amount
+    }
+    fn supply(&self) -> u64 {
+        Mint::unpack(&self.f.svm.get_account(&self.lp).unwrap().data)
+            .unwrap()
+            .supply
+    }
+    fn recorded(&self) -> [u64; 3] {
+        let state = self.f.svm.get_account(&self.f.state.pubkey()).unwrap();
+        assert_eq!(state.data.len(), 216);
+        assert_eq!(&state.data[..20], &self.f.header);
+        assert_eq!(&state.data[20..23], &[1, 0, 0]);
+        for (i, key) in self.keys().iter().enumerate() {
+            assert_eq!(state.data[23 + 33 * i], 0);
+            assert_eq!(
+                &state.data[24 + 33 * i..56 + 33 * i],
+                key.as_ref(),
+                "immutable config"
+            );
+        }
+        assert_eq!(state.data[188], 0);
+        std::array::from_fn(|i| {
+            assert_eq!(state.data[189 + 9 * i], 0);
+            u64::from_le_bytes(state.data[190 + 9 * i..198 + 9 * i].try_into().unwrap())
+        })
+    }
+    fn solvent(&self) {
+        let [x, y, shares] = self.recorded();
+        assert!(self.balance(self.f.vault_token.pubkey()) >= x);
+        assert!(self.balance(self.quote_vault) >= y);
+        assert!(self.supply() <= shares - 1000);
+    }
+    fn snapshot(&self) -> Vec<Option<Account>> {
+        let mut values = self.f.snapshot();
+        for key in [
+            self.quote,
+            self.user_quote,
+            self.quote_vault,
+            self.lp,
+            self.user_lp,
+        ] {
+            values.push(self.f.svm.get_account(&key));
+        }
+        values
+    }
+    fn reject(&mut self, ix: Instruction, code: Option<u32>) {
+        let before = self.snapshot();
+        let error = self.f.send(&[ix]).unwrap_err();
+        if let Some(code) = code {
+            assert_eq!(
+                error.err,
+                TransactionError::InstructionError(0, InstructionError::Custom(code)),
+                "{:?}",
+                error.meta.logs
+            );
+        }
+        assert_eq!(
+            self.snapshot(),
+            before,
+            "rejected operation changed state/tokens"
+        );
+    }
+}
+
+#[test]
+fn amm_initializes_deposits_swaps_both_ways_and_withdraws() {
+    let mut a = Amm::new();
+    a.initialize(10_000, 10_000, 9_000);
+    assert_eq!(a.recorded(), [10_000, 10_000, 10_000]);
+    assert_eq!(a.supply(), 9_000);
+    assert_eq!(a.balance(a.user_lp), 9_000);
+    a.f.send(&[a.instruction(1, [5_000, 5_000, 5_000], false)])
+        .unwrap();
+    assert_eq!(a.recorded(), [15_000, 15_000, 15_000]);
+    assert_eq!(a.supply(), 14_000);
+    let mut x = 15_000u64;
+    let mut y = 15_000u64;
+    for direction in [true, false] {
+        let gross = 1_000;
+        let effective = 997;
+        let (input, output) = if direction { (x, y) } else { (y, x) };
+        let received = (u128::from(output) * effective / (u128::from(input) + effective)) as u64;
+        let before = u128::from(x) * u128::from(y);
+        a.f.send(&[a.instruction(3, [gross, received, 0], direction)])
+            .unwrap();
+        if direction {
+            x += gross;
+            y -= received;
+        } else {
+            y += gross;
+            x -= received;
+        }
+        assert_eq!(a.recorded(), [x, y, 15_000]);
+        assert!(u128::from(x) * u128::from(y) >= before);
+        a.solvent();
+    }
+    let dx = (u128::from(x) * 14_000 / 15_000) as u64;
+    let dy = (u128::from(y) * 14_000 / 15_000) as u64;
+    a.f.send(&[a.instruction(2, [14_000, dx, dy], false)])
+        .unwrap();
+    assert_eq!(a.recorded(), [x - dx, y - dy, 1000]);
+    assert_eq!(a.supply(), 0);
+    assert_eq!(a.balance(a.user_lp), 0);
+    a.solvent();
+    a.reject(a.instruction(2, [1, 0, 0], false), Some(262));
+    // Locked liquidity remains available to price a new deposit.
+    a.f.send(&[a.instruction(1, [1000, x - dx, y - dy], false)])
+        .unwrap();
+    assert_eq!(a.supply(), 1000);
+    a.solvent();
+}
+
+#[test]
+fn amm_rejects_unsigned_slippage_zero_reinitialization_and_wrong_reserves() {
+    let mut a = Amm::new();
+    a.initialize(10_000, 10_000, 9_000);
+    for (op, values, code) in [
+        (1, [1, 0, 1], 261),
+        (2, [1, 2, 0], 261),
+        (3, [1000, 907, 0], 261),
+        (3, [0, 0, 0], 260),
+        (3, [1, 0, 0], 260),
+        (1, [0, 0, 0], 260),
+        (2, [9001, 0, 0], 262),
+    ] {
+        a.reject(a.instruction(op, values, true), Some(code));
+    }
+    let mut repeat = a.instruction(0, [10_000, 10_000, 0], false);
+    repeat.data[0] = 1;
+    repeat.accounts[0].is_signer = false;
+    a.reject(repeat, Some(258));
+    let mut unsigned = a.instruction(1, [1, 1, 1], false);
+    unsigned.accounts[1].is_signer = false;
+    a.reject(unsigned, Some(257));
+    let mint = a.f.mint.pubkey();
+    let custody = a.f.custody;
+    let substitute = create_token(&mut a.f, mint, custody);
+    let before = a.f.svm.get_account(&substitute);
+    let mut wrong = a.instruction(3, [1000, 0, 0], true);
+    wrong.accounts[5].pubkey = substitute;
+    a.reject(wrong, Some(25));
+    assert_eq!(a.f.svm.get_account(&substitute), before);
+    a.solvent();
+}
+
+#[test]
+fn amm_multiple_liquidity_providers_and_transferred_shares() {
+    let mut a = Amm::new();
+    a.initialize(10_000, 10_000, 9_000);
+    let owner = a.f.attacker.pubkey();
+    let base_mint = a.f.mint.pubkey();
+    let other_base = create_token(&mut a.f, base_mint, owner);
+    let other_quote = create_token(&mut a.f, a.quote, owner);
+    let other_lp = create_token(&mut a.f, a.lp, owner);
+    a.f.send(&[
+        token::transfer_checked(
+            &spl_token::id(),
+            &a.f.user_token.pubkey(),
+            &base_mint,
+            &other_base,
+            &a.f.actor.pubkey(),
+            &[],
+            5000,
+            6,
+        )
+        .unwrap(),
+        token::transfer_checked(
+            &spl_token::id(),
+            &a.user_quote,
+            &a.quote,
+            &other_quote,
+            &a.f.actor.pubkey(),
+            &[],
+            5000,
+            6,
+        )
+        .unwrap(),
+    ])
+    .unwrap();
+    let other = |a: &Amm, op, values| {
+        let mut instruction = a.instruction(op, values, false);
+        instruction.accounts[1] = AccountMeta::new_readonly(owner, true);
+        instruction.accounts[4] = AccountMeta::new(other_base, false);
+        instruction.accounts[7] = AccountMeta::new(other_quote, false);
+        instruction.accounts[10] = AccountMeta::new(other_lp, false);
+        instruction
+    };
+    a.f.send(&[other(&a, 1, [5000, 5000, 5000])]).unwrap();
+    assert_eq!(a.balance(other_lp), 5000);
+    assert_eq!(a.balance(a.user_lp), 9000);
+    assert_eq!(a.recorded(), [15000, 15000, 15000]);
+    a.f.send(&[token::transfer_checked(
+        &spl_token::id(),
+        &a.user_lp,
+        &a.lp,
+        &other_lp,
+        &a.f.actor.pubkey(),
+        &[],
+        1000,
+        6,
+    )
+    .unwrap()])
+        .unwrap();
+    a.f.send(&[other(&a, 2, [6000, 6000, 6000])]).unwrap();
+    assert_eq!(a.balance(other_lp), 0);
+    assert_eq!(a.balance(other_base), 6000);
+    assert_eq!(a.balance(other_quote), 6000);
+    assert_eq!(a.recorded(), [9000, 9000, 9000]);
+    assert_eq!(a.supply(), 8000);
+    a.solvent();
+    // Owning fewer shares than requested cannot redeem another holder's stake.
+    let before = [
+        a.balance(other_base),
+        a.balance(other_quote),
+        a.balance(other_lp),
+    ];
+    a.reject(other(&a, 2, [1, 0, 0]), Some(1));
+    assert_eq!(
+        [
+            a.balance(other_base),
+            a.balance(other_quote),
+            a.balance(other_lp)
+        ],
+        before
+    );
+}
+
+#[test]
+fn amm_late_token_failures_undo_mint_burn_transfers_and_state() {
+    let mut a = Amm::new();
+    a.initialize(10_000, 10_000, 9000);
+    a.f.send(&[token::freeze_account(
+        &spl_token::id(),
+        &a.quote_vault,
+        &a.quote,
+        &a.f.actor.pubkey(),
+        &[],
+    )
+    .unwrap()])
+        .unwrap();
+    let before = a.snapshot();
+    let failed =
+        a.f.send(&[a.instruction(2, [1000, 1000, 1000], false)])
+            .unwrap_err();
+    assert_eq!(
+        failed
+            .meta
+            .logs
+            .iter()
+            .filter(|line| line.starts_with(&format!("Program {} invoke", spl_token::id())))
+            .count(),
+        3
+    );
+    assert_eq!(
+        a.snapshot(),
+        before,
+        "burn and base transfer must roll back on frozen quote reserve"
+    );
+    a.reject(a.instruction(3, [1000, 0, 0], true), None);
+    a.f.send(&[token::thaw_account(
+        &spl_token::id(),
+        &a.quote_vault,
+        &a.quote,
+        &a.f.actor.pubkey(),
+        &[],
+    )
+    .unwrap()])
+        .unwrap();
+    a.f.send(&[a.instruction(2, [1000, 1000, 1000], false)])
+        .unwrap();
+    assert_eq!(a.recorded(), [9000, 9000, 9000]);
+    a.solvent();
+    // A later instruction's slippage failure rolls back an earlier successful swap.
+    let before = a.snapshot();
+    a.f.send(&[
+        a.instruction(3, [1000, 0, 0], true),
+        a.instruction(2, [1, u64::MAX, 0], false),
+    ])
+    .unwrap_err();
+    assert_eq!(a.snapshot(), before);
+}
+
+#[test]
+fn amm_initial_funding_failure_rolls_back_creation_and_initial_limits() {
+    let mut a = Amm::new();
+    for (values, expected) in [
+        ([10_000, 10_000, 9001], Some(261)),
+        ([1000, 1000, 0], Some(260)),
+        ([999, 999, 0], Some(260)),
+        ([0, 10_000, 0], Some(259)),
+        ([10_000, 1_000_001, 0], None),
+    ] {
+        let before = a.snapshot();
+        let failure =
+            a.f.send(&[
+                a.f.create(a.f.state.pubkey(), a.f.size, a.f.program),
+                a.instruction(0, values, false),
+            ])
+            .unwrap_err();
+        if let Some(code) = expected {
+            assert_eq!(
+                failure.err,
+                TransactionError::InstructionError(1, InstructionError::Custom(code))
+            );
+        }
+        assert_eq!(a.snapshot(), before);
+    }
+    a.initialize(10_000, 40_000, 19_000);
+    assert_eq!(a.recorded(), [10_000, 40_000, 20_000]);
+    assert_eq!(a.supply(), 19_000);
+    a.solvent();
+}
+
+#[test]
+fn amm_typescript_client_instructions_execute_in_sbf() {
+    #[derive(Deserialize)]
+    struct Meta {
+        address: Vec<u8>,
+        #[serde(rename = "isSigner")]
+        signer: bool,
+        #[serde(rename = "isWritable")]
+        writable: bool,
+    }
+    #[derive(Deserialize)]
+    struct ClientInstruction {
+        data: Vec<u8>,
+        accounts: Vec<Meta>,
+    }
+    let vectors: Vec<ClientInstruction> = serde_json::from_slice(
+        &std::fs::read("build/amm-client-vectors.json").expect("run npm run test:amm"),
+    )
+    .unwrap();
+    assert_eq!(vectors.len(), 4);
+    let mut a = Amm::new();
+    let values = [
+        [10000, 40000, 19000],
+        [100, 100, 400],
+        [100, 50, 200],
+        [1000, 906, 0],
+    ];
+    for (i, vector) in vectors.into_iter().enumerate() {
+        let mut data = vector.data;
+        let metas = a.accounts(i == 0);
+        assert_eq!(vector.accounts.len(), metas.len());
+        for (index, (client, meta)) in vector.accounts.iter().zip(&metas).enumerate() {
+            assert_eq!(client.address, vec![index as u8 + 1; 32]);
+            assert_eq!(client.signer, meta.is_signer);
+            assert_eq!(client.writable, meta.is_writable);
+        }
+        if i == 0 {
+            for (j, (key, marker)) in a.keys().iter().zip([7, 10, 12, 6, 9]).enumerate() {
+                let offset = 4 + 33 * j;
+                assert_eq!(&data[offset..offset + 32], &[marker; 32]);
+                data[offset..offset + 32].copy_from_slice(key.as_ref());
+            }
+        }
+        assert_eq!(
+            data,
+            a.instruction(i as u8, values[i], true).data,
+            "client and independent Rust codec disagree"
+        );
+        let instruction = Instruction {
+            program_id: a.f.program,
+            accounts: metas,
+            data,
+        };
+        if i == 0 {
+            a.f.send(&[
+                a.f.create(a.f.state.pubkey(), a.f.size, a.f.program),
+                instruction,
+            ])
+            .unwrap();
+        } else {
+            a.f.send(&[instruction]).unwrap();
+        }
+        a.solvent();
+    }
+    assert_eq!(a.recorded(), [11_000, 36_374, 20_000]);
+}
+
+#[test]
+fn amm_full_width_liquidity_and_overflow_rejections() {
+    let mut a = Amm::new();
+    let x = (1u64 << 63) - 1000;
+    let y = (1u64 << 63) + 1000;
+    a.f.send(&[
+        token::mint_to(
+            &spl_token::id(),
+            &a.f.mint.pubkey(),
+            &a.f.user_token.pubkey(),
+            &a.f.actor.pubkey(),
+            &[],
+            x - 1_000_000,
+        )
+        .unwrap(),
+        token::mint_to(
+            &spl_token::id(),
+            &a.quote,
+            &a.user_quote,
+            &a.f.actor.pubkey(),
+            &[],
+            y - 1_000_000,
+        )
+        .unwrap(),
+    ])
+    .unwrap();
+    let total = (1u64 << 63) - 1;
+    a.initialize(x, y, total - 1000);
+    assert_eq!(a.recorded(), [x, y, total]);
+    assert_eq!(a.supply(), total - 1000);
+    a.reject(a.instruction(3, [u64::MAX, 0, 0], true), Some(260));
+    a.reject(
+        a.instruction(1, [u64::MAX, u64::MAX, u64::MAX], false),
+        Some(260),
+    );
+    a.reject(a.instruction(2, [u64::MAX, 0, 0], false), Some(262));
+    let shares = total - 1000;
+    let dx = (u128::from(x) * u128::from(shares) / u128::from(total)) as u64;
+    let dy = (u128::from(y) * u128::from(shares) / u128::from(total)) as u64;
+    a.f.send(&[a.instruction(2, [shares, dx, dy], false)])
+        .unwrap();
+    assert_eq!(a.recorded(), [x - dx, y - dy, 1000]);
+    assert_eq!(a.supply(), 0);
+    a.solvent();
+}
+
+#[test]
+fn amm_donations_and_external_lp_burns_do_not_change_recorded_pricing() {
+    let mut a = Amm::new();
+    a.initialize(10_000, 10_000, 9000);
+    a.f.send(&[
+        token::transfer_checked(
+            &spl_token::id(),
+            &a.f.user_token.pubkey(),
+            &a.f.mint.pubkey(),
+            &a.f.vault_token.pubkey(),
+            &a.f.actor.pubkey(),
+            &[],
+            777,
+            6,
+        )
+        .unwrap(),
+        token::burn_checked(
+            &spl_token::id(),
+            &a.user_lp,
+            &a.lp,
+            &a.f.actor.pubkey(),
+            &[],
+            100,
+            6,
+        )
+        .unwrap(),
+    ])
+    .unwrap();
+    assert_eq!(a.recorded(), [10_000, 10_000, 10_000]);
+    assert_eq!(a.supply(), 8900);
+    a.f.send(&[a.instruction(3, [1000, 906, 0], true)]).unwrap();
+    assert_eq!(a.recorded(), [11_000, 9094, 10_000]);
+    assert_eq!(a.balance(a.f.vault_token.pubkey()), 11_777);
+    a.solvent();
+}
+
+/// Compare complete transactions with fixed public test keys, the same program
+/// address, and byte-identical account fixtures. These are observed costs, not
+/// worst-case bounds. Kept explicit because it requires the separate Rust ELF.
+#[test]
+#[ignore = "run the AMM benchmark command after building both implementations"]
+fn amm_benchmark_identical_fixtures() {
+    let mut bend = Amm::with_program("build/amm.so", true);
+    let mut rust = Amm::with_program("build/amm-rust.so", true);
+    assert_eq!(bend.f.program, rust.f.program);
+    assert_eq!(bend.f.state.pubkey(), rust.f.state.pubkey());
+    assert_eq!(bend.f.custody, rust.f.custody);
+    assert_eq!(bend.keys(), rust.keys());
+    assert_eq!(bend.snapshot(), rust.snapshot());
+    // Allocate outside the measured transaction so initialization costs describe
+    // the AMM itself. Both state accounts still sign the initialization call.
+    for a in [&mut bend, &mut rust] {
+        a.f.send(&[a.f.create(a.f.state.pubkey(), a.f.size, a.f.program)])
+            .unwrap();
+    }
+    let mut rows = Vec::new();
+    let scenarios = [
+        ("initialize", 0, [100_000, 400_000, 199_000], false, None),
+        ("deposit", 1, [10_000, 5_000, 20_000], false, None),
+        ("swap_base", 3, [1_000, 1, 0], true, None),
+        ("swap_quote", 3, [1_000, 1, 0], false, None),
+        ("withdraw", 2, [10_000, 1, 1], false, None),
+        ("reject_slippage", 3, [1_000, u64::MAX, 0], true, Some(261)),
+        ("reject_zero_input", 3, [0, 0, 0], true, Some(260)),
+        (
+            "reject_locked_shares",
+            2,
+            [u64::MAX, 0, 0],
+            false,
+            Some(262),
+        ),
+    ];
+    for (name, op, values, direction, error) in scenarios {
+        let bi = bend.instruction(op, values, direction);
+        let ri = rust.instruction(op, values, direction);
+        assert_eq!(bi, ri);
+        assert_eq!(bend.snapshot(), rust.snapshot(), "before {name}");
+        let before = bend.snapshot();
+        let br = bend.f.send(&[bi]);
+        let rr = rust.f.send(&[ri]);
+        let (bm, rm) = match error {
+            None => (br.unwrap(), rr.unwrap()),
+            Some(code) => {
+                let b = br.unwrap_err();
+                let r = rr.unwrap_err();
+                assert_eq!(b.err, r.err);
+                assert_eq!(
+                    b.err,
+                    TransactionError::InstructionError(0, InstructionError::Custom(code))
+                );
+                assert_eq!(bend.snapshot(), before, "Bend rollback: {name}");
+                assert_eq!(rust.snapshot(), before, "Rust rollback: {name}");
+                (b.meta, r.meta)
+            }
+        };
+        assert_eq!(bend.snapshot(), rust.snapshot(), "after {name}");
+        assert_eq!(bm.return_data, rm.return_data, "return data: {name}");
+        rows.push(
+            serde_json::json!({"operation":name,"bendCU":bm.compute_units_consumed,
+            "rustCU":rm.compute_units_consumed,"error":error}),
+        );
+    }
+    let report = serde_json::json!({"runtime":"LiteSVM 0.7.1", "target":"SBF v0 / generic",
+        "fixture":"fixed public test seeds 1..12; program bytes [42;32]",
+        "program":bend.f.program.to_string(),"custody":bend.f.custody.to_string(),
+        "state":bend.f.state.pubkey().to_string(),"rows":rows,
+        "bendElfBytes":std::fs::metadata("build/amm.so").unwrap().len(),
+        "rustElfBytes":std::fs::metadata("build/amm-rust.so").unwrap().len()});
+    std::fs::write(
+        "build/amm-benchmark.json",
+        serde_json::to_string_pretty(&report).unwrap() + "\n",
+    )
+    .unwrap();
+    println!("{report}");
+}
+
+#[test]
+fn amm_adapter_rejects_malformed_accounts_and_encodings() {
+    let mut a = Amm::new();
+    a.initialize(10_000, 10_000, 9_000);
+    let clean = a.f.svm.clone();
+    for case in 0..33 {
+        a.f.svm = clean.clone();
+        let mut ix = a.instruction(3, [1000, 1, 0], true);
+        if case >= 25 {
+            ix = a.instruction(1, [1000, 1000, 1000], false);
+        }
+        let mut edit = |key: Pubkey, change: &dyn Fn(&mut Account)| {
+            let mut account = a.f.svm.get_account(&key).unwrap();
+            change(&mut account);
+            a.f.svm.set_account(key, account).unwrap();
+        };
+        let code = match case {
+            0 => {
+                ix.accounts.truncate(3);
+                1
+            }
+            1 => {
+                ix.data[0] = 2;
+                2
+            }
+            2 => {
+                ix.data[1] = 4;
+                2
+            }
+            3 => {
+                ix.data[2] = 2;
+                2
+            }
+            4 => {
+                ix.data[194] = 1;
+                2
+            }
+            5 => {
+                edit(a.f.state.pubkey(), &|x| x.owner = spl_token::id());
+                3
+            }
+            6 => {
+                ix.accounts[0].is_writable = false;
+                5
+            }
+            7 => {
+                edit(a.f.state.pubkey(), &|x| {
+                    x.data.pop();
+                });
+                4
+            }
+            8 => {
+                edit(a.f.state.pubkey(), &|x| x.data[0] ^= 1);
+                4
+            }
+            9 => {
+                edit(a.f.state.pubkey(), &|x| x.data[21] = 1);
+                4
+            }
+            10 => {
+                ix.accounts[4].pubkey = ix.accounts[5].pubkey;
+                6
+            }
+            11 => {
+                ix.accounts[2].pubkey = a.f.attacker.pubkey();
+                10
+            }
+            12 => {
+                ix.accounts[3].pubkey = a.f.attacker.pubkey();
+                11
+            }
+            13 => {
+                edit(a.f.mint.pubkey(), &|x| x.owner = a.f.program);
+                13
+            }
+            14 => {
+                edit(a.f.mint.pubkey(), &|x| {
+                    x.data.pop();
+                });
+                14
+            }
+            15 => {
+                edit(a.f.mint.pubkey(), &|x| x.data[45] = 0);
+                14
+            }
+            16 => {
+                edit(a.f.user_token.pubkey(), &|x| x.owner = a.f.program);
+                13
+            }
+            17 => {
+                edit(a.f.user_token.pubkey(), &|x| {
+                    x.data.pop();
+                });
+                14
+            }
+            18 => {
+                edit(a.f.user_token.pubkey(), &|x| x.data[108] = 0);
+                14
+            }
+            19 => {
+                edit(a.f.user_token.pubkey(), &|x| x.data[109] = 1);
+                14
+            }
+            20 => {
+                edit(a.f.user_token.pubkey(), &|x| {
+                    x.data[..32].copy_from_slice(a.quote.as_ref())
+                });
+                15
+            }
+            21 => {
+                edit(a.f.user_token.pubkey(), &|x| {
+                    x.data[32..64].copy_from_slice(a.f.attacker.pubkey().as_ref())
+                });
+                16
+            }
+            22 => {
+                edit(a.user_quote, &|x| {
+                    x.data[32..64].copy_from_slice(a.f.attacker.pubkey().as_ref())
+                });
+                17
+            }
+            23 => {
+                ix.accounts[4].is_writable = false;
+                5
+            }
+            24 => {
+                ix.accounts[1].is_signer = false;
+                257
+            }
+            25 => {
+                edit(a.lp, &|x| x.data[46] = 1);
+                23
+            }
+            26 => {
+                edit(a.lp, &|x| x.data[0] = 0);
+                23
+            }
+            27 => {
+                edit(a.lp, &|x| {
+                    x.data[4..36].copy_from_slice(a.f.actor.pubkey().as_ref())
+                });
+                23
+            }
+            28 => {
+                edit(a.lp, &|x| x.owner = a.f.program);
+                13
+            }
+            29 => {
+                edit(a.lp, &|x| {
+                    x.data.pop();
+                });
+                14
+            }
+            30 => {
+                edit(a.user_lp, &|x| {
+                    x.data[32..64].copy_from_slice(a.f.attacker.pubkey().as_ref())
+                });
+                17
+            }
+            31 => {
+                edit(a.user_lp, &|x| {
+                    x.data[..32].copy_from_slice(a.quote.as_ref())
+                });
+                15
+            }
+            32 => {
+                ix.accounts[11].is_writable = false;
+                5
+            }
+            _ => unreachable!(),
+        };
+        a.reject(ix, Some(code));
+    }
+}
+
+#[test]
+fn amm_initialization_rejects_reused_mints_and_unsafe_custody() {
+    let mut a = Amm::new();
+    a.f.send(&[a.f.create(a.f.state.pubkey(), a.f.size, a.f.program)])
+        .unwrap();
+    let clean = a.f.svm.clone();
+    for case in 0..9 {
+        a.f.svm = clean.clone();
+        let mut ix = a.instruction(0, [10_000, 10_000, 9_000], false);
+        let mut edit = |key: Pubkey, offset: usize, bytes: &[u8]| {
+            let mut account = a.f.svm.get_account(&key).unwrap();
+            account.data[offset..offset + bytes.len()].copy_from_slice(bytes);
+            a.f.svm.set_account(key, account).unwrap();
+        };
+        let code = match case {
+            0 => {
+                edit(a.lp, 36, &1u64.to_le_bytes());
+                24
+            }
+            1 => {
+                edit(a.lp, 4, a.f.actor.pubkey().as_ref());
+                23
+            }
+            2 => {
+                edit(a.lp, 46, &1u32.to_le_bytes());
+                23
+            }
+            3 => {
+                edit(a.f.vault_token.pubkey(), 64, &1u64.to_le_bytes());
+                26
+            }
+            4 => {
+                edit(a.f.vault_token.pubkey(), 72, &1u32.to_le_bytes());
+                26
+            }
+            5 => {
+                edit(a.quote_vault, 129, &1u32.to_le_bytes());
+                26
+            }
+            6 => {
+                edit(a.quote_vault, 32, a.f.actor.pubkey().as_ref());
+                26
+            }
+            7 => {
+                ix.accounts[0].is_signer = false;
+                7
+            }
+            8 => {
+                edit(a.f.state.pubkey(), 215, &[1]);
+                4
+            }
+            _ => unreachable!(),
+        };
+        a.reject(ix, Some(code));
+    }
+}
