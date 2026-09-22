@@ -111,9 +111,10 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   const nodeModules=linkCache(stagedSource,'node_modules',path.join(repository,'node_modules'));
   const bendCache=linkCache(stagedSource,'.deps/bend',path.join(repository,'.deps/bend'));
   const cargoCache=path.join(evidence,'runner-target');
-  const reuseCargoCache=fs.existsSync(cargoCache);
-  const cargoTarget=reuseCargoCache?cargoCache:path.join(stagedSource,'target');
-  if(reuseCargoCache)fs.symlinkSync(cargoCache,path.join(stagedSource,'target'),'dir');
+  const reuseCargoCache=fs.existsSync(path.join(cargoCache,'debug/bend-test-runner'));
+  fs.mkdirSync(cargoCache,{recursive:true});
+  const cargoTarget=cargoCache;
+  fs.symlinkSync(cargoCache,path.join(stagedSource,'target'),'dir');
   const stageEnv:NodeJS.ProcessEnv={CARGO_TARGET_DIR:cargoTarget};
   const bun=process.execPath;
   const doctorFile=path.join(evidence,`doctor-${stamp}.json`);
