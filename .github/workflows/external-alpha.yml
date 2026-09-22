@@ -46,6 +46,7 @@ jobs:
         run: |
           npm exec -- bun tests/local-rpc.ts
           npm exec -- bun tests/fresh-developer-local.ts
+          npm exec -- bun tests/process-lifecycle.ts
       - name: Generate fixtures and run complete regression suite
         run: npm test
       - name: Run generated-client and packaging checks after fixture generation
