@@ -1,103 +1,161 @@
 # External alpha tutorial
 
-This tutorial starts with a new project, changes it, observes a declared
-source-law failure, and executes the repaired project as SBF. Run commands from
-the repository root after [external-alpha.md](external-alpha.md) setup.
+This walkthrough changes a collection program's business rule, states the rule
+as a Bend law, proves it, and exercises the result as SBF. Run commands from the
+repository root after completing [external-alpha.md](external-alpha.md) setup.
 
-## 1. Create and inspect a starter
+## Create a collection project
 
 ```sh
 npm ci
 npm run doctor
-npm run bend -- new "projects/My Alpha"
+npm run bend -- new projects/My-Alpha
 ```
 
-The starter contains `program.bend`, `LAWS.bend`, `PROOF.bend`, `storage.json`
-and `test.ts`. It imports the SDK source from this checkout, while its generated
-clients and SBF remain in the project `dist/` directory.
+The starter has a signed owner, a bounded collection of U32 values, and
+`Append` and `Replace` instructions. Its generated clients and SBF outputs go
+under the project `dist/` directory. The source imports the shared SDK from
+this checkout.
 
-## 2. Modify the behavior and run the checks
+## Change the application rule
 
-For a harmless first change, edit `projects/My Alpha/test.ts` and change the
-third appended fixture and matching expected entry from `99` to `77`. Then run:
+Open `projects/My-Alpha/program.bend`. Add this helper after `finish`. Bend's
+current subset requires a match to inspect a named parameter, so the computed
+zero flag is passed into the helper and the match reads `zero`:
+
+```bend
+def append_result(zero: Bool, state: State, length: U32, window: C.Window<U32, B.Pair<U32>>, value: U32) -> Outcome:
+  match zero:
+    case True{}:
+      Rejected{4}
+    case False{}:
+      finish(state, C.push(U32, B.Pair<U32>, 2, storage => index => value => B.pair_set(U32, storage, index, value), window, value), U32.add(length, 1))
+```
+
+Then change the `Append` case inside `apply` to call it:
+
+```bend
+    case Append{+value}:
+      append_result(U32.is_zero(value), state, length, window, value)
+```
+
+This rejects zero with application code `4`; nonzero values still use the
+starter's bounded `C.push` transition. The `+value` binder permits both the
+zero check and the existing append path to use the value. Leave `Replace` as it is.
+
+## State and prove the rule
+
+Add this law to `projects/My-Alpha/LAWS.bend`:
+
+```bend
+law zero_append_is_rejected:
+  for state: Program.State
+  for length: U32
+  for window: C.Window<U32, B.Pair<U32>>
+  {Program.apply(state, Program.Append{0}, length, window) == Program.Rejected{4} : Program.Outcome}
+```
+
+This law specifies `Program.apply` after authorization and collection selection.
+Earlier account-level checks may reject with their own application codes.
+
+Then add its proof to `projects/My-Alpha/PROOF.bend`:
+
+```bend
+def Laws.zero_append_is_rejected(state, length, window):
+  {==}
+```
+
+The tutorial helper applies these exact source edits with checked match counts;
+its exported `applyFreshDeveloperTutorial(projectDirectory)` function is also
+used by the repeatable gate.
+
+## Test successful and rejected transactions
+
+In `projects/My-Alpha/test.ts`, keep the existing nonzero append and replace
+checks. Immediately after the existing `before` collection assertions, add:
+
+```ts
+await t.reject(client.instructions.Append({value:0},accounts),{application:4});
+t.equal(await t.data(accounts.collection),before);
+```
+
+The rejected transaction must leave the collection account unchanged. To confirm
+the rule is specific to `Append`, also send `Replace({index:1,value:0})`, assert
+that the decoded entries become `[17,0]`, then replace the value with `123` again
+and compare the account with the saved `after` bytes. The existing successful
+appends and replacement continue to check the old behavior. Run the project lifecycle:
 
 ```sh
-npm run bend -- check "projects/My Alpha"
-npm run bend -- verify "projects/My Alpha"
-npm run bend -- build "projects/My Alpha"
-npm run bend -- test "projects/My Alpha"
+npm run bend -- check projects/My-Alpha
+npm run bend -- verify projects/My-Alpha
+npm run bend -- build projects/My-Alpha
+npm run bend -- test projects/My-Alpha
 ```
 
 `check` validates the supported subset, storage layout and generated-client
-compatibility. `verify` checks the laws actually declared by this project;
-it does not invent specifications or run universal SMT proofs. `build` emits
-SBF, interfaces, a manifest and portable clients. `test` invokes those clients
-against the compiled SBF in LiteSVM and checks successful and rejected
-transactions, including unchanged application accounts on rejection.
+compatibility. `verify` checks the laws declared by this project; it does not
+invent specifications or run universal SMT proofs. `build` emits SBF,
+interfaces, a manifest and portable clients. `test` executes those clients
+against the compiled SBF in LiteSVM and checks the rejection and account
+rollback.
 
-## 3. See a source-law failure
+## Confirm the law catches a broken implementation
 
-Make an intentionally invalid implementation change while leaving its laws and
-proofs unchanged. Save the original file first:
-
-```sh
-cp "projects/My Alpha/program.bend" /tmp/bend-alpha-program.bend
-sed -i.bak 's/Rejected{1}/Rejected{4}/g' "projects/My Alpha/program.bend"
-npm run bend -- verify "projects/My Alpha"   # expected: non-zero
-npm run bend -- build "projects/My Alpha"    # expected: non-zero
-mv /tmp/bend-alpha-program.bend "projects/My Alpha/program.bend"
-rm -f "projects/My Alpha/program.bend.bak"
-```
-
-The failure is evidence that the declared source contract is checked. It is not
-evidence that the compiler or deployed program is formally verified. A proof
-hole in `PROOF.bend` is a separate expected failure mode.
-
-## 4. Rebuild and exercise SBF
+After the positive lifecycle passes, save `program.bend` and change only the
+zero branch's `Rejected{4}` to `Rejected{5}`. Keep `LAWS.bend` and `PROOF.bend`
+unchanged. Both commands must fail because the implementation no longer
+satisfies `zero_append_is_rejected`:
 
 ```sh
-npm run bend -- check "projects/My Alpha"
-npm run bend -- verify "projects/My Alpha"
-npm run bend -- build "projects/My Alpha"
-npm run bend -- test "projects/My Alpha"
+cp projects/My-Alpha/program.bend /tmp/my-alpha-program.bend
+# Edit the zero branch's application code from 4 to 5.
+npm run bend -- verify projects/My-Alpha   # expected semantic law failure
+npm run bend -- build projects/My-Alpha    # expected semantic law failure
+cp /tmp/my-alpha-program.bend projects/My-Alpha/program.bend
 ```
 
-Inspect `projects/My Alpha/dist/program.test-report.json` and the manifest. The
-report is a local fixture measurement, not a worst-case compute bound. The
-generated client constructs account order, signer/writable flags and canonical
-bytes; the test context supplies deterministic test keys. No configured wallet,
-RPC endpoint or manual Rust/C instruction encoding is involved.
+Restore the source, then rerun `check`, `verify`, `build` and `test`. A semantic
+law failure is evidence that the declared source contract is checked. A spawn
+failure, signal, missing prerequisite or unrelated build error is not evidence
+of that property. This check does not prove the compiler or deployed binary.
 
-## 5. Use the generated client
+## Run the repeatable fresh-developer gate
 
-The portable JavaScript client can be copied with its runtime, or the typed
-TypeScript client can be used with its runtime declaration. A transport must
-turn the plan into a signed transaction:
-
-```ts
-import {createClient} from './dist/program.client.js';
-
-const client=createClient(programAddress);
-const instruction=client.instructions.Append({value:17}, {
-  state:stateAddress,
-  actor:ownerAddress,
-  collection:collectionAddress,
-});
-// Sign and submit `instruction` with the wallet/RPC transport of your choice.
-```
-
-Do not hand-copy tags, padding or account offsets. For token/CPI programs, pass
-the policy-specific `remaining` account metas explicitly. The queue deployment
-example exercises this generated-client path in its live harness; a reusable
-wallet/RPC transport is not yet part of the alpha.
-
-## 6. Run the repeatable gate
+Until package wiring lands, run the offline gate directly:
 
 ```sh
-npm run acceptance:alpha
+npm exec -- bun scripts/fresh-developer-acceptance.ts
 ```
 
-The gate creates a new staging directory under `build/external-alpha/`, runs
-the full starter lifecycle, deliberately checks the invalid-law path, and writes
-`build/external-alpha/acceptance.json`. It starts with an empty staged project
-and never copies the repository's existing application ELF/client outputs.
+It copies only tracked source files (plus the gate and its helper) into a new
+staging tree, excluding generated outputs and key material. It reuses the
+installed locked `node_modules`, the clean pinned `.deps/bend` checkout, Cargo
+registry/git caches, and Anza platform-tools. The LiteSVM runner is rebuilt with
+`--locked --offline` from staged source into a gate-owned Cargo target cache at
+`build/fresh-developer-acceptance/runner-target`; the application project and
+its build outputs remain fresh in the staging tree. It creates a new project,
+applies the rule, runs the successful
+project lifecycle, mutates the implementation while leaving its law and proof
+intact, and requires semantic failures from both `verify` and `build`. It then
+restores the source and repeats `check`, `verify`, `build` and `test`.
+
+The gate removes old success evidence before starting, preserves command logs,
+checks that a seeded stale success is removed after a semantic prerequisite
+failure, and writes `build/fresh-developer-acceptance/acceptance.json` only
+after all offline gates pass. The report hashes the staged source inventory,
+project inputs, ELF, manifest, generated clients, test report and gate/helper
+inputs. It records reused cache paths and host/tool versions. A clean staged
+source tree is not a fresh machine or independent developer run. The report
+retains the staged repository and finished project paths so a later local
+deployment acceptance step can use the same source and ELF.
+
+The recorded run for this change used macOS arm64, Bun 1.4.2 and Rust 1.92.0.
+It passed the offline gate; LiteSVM reported 7 successful transactions, 4
+expected rejections and 22 assertions. The resulting ELF was 12,816 bytes with
+SHA-256 `f49a704dd7cd30659ffe2a557f035dd68dd7d8de9fe0f9093b900eba4108f471`.
+Both mutation commands failed on `zero_append_is_rejected`, with expected
+`Rejected{5}` and observed `Rejected{4}`. The full log and hash record is in
+`build/fresh-developer-acceptance/acceptance.json` in the validating worktree.
+
+Local RPC/deployment acceptance is handled by a later integration step; this
+offline command does not start a validator or submit transactions.
