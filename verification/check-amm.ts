@@ -32,7 +32,7 @@ async function check(source: string, stem: string, status: number) {
   assert.equal(result.status,status,result.stderr||result.stdout);
   assert(result.stdout.trim().startsWith('{'), result.stderr || 'Missing proof report');
   const report=JSON.parse(result.stdout);
-  assert.equal(report.claims.length,27);
+  assert.equal(report.claims.length,32);
   assert.equal(report.bindings.length,4);
   assert.equal(report.schema.result,'checked');
   assert(report.bindings.every((b:any)=>b.result==='checked'));
@@ -76,6 +76,8 @@ const cases:[string,string,string,string,bigint,boolean,()=>any][]=[
   ['swap omits input credit','Math.add(x, gross)','Math.add(x, Math.zero())','Swap',1000n,true,swap],
   ['wrong swap recipient','Token.TransferDetails{8, 7, 9, quote, Fx.ToActor{}','Token.TransferDetails{8, 7, 9, quote, Fx.ToCustody{}','Swap',1000n,true,swap],
   ['deposit issues zero shares','funding(config, dx, dy, shares, False{})','funding(config, dx, dy, Math.zero(), False{})','Deposit',1000n,true,deposit],
+  ['deposit underfunds recorded reserve','funding(config, dx, dy, shares, False{})','funding(config, Math.zero(), dy, shares, False{})','Deposit',1000n,true,deposit],
+  ['deposit fails to account issued shares','Math.add(supply, shares)','Math.add(supply, Math.zero())','Deposit',1000n,true,deposit],
   ['reserve address unbound','Token.TransferDetails{4, 5, 6, base, Fx.ToCustody{}, amount, Fx.Actor{}}, Token.Any{}, Token.Exact{vault}, fresh','Token.TransferDetails{4, 5, 6, base, Fx.ToCustody{}, amount, Fx.Actor{}}, Token.Any{}, Token.Any{}, fresh','Deposit',1000n,true,deposit],
 ];
 const mutations=[];
@@ -114,4 +116,4 @@ const files=['examples/amm/amm.bend','examples/amm/pricing.bend','sdk/math.bend'
   ...fs.readdirSync('verification').filter(f=>/\.(py|ts)$/.test(f)).map(f=>`verification/${f}`)];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/amm-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,importMismatchesRejected:true,uncoveredInstructionRejected:true,hashes},null,2)+'\n');
-console.log('AMM transition refinement: 27 obligations, eight SAT mutations with concrete Bend witnesses and four import negatives passed');
+console.log('AMM transition refinement: 32 obligations, ten SAT mutations with concrete Bend witnesses and four import negatives passed');

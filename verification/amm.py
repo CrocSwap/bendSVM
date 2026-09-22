@@ -11,6 +11,7 @@ from sqrt import prove as sqrt_proof
 M='../../sdk/math.';S='../../sdk/context.';F='../../sdk/effects.';T='../../sdk/issuance.'
 Q='pricing.';R='../../sdk/sqrt.'
 MAX=(1<<64)-1
+LOCKED=1000
 
 
 def audit_schema(program):
@@ -167,10 +168,11 @@ def transitions(program):
 
 
 def accounting():
-    """Compose the exact transition with the proved quote bounds.
+    """Prove the global reserve/share invariant around the exact transition.
 
-    Token balances/supply obey original SPL semantics and successful effects are
-    atomic with state updates. Those runtime assumptions are tested separately.
+    Actual token balances and LP supply follow original SPL semantics, and
+    successful effects are atomic with state updates. The source transition
+    binds those effects; runtime execution remains a separate assumption/test.
     """
     reports=[]
     a,b=z.BitVecs('before amount',64)
@@ -180,34 +182,105 @@ def accounting():
     reports.append(obligation('amm-u64-debit-conservation',[z.UGE(a,b)],
         z.ZeroExt(1,a-b)+z.ZeroExt(1,b)==z.ZeroExt(1,a),[a,b]))
     x,y,l,s,dx,dy=z.Ints('base quote supply shares base_amount quote_amount')
-    common=[x>0,y>0,l>=1000,l<=MAX,x<=MAX,y<=MAX]
+    common=[x>0,y>0,l>=LOCKED,l<=MAX,x<=MAX,y<=MAX]
     reports.append(obligation('amm-deposit-reachable-state',common+
         [s>0,dx>0,dy>0,x+dx<=MAX,y+dy<=MAX,l+s<=MAX],
-        z.And(x+dx>0,y+dy>0,l+s>=1000)))
+        z.And(x+dx>0,y+dy>0,l+s>=LOCKED)))
     reports.append(obligation('amm-withdraw-reachable-state',common+
-        [s>0,s<=l-1000,dx>0,dx<x,dy>0,dy<y],
-        z.And(x-dx>0,y-dy>0,l-s>=1000)))
+        [s>0,s<=l-LOCKED,dx>0,dx<x,dy>0,dy<y],
+        z.And(x-dx>0,y-dy>0,l-s>=LOCKED)))
     reports.append(obligation('amm-swap-reachable-state',common+
         [s>0,dx>0,dx<y,x+s<=MAX],z.And(x+s>0,y-dx>0,l>=1000)))
     total=z.Int('initial_total')
-    reports.append(obligation('amm-initial-locked-supply',[total>1000,total<=MAX],
-        z.And(total-1000>0,(total-1000)+1000==total)))
+    reports.append(obligation('amm-initial-locked-supply',[total>LOCKED,total<=MAX],
+        z.And(total-LOCKED>0,(total-LOCKED)+LOCKED==total)))
     outstanding=z.Int('outstanding')
     reports.append(obligation('amm-issued-share-backing',
-        [l>=1000,outstanding>=0,outstanding<=l-1000,s>0,l+s<=MAX],
-        z.And(outstanding+s<=l+s-1000,outstanding+s<=MAX)))
+        [l>=LOCKED,outstanding>=0,outstanding<=l-LOCKED,s>0,l+s<=MAX],
+        z.And(outstanding+s<=l+s-LOCKED,outstanding+s<=MAX)))
     reports.append(obligation('amm-redeemed-share-backing',
-        [l>=1000,outstanding>=s,s>0,outstanding<=l-1000,s<=l-1000],
-        z.And(outstanding-s>=0,outstanding-s<=l-s-1000,l-s>=1000)))
+        [l>=LOCKED,outstanding>=s,s>0,outstanding<=l-LOCKED,s<=l-LOCKED],
+        z.And(outstanding-s>=0,outstanding-s<=l-s-LOCKED,l-s>=LOCKED)))
     reports.append(obligation('amm-external-burn-preserves-backing',
-        [l>=1000,outstanding>=s,s>=0,outstanding<=l-1000],
-        z.And(outstanding-s>=0,outstanding-s<=l-1000)))
-    actual,recorded,amount=z.Ints('actual recorded amount')
-    reports.append(obligation('amm-reserve-solvency-credit',
-        [actual>=recorded,recorded>=0,amount>=0],actual+amount>=recorded+amount))
-    reports.append(obligation('amm-reserve-solvency-debit',
-        [actual>=recorded,recorded>=amount,amount>=0],
-        z.And(actual-amount>=recorded-amount,recorded-amount>=0)))
+        [l>=LOCKED,outstanding>=s,s>=0,outstanding<=l-LOCKED],
+        z.And(outstanding-s>=0,outstanding-s<=l-LOCKED)))
+
+    # Global LP claim bound. For any finite set of holders, each floor quote
+    # satisfies L*q_i <= R*h_i; summing gives L*C <= R*S. Since S<L due to
+    # locked shares, aggregate integer payouts C are strictly below R.
+    reserve,total_shares,lp_supply,claims=z.Ints('claim_reserve total_shares lp_supply aggregate_claims')
+    reports.append(obligation('amm-global-aggregate-claim-backing',
+        [reserve>0,total_shares>=LOCKED,lp_supply>=0,
+         lp_supply<=total_shares-LOCKED,claims>=0,
+         total_shares*claims<=reserve*lp_supply],
+        claims<reserve,[reserve,total_shares,lp_supply,claims]))
+
+    # The following are one-step preservation obligations for the global
+    # invariant: actual vault balance >= recorded reserve > 0, total accounting
+    # shares >= LOCKED, and outstanding SPL LP supply <= total shares - LOCKED.
+    ab,rb,aq,rq,l,s=z.Ints('actual_base recorded_base actual_quote recorded_quote total_shares outstanding_lp')
+    inv=[ab>=rb,rb>0,aq>=rq,rq>0,l>=LOCKED,l<=MAX,s>=0,s<=l-LOCKED]
+
+    init_base,init_quote,init_total=z.Ints('init_base init_quote init_total')
+    (init_actual_base,init_recorded_base,init_actual_quote,init_recorded_quote,
+     init_lp_supply)=z.Ints('init_actual_base init_recorded_base init_actual_quote init_recorded_quote init_lp_supply')
+    minted=init_total-LOCKED
+    # These equalities are the ghost-state interpretation of the initialization
+    # effects/state checked by transitions(): fresh vaults receive the exact
+    # recorded amounts and the LP mint receives total_shares - LOCKED.
+    reports.append(obligation('amm-global-initialize-establishes',
+        [init_base>0,init_quote>0,init_total>LOCKED,init_total<=MAX,
+         init_actual_base==init_base,init_recorded_base==init_base,
+         init_actual_quote==init_quote,init_recorded_quote==init_quote,
+         init_lp_supply==minted],
+        z.And(init_actual_base>=init_recorded_base,
+              init_actual_quote>=init_recorded_quote,
+              init_lp_supply>=0,init_lp_supply<=init_total-LOCKED,
+              init_total>=LOCKED),
+        [init_base,init_quote,init_total,minted,init_actual_base,
+         init_recorded_base,init_actual_quote,init_recorded_quote,init_lp_supply]))
+
+    dep_base,dep_quote,dep_shares=z.Ints('deposit_base_in deposit_quote_in deposit_shares')
+    reports.append(obligation('amm-global-deposit-preserves',inv+
+        [dep_base>0,dep_quote>0,dep_shares>0,
+         ab+dep_base<=MAX,aq+dep_quote<=MAX,
+         rb+dep_base<=MAX,rq+dep_quote<=MAX,l+dep_shares<=MAX],
+        z.And(ab+dep_base>=rb+dep_base,aq+dep_quote>=rq+dep_quote,
+              rb+dep_base>0,rq+dep_quote>0,l+dep_shares>=LOCKED,
+              s+dep_shares<=l+dep_shares-LOCKED),
+        [ab,rb,aq,rq,l,s,dep_base,dep_quote,dep_shares]))
+
+    out_base,out_quote,burned=z.Ints('withdraw_base_out withdraw_quote_out shares_burned')
+    reports.append(obligation('amm-global-withdraw-preserves',inv+
+        [out_base>0,out_quote>0,out_base<rb,out_quote<rq,
+         burned>0,burned<=s,burned<=l-LOCKED],
+        z.And(ab-out_base>=rb-out_base,aq-out_quote>=rq-out_quote,
+              rb-out_base>0,rq-out_quote>0,l-burned>=LOCKED,
+              s-burned>=0,s-burned<=l-burned-LOCKED),
+        [ab,rb,aq,rq,l,s,out_base,out_quote,burned]))
+
+    gross,swap_out=z.Ints('swap_gross_in swap_token_out')
+    reports.append(obligation('amm-global-base-in-swap-preserves',inv+
+        [gross>0,swap_out>0,swap_out<rq,
+         ab+gross<=MAX,rb+gross<=MAX],
+        z.And(ab+gross>=rb+gross,aq-swap_out>=rq-swap_out,
+              rq-swap_out>0,l>=LOCKED,s<=l-LOCKED),
+        [ab,rb,aq,rq,l,s,gross,swap_out]))
+
+    reports.append(obligation('amm-global-quote-in-swap-preserves',inv+
+        [gross>0,swap_out>0,swap_out<rb,
+         aq+gross<=MAX,rq+gross<=MAX],
+        z.And(aq+gross>=rq+gross,ab-swap_out>=rb-swap_out,
+              rb-swap_out>0,l>=LOCKED,s<=l-LOCKED),
+        [ab,rb,aq,rq,l,s,gross,swap_out]))
+
+    donation_base,donation_quote=z.Ints('donation_base donation_quote')
+    reports.append(obligation('amm-global-donation-preserves',inv+
+        [donation_base>=0,donation_quote>=0,
+         ab+donation_base<=MAX,aq+donation_quote<=MAX],
+        z.And(ab+donation_base>=rb,aq+donation_quote>=rq,
+              rb>0,rq>0,l>=LOCKED,s<=l-LOCKED),
+        [ab,rb,aq,rq,l,s,donation_base,donation_quote]))
     return reports
 
 
@@ -227,4 +300,4 @@ def prove(program_path,pricing_path,sqrt_path,math_path,wide_path,sqrt_math_path
 if __name__=='__main__':
     if z.get_version_string()!='5.1.0':raise RuntimeError('Requires Z3 5.1.0')
     report=prove(*sys.argv[1:]);print(json.dumps(report,indent=2))
-    sys.exit(0 if len(report['claims'])==27 and all(c['result']=='unsat' for c in report['claims']) else 1)
+    sys.exit(0 if len(report['claims'])==32 and all(c['result']=='unsat' for c in report['claims']) else 1)
