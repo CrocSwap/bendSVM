@@ -50,6 +50,12 @@ passed **7 successful transactions, 4 expected rejections and 22 assertions**.
   transactions. Rejected transactions check unchanged application accounts;
   transaction fees are excluded. The validator was stopped after validation.
 
+The final implementation also passed `npm test` (78 SBF tests passed, three
+benchmark-only tests ignored), followed by the generated-client, project-command
+and client-packaging checks. All five local-runner Rust tests and the targeted
+endpoint, evidence-rejection and process-lifecycle tests passed. Lifecycle checks
+cover startup/build interruption, SIGINT/SIGTERM, normal close and explicit exit.
+
 The safe top-level reports are:
 
 - `build/fresh-developer-acceptance/acceptance.json`: source inventory, project
