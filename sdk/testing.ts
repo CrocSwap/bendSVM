@@ -4,6 +4,7 @@ import path from 'node:path';
 import {spawn,spawnSync} from 'node:child_process';
 import {createInterface} from 'node:readline';
 import type {InstructionPlan} from './program-client.ts';
+import {ownDetachedProcessGroup} from './process-lifecycle.ts';
 
 export type TestAccount={lamports:number;owner:string;executable:boolean;data:Uint8Array};
 export type TestReceipt={ok:boolean;units:number;logs:string[];code?:number|null;error?:string;signature?:string};
@@ -90,20 +91,17 @@ function testContext(transport:Transport):TestProgram {
 }
 function lineProcess(executable:string,args:string[],cwd:string,defaultTimeoutMs=30000) {
   const child=spawn(executable,args,{cwd,stdio:['pipe','pipe','pipe'],detached:process.platform!=='win32'});
+  const cleanupGroup=ownDetachedProcessGroup(child);
   type Pending={resolve:(value:any)=>void;reject:(e:Error)=>void;timer:ReturnType<typeof setTimeout>};
   const pending:Pending[]=[];let stderr='',closed=false;
   const failPending=(error:Error)=>{for(const p of pending.splice(0)){clearTimeout(p.timer);p.reject(error);}};
   const finished=new Promise<number|null>(resolve=>child.on('close',code=>{
     closed=true;failPending(new Error(`SBF test runner exited (${code}): ${stderr}`));resolve(code);
-  }));
+  })).then(async code=>{await cleanupGroup();return code;});
   child.stderr.on('data',data=>{stderr=(stderr+data.toString()).slice(-16000);});
-  const kill=()=>{
-    try { if(process.platform==='win32')child.kill();else process.kill(-child.pid!, 'SIGTERM'); } catch {}
-    const force=setTimeout(()=>{try { if(process.platform==='win32')child.kill('SIGKILL');else process.kill(-child.pid!, 'SIGKILL'); } catch {}},1000);
-    force.unref();
-  };
-  child.on('error',error=>{failPending(error);kill();});
-  child.stdin.on('error',error=>{failPending(new Error(`SBF test runner stdin failed: ${error.message}`));kill();});
+  const kill=()=>cleanupGroup();
+  child.on('error',error=>{failPending(error);void kill();});
+  child.stdin.on('error',error=>{failPending(new Error(`SBF test runner stdin failed: ${error.message}`));void kill();});
   const lines=createInterface({input:child.stdout});
   lines.on('line',line=>{
     const p=pending.shift();if(!p){failPending(new Error(`SBF test runner emitted unsolicited output: ${line.slice(0,200)}`));kill();return;}
@@ -116,13 +114,21 @@ function lineProcess(executable:string,args:string[],cwd:string,defaultTimeoutMs
   });
   const request=(value:unknown,timeoutMs=defaultTimeoutMs)=>new Promise<any>((resolve,reject)=>{
     if(closed){reject(new Error(`SBF test runner is closed: ${stderr}`));return;}
-    const timer=setTimeout(()=>{kill();reject(new Error('SBF test runner request timed out'));},timeoutMs);
-    pending.push({resolve,reject,timer});child.stdin.write(JSON.stringify(value)+'\n');
+    const timer=setTimeout(()=>{
+      const error=new Error('SBF test runner request timed out');
+      failPending(error);void kill();
+    },timeoutMs);
+    pending.push({resolve,reject,timer});
+    try{child.stdin.write(JSON.stringify(value)+'\n');}catch(error){
+      failPending(error instanceof Error?error:new Error(String(error)));void kill();
+    }
   });
   const close=async()=>{
     child.stdin.end();
     let timer:ReturnType<typeof setTimeout>|undefined;
-    const timeout=new Promise<never>((_,reject)=>{timer=setTimeout(()=>{kill();reject(new Error(`SBF test runner close timed out: ${stderr}`));},15000);});
+    const timeout=new Promise<never>((_,reject)=>{timer=setTimeout(()=>{
+      void kill().finally(()=>reject(new Error(`SBF test runner close timed out: ${stderr}`)));
+    },15000);});
     try {const code=await Promise.race([finished,timeout]);if(code!==0)throw new Error(`SBF runner exited ${code}: ${stderr}`);}
     finally {if(timer)clearTimeout(timer);lines.close();}
   };
@@ -131,19 +137,20 @@ function lineProcess(executable:string,args:string[],cwd:string,defaultTimeoutMs
 async function buildLocalRunner() {
   const child=spawn('cargo',['build','--locked','--offline','--manifest-path','scripts/local-runner/Cargo.toml','--target-dir','target/local-runner'],
     {cwd:repository,stdio:['ignore','pipe','pipe'],detached:process.platform!=='win32'});
+  const cleanupGroup=ownDetachedProcessGroup(child);
   let output='',error='';
   child.stdout.on('data',data=>{output=(output+data.toString()).slice(-32000);});
   child.stderr.on('data',data=>{error=(error+data.toString()).slice(-32000);});
   let timedOut=false;
   const timer=setTimeout(()=>{
     timedOut=true;
-    try {if(process.platform==='win32')child.kill();else process.kill(-child.pid!,'SIGTERM');}catch{}
-    const force=setTimeout(()=>{try{if(process.platform==='win32')child.kill('SIGKILL');else process.kill(-child.pid!,'SIGKILL');}catch{}},1000);force.unref();
+    void cleanupGroup();
   },900000);
   const result=await new Promise<{code:number|null;failure?:Error}>((resolve)=>{
     child.once('error',failure=>resolve({code:null,failure}));
     child.once('close',code=>resolve({code}));
   }).finally(()=>clearTimeout(timer));
+  await cleanupGroup();
   if(result.failure||result.code!==0)throw new Error(`Cannot build local RPC test runner${timedOut?' (15 minute timeout)':''}. Install the locked Cargo dependencies first with cargo fetch --locked --manifest-path scripts/local-runner/Cargo.toml.\n${result.failure?.message??''}${error}${output}`);
 }
 export async function startTestProgram(elf:string) {
@@ -156,7 +163,7 @@ export async function startTestProgram(elf:string) {
     const key=async(_name:string):Promise<string>=>process.request({op:'key',seed:++seed});
     const program=await key('$program');await process.request({op:'load',program,elf:path.resolve(elf)});
     return testContext({request:process.request,hello:{...hello,program,backend:'litesvm'},close:process.close,key});
-  }catch(e){process.kill();await process.finished;throw e;}
+  }catch(e){await process.kill();await process.finished;throw e;}
 }
 export async function startLocalRpcTestProgram(elf:string,endpoint:string,runDirectory:string) {
   if(endpoint!=='http://127.0.0.1:18899')throw new Error('Local RPC testing accepts only http://127.0.0.1:18899');
@@ -175,5 +182,5 @@ export async function startLocalRpcTestProgram(elf:string,endpoint:string,runDir
       return {...evidence,receipts,signatures};
     };
     return testContext({request:process.request,hello:{...hello,backend:'local-rpc'},close:process.close,key,localEvidence});
-  }catch(e){process.kill();await process.finished;throw e;}
+  }catch(e){await process.kill();await process.finished;throw e;}
 }

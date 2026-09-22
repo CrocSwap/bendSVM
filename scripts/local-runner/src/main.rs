@@ -84,6 +84,20 @@ fn write_private(path: &Path, contents: &[u8]) -> Result<()> {
         .and_then(|_| file.sync_all())
         .map_err(|e| format!("Cannot flush {}: {e}", path.display()))
 }
+fn append_private(path: &Path, contents: &[u8]) -> Result<()> {
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .append(true)
+        .mode(0o600)
+        .open(path)
+        .map_err(|e| format!("Cannot append {}: {e}", path.display()))?;
+    file.set_permissions(Permissions::from_mode(0o600))
+        .map_err(|e| format!("Cannot protect {}: {e}", path.display()))?;
+    file.write_all(contents)
+        .and_then(|_| file.sync_all())
+        .map_err(|e| format!("Cannot append {}: {e}", path.display()))
+}
 fn write_json(path: &Path, value: &Value) -> Result<()> {
     write_private(
         path,
@@ -388,6 +402,87 @@ fn run_command(command: &mut Command, timeout: Duration) -> Result<CommandResult
         stderr: err_reader.join().unwrap_or_default(),
     })
 }
+fn run_command_to_files(
+    command: &mut Command,
+    timeout: Duration,
+    stdout_path: &Path,
+    stderr_path: &Path,
+) -> Result<CommandResult> {
+    let stdout = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .mode(0o600)
+        .open(stdout_path)
+        .map_err(|e| format!("Cannot open {}: {e}", stdout_path.display()))?;
+    let stderr = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .mode(0o600)
+        .open(stderr_path)
+        .map_err(|e| format!("Cannot open {}: {e}", stderr_path.display()))?;
+    let mut child = command
+        .stdout(Stdio::from(stdout))
+        .stderr(Stdio::from(stderr))
+        .spawn()
+        .map_err(|e| {
+            format!(
+                "Cannot start {}: {e}",
+                command.get_program().to_string_lossy()
+            )
+        })?;
+    let deadline = Instant::now() + timeout;
+    let mut timed_out = false;
+    let status = loop {
+        match child
+            .try_wait()
+            .map_err(|e| format!("Cannot wait for command: {e}"))?
+        {
+            Some(status) => break Some(status.code().unwrap_or(-1)),
+            None if Instant::now() >= deadline => {
+                timed_out = true;
+                let _ = child.kill();
+                let status = child.wait().ok();
+                break status.map(|s| s.code().unwrap_or(-1));
+            }
+            None => thread::sleep(Duration::from_millis(100)),
+        }
+    };
+    Ok(CommandResult {
+        status,
+        timed_out,
+        stdout: fs::read(stdout_path)
+            .map_err(|e| format!("Cannot read {}: {e}", stdout_path.display()))?,
+        stderr: fs::read(stderr_path)
+            .map_err(|e| format!("Cannot read {}: {e}", stderr_path.display()))?,
+    })
+}
+fn deploy_command(
+    endpoint: &str,
+    payer_path: &Path,
+    elf_path: &Path,
+    program_path: &Path,
+) -> Command {
+    let mut command = Command::new("solana");
+    command
+        .args(["--url", endpoint, "--keypair"])
+        .arg(payer_path)
+        .args([
+            "--commitment",
+            "confirmed",
+            "program",
+            "deploy",
+            "--use-rpc",
+            "--max-sign-attempts",
+            "1",
+        ])
+        .arg(elf_path)
+        .arg("--program-id")
+        .arg(program_path)
+        .args(["--output", "json"]);
+    command
+}
 fn find_signatures(value: &Value, out: &mut Vec<String>) {
     match value {
         Value::Object(object) => {
@@ -532,49 +627,46 @@ impl Runner {
                 String::from_utf8_lossy(&cli_version.stderr)
             ));
         }
-        let deployment = match run_command(
-            Command::new("solana").args([
-                "--url",
-                endpoint.as_str(),
-                "--keypair",
-                dir.join("payer.json")
-                    .to_str()
-                    .ok_or("Invalid payer path")?,
-                "--commitment",
-                "confirmed",
-                "program",
-                "deploy",
-                "--use-rpc",
-                elf_path.to_str().ok_or("Invalid ELF path")?,
-                "--program-id",
-                dir.join("program.json")
-                    .to_str()
-                    .ok_or("Invalid program key path")?,
-                "--output",
-                "json",
-            ]),
+        let deployment_stdout = dir.join("deployment.stdout");
+        let deployment_stderr = dir.join("deployment.stderr");
+        write_private(&deployment_stdout, b"")?;
+        write_private(&deployment_stderr, b"")?;
+        deployment_uncertain(
+            &dir,
+            program.pubkey(),
+            &[],
+            "solana program deploy is starting or was interrupted; inspect saved output and chain state before retrying",
+            None,
+            false,
+        )?;
+        let deployment = match run_command_to_files(
+            &mut deploy_command(
+                &endpoint,
+                &dir.join("payer.json"),
+                &elf_path,
+                &dir.join("program.json"),
+            ),
             Duration::from_secs(300),
+            &deployment_stdout,
+            &deployment_stderr,
         ) {
             Ok(output) => output,
             Err(error) => {
-                write_private(&dir.join("deployment.stdout"), b"")?;
-                write_private(&dir.join("deployment.stderr"), error.as_bytes())?;
+                append_private(&deployment_stderr, format!("{error}\n").as_bytes())?;
                 deployment_uncertain(
                     &dir,
                     program.pubkey(),
                     &[],
-                    "solana program deploy could not start; inspect saved output before retrying",
+                    "solana program deploy could not start or did not return a complete result; inspect saved output and chain state before retrying",
                     None,
                     false,
                 )?;
                 return Err(format!(
-                    "solana program deploy could not start; inspect {}/deployment-uncertain.json",
+                    "solana program deploy did not return a complete result; inspect {}/deployment-uncertain.json",
                     relative_to_cwd(&dir)
                 ));
             }
         };
-        write_private(&dir.join("deployment.stdout"), &deployment.stdout)?;
-        write_private(&dir.join("deployment.stderr"), &deployment.stderr)?;
         let mut signatures = deployment_signatures(&deployment.stdout)
             .into_iter()
             .chain(deployment_signatures(&deployment.stderr))
@@ -722,6 +814,8 @@ impl Runner {
             "payer":payer_address,"program":program_address,"backend":"local-rpc",
             "runtime":local_evidence["runtime"],"localEvidence":local_evidence
         });
+        fs::remove_file(dir.join("deployment-uncertain.json"))
+            .map_err(|e| format!("Cannot clear completed deployment uncertainty marker: {e}"))?;
         Ok(Self {
             dir,
             rpc,
@@ -995,6 +1089,25 @@ mod tests {
             vec!["abc"]
         );
         assert!(deployment_signatures(b"invalid json").is_empty());
+    }
+    #[test]
+    fn deployment_command_allows_only_one_signing_attempt() {
+        let command = deploy_command(
+            LOCAL_URL,
+            Path::new("build/payer.json"),
+            Path::new("build/program.so"),
+            Path::new("build/program-key.json"),
+        );
+        let args = command
+            .get_args()
+            .map(|arg| arg.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+        let attempts = args
+            .windows(2)
+            .filter(|pair| pair[0] == "--max-sign-attempts" && pair[1] == "1")
+            .count();
+        assert_eq!(attempts, 1, "deployment args: {args:?}");
+        assert!(args.contains(&"--use-rpc".to_owned()));
     }
     #[test]
     fn repeated_test_plans_wait_for_a_new_blockhash() {
