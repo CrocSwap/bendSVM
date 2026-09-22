@@ -521,7 +521,7 @@ witnesses are in `build/amm-pricing-refinement.json`. UNKNOWN fails the command.
 
 ## Complete AMM source transition
 
-`npm run verify:amm` checks 27 obligations against the exported checked
+`npm run verify:amm` checks 32 obligations against the exported checked
 `amm.process` source. The proof enumerates both state constructors and all
 instruction constructors (including both swap directions), and compares the
 entire outcome: error priority, immutable configuration, reserve/share updates,
@@ -547,9 +547,31 @@ quote-level rounding and product lemmas above. Runtime validation and SPL Token
 execution/atomicity remain assumptions, tested separately on SBF; the theorem
 does not verify the compiler or token program.
 
-Eight source mutations produce SAT plus independently evaluated Bend witnesses:
+The global accounting invariant is `actual_base >= recorded_base > 0`,
+`actual_quote >= recorded_quote > 0`, `total_shares >= 1,000`, and
+`outstanding_LP_supply <= total_shares - 1,000`. Initialization establishes it
+from fresh empty reserves and matching funding effects. Deposits, withdrawals,
+and both swap directions preserve the reserve inequalities when their exact
+source-bound token effects succeed; unsolicited donations add surplus without
+changing recorded reserves, and external LP burns only reduce outstanding
+supply. The claim-bound obligation additionally proves that if aggregate
+integer LP payouts `C` satisfy the per-holder floor bound
+`total_shares * C <= recorded_reserve * outstanding_LP_supply`, then `C` is
+strictly less than that reserve. The floor quote inequality gives the premise
+for each holder, and summing those inequalities covers any finite partition of
+the outstanding supply.
+
+This is a backing/no-overdraw invariant for **current pro-rata claims**, not a
+promise that each account can immediately redeem positive units of both tokens:
+the source rejects withdrawals whose rounded payout is zero on either side.
+Nor is the reserve-balance invariant an end-to-end theorem about arbitrary SPL
+mint authorities or compiled SBF; those execution assumptions remain covered by
+separate runtime tests.
+
+Ten source mutations produce SAT plus independently evaluated Bend witnesses:
 unsigned execution, wrong LP mint, withdrawal crediting a reserve, removed locked
 liquidity, omitted swap input credit, wrong payout recipient, zero LP issuance,
-and an unbound reserve address. Four imported-source corruptions and an extra
+an unbound reserve address, underfunded recorded reserves, and LP issuance not
+reflected in accounting shares. Four imported-source corruptions and an extra
 instruction constructor are rejected. `build/amm-refinement.json` records the
 obligations, witnesses, prerequisite reports, and source hashes.

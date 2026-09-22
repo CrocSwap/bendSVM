@@ -4,6 +4,10 @@ Status: **passed on 2026-09-20**. This is a
 project self-review against [the milestone contract](amm-plan.md), not an
 independent security audit or approval for production funds.
 
+The global-invariant proof extension below was checked separately on
+2026-09-21. It refreshes the AMM source-refinement result only; it is not a rerun
+of the complete regression suite or benchmark recorded in the original audit.
+
 ## Requirement and evidence map
 
 | Requirement | Implementation and evidence | Current assessment |
@@ -34,6 +38,17 @@ report/source hashes, build manifests, ELF hashes, exact benchmark repetition,
 and the completed suite logs. `build/amm-acceptance.json` records the current
 source and evidence hashes. No required milestone item remains open within the
 experimental scope defined above.
+
+## Global-invariant proof extension (2026-09-21)
+
+After the original audit snapshot, `npm run verify:amm` was rerun with explicit
+global reserve-balance and LP-supply invariants. All 32 obligations passed; ten
+mutated source variants produced SAT counterexamples with concrete Bend
+witnesses, and the import-binding/schema negatives still failed closed. The
+extension proves backing for aggregate current pro-rata claims, conditional on
+successful exact SPL effects and atomic execution. It does not make dust-sized
+withdrawals with a zero rounded leg redeemable, and it does not replace a full
+runtime/benchmark audit rerun.
 
 ## Source review
 
