@@ -107,6 +107,8 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   const logs:Record<string,string>={};
   fs.mkdirSync(stagedSource,{recursive:true});
 
+  const gitHead=hostVersion('git',['-C',repository,'rev-parse','HEAD']);
+  const gitStatus=spawnSync('git',['-C',repository,'status','--porcelain'],{encoding:'utf8'});
   const inventory=sourceInventory(repository,stagedSource);
   const nodeModules=linkCache(stagedSource,'node_modules',path.join(repository,'node_modules'));
   const bendCache=linkCache(stagedSource,'.deps/bend',path.join(repository,'.deps/bend'));
@@ -201,8 +203,6 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   for(const file of runnerInputs)assertFile(file);
   const runnerBinary=path.join(cargoTarget,'debug/bend-test-runner');
   assertFile(runnerBinary);
-  const gitHead=hostVersion('git',['-C',repository,'rev-parse','HEAD']);
-  const gitStatus=spawnSync('git',['-C',repository,'status','--porcelain'],{encoding:'utf8'});
   const bentHead=hostVersion('git',['-C',bendCache,'rev-parse','HEAD']);
   const bentStatus=spawnSync('git',['-C',bendCache,'status','--porcelain'],{encoding:'utf8'});
   const platformTools=process.env.SBF_TOOLS??path.join(os.homedir(),'.cache/solana/v1.53/platform-tools/llvm/bin');

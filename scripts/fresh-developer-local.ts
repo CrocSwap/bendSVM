@@ -14,7 +14,10 @@ const hash=(file:string)=>crypto.createHash('sha256').update(fs.readFileSync(fil
 const endpoint='http://127.0.0.1:18899';
 type FileHash={path:string;sha256:string};
 type OfflineReport={
+  version:number;gate:string;
   passed:boolean;
+  lawMutation:{law:string;verifyRejected:boolean;buildRejected:boolean;bothSemanticFailures:boolean;sourceRestored:boolean};
+  staleReportProbe:{staleSuccessSeeded:boolean;prerequisiteFailureWasSemantic:boolean;staleSuccessRemoved:boolean};
   sourceCopy:{stagedRepository:string;projectDirectory:string;copiedFiles:FileHash[]};
   tutorial:{changedProjectFiles:FileHash[]};
   gateInputs:Record<string,string>;
@@ -27,6 +30,15 @@ try {
   if(!fs.existsSync(offlinePath))throw new Error('Missing offline acceptance report; run npm run acceptance:developer first.');
   const offline=JSON.parse(fs.readFileSync(offlinePath,'utf8')) as OfflineReport;
   assert.equal(offline.passed,true,'Offline acceptance must have passed');
+  assert.equal(offline.version,1,'Unsupported offline acceptance report');
+  assert.equal(offline.gate,'fresh developer offline acceptance','Expected the fresh developer offline gate');
+  assert.equal(offline.lawMutation?.law,'zero_append_is_rejected','Missing new-law mutation evidence');
+  for(const field of ['verifyRejected','buildRejected','bothSemanticFailures','sourceRestored'] as const)
+    assert.equal(offline.lawMutation[field],true,`Offline law mutation gate incomplete: ${field}`);
+  for(const field of ['staleSuccessSeeded','prerequisiteFailureWasSemantic','staleSuccessRemoved'] as const)
+    assert.equal(offline.staleReportProbe?.[field],true,`Offline stale-report gate incomplete: ${field}`);
+  assert(offline.sourceCopy?.copiedFiles?.length>0&&offline.tutorial?.changedProjectFiles?.length>0,
+    'Offline acceptance must record staged source and project hashes');
   const offlineHash=hash(offlinePath);
   const stage=path.resolve(repository,offline.sourceCopy.stagedRepository);
   const project=path.resolve(repository,offline.sourceCopy.projectDirectory);
@@ -58,6 +70,13 @@ try {
   assert.equal(local.endpoint,endpoint);
   assert.equal(local.elfSha256,offline.outputs.elf.sha256,'Local deployment must use the offline-tested ELF');
   assert.equal(local.sourceManifestSha256,offline.outputs.manifest.sha256,'Local deployment must use the offline-tested manifest');
+  const elf=fs.readFileSync(path.resolve(repository,offline.outputs.elf.path));
+  const deployedPath=path.resolve(stage,local.runDirectory,'deployed.so');
+  const deployed=fs.readFileSync(deployedPath);
+  assert(elf.length>0&&deployed.length>=elf.length&&deployed.subarray(0,elf.length).equals(elf)&&
+    deployed.subarray(elf.length).every(byte=>byte===0),'Deployed bytes differ from the offline-tested ELF');
+  assert.deepEqual(local.byteMatch,{matchedBytes:elf.length,deployedBytes:deployed.length,zeroPaddingBytes:deployed.length-elf.length},
+    'Local byte-match evidence is missing or inconsistent');
   assert(local.programCalls>0&&local.assertions>0&&local.rejected>0,'Local acceptance must exercise the program and expected rejection');
   assert(local.signatures.length>0,'Local acceptance must record confirmed transactions');
   const receiptPath=path.resolve(stage,local.receiptPath);
@@ -65,6 +84,7 @@ try {
     offlineAcceptance:{path:offlinePath,sha256:offlineHash},
     localTest:{path:localReportPath,sha256:hash(localReportPath)},
     receipts:{path:receiptPath,sha256:hash(receiptPath)},
+    deployedElf:{path:deployedPath,sha256:hash(deployedPath)},
     coordinator:{path:'scripts/fresh-developer-local.ts',sha256:hash(import.meta.path)},
     elfSha256:local.elfSha256,sourceManifestSha256:local.sourceManifestSha256,
     program:local.program,byteMatch:local.byteMatch,
