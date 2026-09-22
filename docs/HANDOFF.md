@@ -1,5 +1,32 @@
 # Director handoff — 2026-09-20
 
+## Update — 2026-09-22
+
+The fresh-developer workflow is implemented. Start with
+`docs/fresh-developer-acceptance.md`, `docs/external-alpha-tutorial.md` and
+`docs/local-testing.md` for this milestone; the older roadmap below is historical.
+`npm run acceptance:developer` stages tracked source, adds a zero-append rule and
+law/proof/test, checks a deliberate law violation and runs the restored SBF in
+LiteSVM. `npm run acceptance:developer:local` extends that exact result through
+the generic localhost transport and independently checks the deployed bytes.
+The same project `test.ts` also runs directly with
+`npm run bend -- test <project> --local-rpc http://127.0.0.1:18899`.
+The recorded offline and local runs each passed 7 successful transactions,
+4 expected rejections and 22 assertions. Local execution matched all 12,816 ELF
+bytes and recorded 13 confirmed funding/deployment/test signatures. The host
+stopped its validator. Reports identify source hashes and reused caches;
+independent developer trials and actual GitHub/Linux validation remain distinct.
+
+The main implementation entrypoints added here are
+`scripts/fresh-developer-acceptance.ts`, `scripts/fresh-developer-tutorial.ts`,
+`scripts/fresh-developer-local.ts`, and `scripts/local-runner/`. The existing CLI
+and `sdk/testing.ts` select the offline or explicit localhost backend. Bootstrap
+fetches the new runner's locked dependencies; CI includes the offline gate and
+local-command/evidence failure tests. No public deployment was made for this
+milestone.
+
+## Earlier context
+
 Repository update: this checkout now has an initial Git history, root CI and a
 GPL-3.0-only project license. The notes below preserve the earlier handoff's
 historical context; current source and repository metadata take precedence.

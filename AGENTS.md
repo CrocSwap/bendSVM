@@ -17,6 +17,8 @@ to the task:
   language, resource limits and account/wire contracts.
 - `docs/refinement.md` and application-specific documents: verification scope,
   assumptions and evidence.
+- `docs/fresh-developer-acceptance.md` and `docs/local-testing.md`: changed-program
+  acceptance and the reusable localhost test/deployment backend.
 - `.github/workflows/external-alpha.yml`: actual CI commands and ordering.
 
 Source, current repository metadata and fresh results take precedence over
@@ -41,6 +43,7 @@ backing invariants in `verification/amm.py` and documented their scope in
 | `verification/` | Checked-source model exporter, Python/Z3 proofs, negative checks and reports |
 | `benchmarks/` | Independent Rust implementations for matched comparisons |
 | `scripts/test-runner/` | Rust LiteSVM runner used by project tests |
+| `scripts/local-runner/` | Generic localhost RPC backend for the same project tests |
 | `scripts/live-queue/` | Local-validator/devnet deployment and integration harness |
 
 `build/`, `target/`, `.deps/`, `node_modules/` and `.fadeno/` are ignored local
@@ -104,6 +107,9 @@ compiler suite.
   `npm exec -- bun tests/project-commands.ts`, and
   `npm exec -- bun tests/client-packaging.ts`.
 - `npm run acceptance:alpha` runs the isolated external-alpha gate.
+- `npm run acceptance:developer` exercises the changed source/law/proof/test in a
+  staged source copy. With an explicitly started local validator on port 18899,
+  `npm run acceptance:developer:local` validates the same artifact over RPC.
 - `npm run verify:all` runs 17 separate source refinement commands and writes
   `build/refinement-suite.json`. Use focused `verify:*` commands for relevant
   proof changes; these checks are separate from ordinary regression tests.

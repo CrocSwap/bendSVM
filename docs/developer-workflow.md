@@ -118,4 +118,7 @@ the same commands and generated client. Add a `test.ts` using their instructions
 
 The supported language and resource bounds still apply; see `subset.md` and
 `diagnostics.md`. This workflow adds packaging and testing, not unrestricted Bend
-coverage, automatic wallet integration or an RPC deployment transport.
+coverage or automatic wallet integration. An explicit
+[local-validator test backend](local-testing.md) now deploys a fresh program and
+runs the same `test.ts` with `test <project> --local-rpc http://127.0.0.1:18899`.
+The default `test <project>` command remains offline.
