@@ -32,6 +32,7 @@ fi
 
 cargo fetch --locked --manifest-path Cargo.toml
 cargo fetch --locked --manifest-path scripts/test-runner/Cargo.toml
+cargo fetch --locked --manifest-path scripts/local-runner/Cargo.toml
 cargo fetch --locked --manifest-path scripts/live-queue/Cargo.toml
 npm run doctor -- --write build/alpha-doctor.json
 echo 'External-alpha bootstrap complete. Review the doctor output before building.'

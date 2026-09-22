@@ -8,6 +8,8 @@
     "doctor": "bun scripts/alpha-doctor.ts",
     "bootstrap:alpha": "bash scripts/bootstrap-alpha.sh",
     "acceptance:alpha": "bun scripts/alpha-acceptance.ts",
+    "acceptance:developer": "bun scripts/fresh-developer-acceptance.ts",
+    "acceptance:developer:local": "bun scripts/fresh-developer-local.ts",
     "build": "bun scripts/build.ts",
     "build:program": "bun scripts/program.ts",
     "verify:arithmetic": "bun verification/check.ts",

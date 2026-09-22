@@ -61,7 +61,7 @@ if(fs.existsSync(path.join(tools,'clang'))){
 const bendHead=command('git',['-C','.deps/bend','rev-parse','HEAD']);
 const bendStatus=command('git',['-C','.deps/bend','status','--porcelain']);
 add('bend-checkout',true,bendHead.ok&&bendHead.output===BEND_COMMIT&&bendStatus.ok&&!bendStatus.output,`${bendHead.output||bendHead.error||'missing'}${bendStatus.output?' (dirty)':''}`,`.deps/bend at ${BEND_COMMIT}`);
-for(const manifest of ['scripts/test-runner/Cargo.toml','scripts/live-queue/Cargo.toml']){
+for(const manifest of ['scripts/test-runner/Cargo.toml','scripts/local-runner/Cargo.toml','scripts/live-queue/Cargo.toml']){
   const result=command('cargo',['metadata','--locked','--offline','--no-deps','--manifest-path',manifest]);
   add(`cargo-${path.basename(path.dirname(manifest))}`,true,result.ok,result.ok?'locked offline metadata available':result.error??result.output);
 }

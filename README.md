@@ -102,6 +102,15 @@ starter and source-law failure gate. Use `npm run doctor -- --refinement` only
 after provisioning the optional pinned Z3 virtualenv. The acceptance record
 distinguishes clean-source validation from reused platform-tools/Cargo caches.
 
+`npm run acceptance:developer` exercises a real application change in a staged
+source copy: reject zero-valued appends, add a declared law and proof, check a
+deliberate violation, and execute the repaired program in LiteSVM. Follow the
+[tutorial](docs/external-alpha-tutorial.md) for the corresponding source and test
+edits. This automated gate is separate from an independent developer trial.
+With a [local validator](docs/local-testing.md) running, extend that result with
+`npm run acceptance:developer:local`. Individual projects can run their same
+`test.ts` using `npm run bend -- test <project> --local-rpc http://127.0.0.1:18899`.
+
 Build an application independently:
 
 ```sh

@@ -121,10 +121,10 @@ of that property. This check does not prove the compiler or deployed binary.
 
 ## Run the repeatable fresh-developer gate
 
-Until package wiring lands, run the offline gate directly:
+Run the offline gate:
 
 ```sh
-npm exec -- bun scripts/fresh-developer-acceptance.ts
+npm run acceptance:developer
 ```
 
 It copies only tracked source files (plus the gate and its helper) into a new
@@ -157,5 +157,29 @@ Both mutation commands failed on `zero_append_is_rejected`, with expected
 `Rejected{5}` and observed `Rejected{4}`. The full log and hash record is in
 `build/fresh-developer-acceptance/acceptance.json` in the validating worktree.
 
-Local RPC/deployment acceptance is handled by a later integration step; this
-offline command does not start a validator or submit transactions.
+## Run the same project on a local validator
+
+Start a fresh validator using the commands in [local-testing.md](local-testing.md),
+then extend the completed offline gate:
+
+```sh
+npm run acceptance:developer:local
+```
+
+This command checks the retained source, project and artifact hashes before
+running the staged project's same `test.ts` through the local RPC backend. It
+requires the rebuilt and deployed ELF to match the offline-tested artifact,
+and writes `build/fresh-developer-acceptance/local-acceptance.json` only after
+the local tests and hash checks pass. The local report links the offline report,
+deployed-byte comparison and transaction receipts. If a staged input changed,
+rerun `acceptance:developer` first.
+
+For your own project, the reusable command is:
+
+```sh
+npm run bend -- test projects/My-Alpha --local-rpc http://127.0.0.1:18899
+```
+
+The offline command does not submit transactions. Local testing creates fresh
+test keys and deploys only to the explicit loopback endpoint; its output directory
+contains private test keys and must remain local. Stop your validator when done.
