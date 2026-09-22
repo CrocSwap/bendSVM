@@ -110,6 +110,8 @@ edits. This automated gate is separate from an independent developer trial.
 With a [local validator](docs/local-testing.md) running, extend that result with
 `npm run acceptance:developer:local`. Individual projects can run their same
 `test.ts` using `npm run bend -- test <project> --local-rpc http://127.0.0.1:18899`.
+See the [fresh-developer acceptance record](docs/fresh-developer-acceptance.md)
+for executed checks and their limits.
 
 Build an application independently:
 
