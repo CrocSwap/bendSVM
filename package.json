@@ -18,6 +18,7 @@
     "verify:amm": "bun verification/check-amm.ts",
     "build:amm-rust": "bun scripts/build-amm-rust.ts",
     "benchmark:amm": "bun scripts/benchmark-amm.ts",
+    "benchmark:amm:phases": "bun scripts/benchmark-amm-phases.ts",
     "verify:sqrt": "bun verification/check-sqrt.ts",
     "verify:wide": "bun verification/check-wide.ts",
     "verify:vesting": "bun verification/check-vesting.ts",

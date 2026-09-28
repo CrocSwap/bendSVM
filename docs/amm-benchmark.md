@@ -76,3 +76,31 @@ The benchmark proves agreement on these fixtures, not universal backend or
 runtime equivalence. [Source refinements](refinement.md) establish separate
 properties of checked Bend terms. The [acceptance audit](amm-acceptance-audit.md) records the completed full
 regression and source review.
+
+## Separate phase diagnostic
+
+`npm run benchmark:amm:phases` builds the checked Bend AMM into
+`build/amm-phases/checked`, instruments a copy of its generated C, and compiles
+a copy of the independent Rust sources with the same pinned SBF tools. It does
+not change the release programs or `build/amm-benchmark.json`. Its focused,
+ignored LiteSVM test compares fixed public keys, identical instruction bytes,
+account snapshots, return data, rejection codes, and rollback for initialization,
+zero-input rejection, slippage rejection, and a successful base-to-quote swap.
+The command runs the test twice and requires byte-identical phase reports.
+
+The diagnostic report is `build/amm-phases/report.json`. Each stage has its raw
+remaining-CU log reading; adjacent readings yield interval deltas. Root total
+CU and nested Token Program CU are recorded separately. The child CU is already
+included in the root and in the interval spanning token execution. Rejections
+reach only the baseline, parsed/PDA, decoded/clock, and transition markers.
+The successful cases reach effect validation, token execution, and state write.
+
+These intervals include logging syscall overhead and code changes caused by
+instrumentation. They are observed costs of diagnostic binaries, not corrected
+intrinsic phase costs. The parsed/PDA boundary also follows basic state account
+checks. Bend constructs a context before the decoded/clock boundary; Rust has no
+equivalent object. Before validation, Bend encodes state and extracts effects,
+while Rust encodes its state payload. The state-write marker is before return
+data publication. The phase diagnostic's swap follows initialization directly,
+whereas the release benchmark's swap follows a deposit, so compare each report
+within its own fixture sequence.

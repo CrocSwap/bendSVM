@@ -38,7 +38,10 @@ impl Amm {
         )
     }
     fn with_program(elf: &str, deterministic: bool) -> Self {
-        let mut f = TokenFixture::with_program_seeded("amm", elf, deterministic);
+        Self::with_program_interface(elf, deterministic, "build/amm.interface.json")
+    }
+    fn with_program_interface(elf: &str, deterministic: bool, interface: &str) -> Self {
+        let mut f = TokenFixture::with_program_seeded_interface(elf, deterministic, interface);
         let key = |marker| {
             if deterministic {
                 Keypair::new_from_array([marker; 32])
@@ -941,6 +944,153 @@ fn amm_benchmark_identical_fixtures() {
     )
     .unwrap();
     println!("{report}");
+}
+
+const PHASE_MARKERS: [&str; 7] = [
+    "baseline",
+    "parsed_pda",
+    "decoded_clock",
+    "transition",
+    "validated",
+    "token_executed",
+    "state_written",
+];
+
+/// The diagnostic copies emit one `sol_log_compute_units_` line per reached
+/// boundary. LiteSVM also emits CPI logs, so only root invocation readings count.
+fn phase_readings(logs: &[String], reached: usize) -> Vec<serde_json::Value> {
+    let mut depth = 0usize;
+    let mut readings = Vec::new();
+    for line in logs {
+        if let Some(rest) = line.strip_prefix("Program ") {
+            if let Some((_, level)) = rest.strip_suffix(']').and_then(|x| x.rsplit_once(" invoke [")) {
+                depth += 1;
+                assert_eq!(level.parse::<usize>().unwrap(), depth, "{line}");
+            } else if rest.ends_with(" success") || rest.contains(" failed: ") {
+                assert!(depth > 0, "completion outside invocation: {line}");
+                depth -= 1;
+            }
+        }
+        if let Some(value) = line.strip_prefix("Program consumption: ") {
+            assert_eq!(depth, 1, "CU marker outside root AMM invocation: {line}");
+            let remaining = value
+                .strip_suffix(" units remaining")
+                .unwrap_or_else(|| panic!("malformed CU marker: {line}"))
+                .parse::<u64>()
+                .unwrap();
+            let index = readings.len();
+            assert!(index < reached, "unexpected extra CU marker: {logs:#?}");
+            readings.push(serde_json::json!({
+                "stage": PHASE_MARKERS[index],
+                "remainingCU": remaining,
+                "rawLog": line,
+            }));
+        }
+    }
+    assert_eq!(depth, 0, "unclosed invocation in CU marker logs");
+    assert_eq!(readings.len(), reached, "missing CU marker: {logs:#?}");
+    for pair in readings.windows(2) {
+        assert!(pair[0]["remainingCU"].as_u64().unwrap() > pair[1]["remainingCU"].as_u64().unwrap(),
+            "CU readings must strictly decrease");
+    }
+    readings
+}
+
+fn phase_intervals(readings: &[serde_json::Value]) -> Vec<serde_json::Value> {
+    readings.windows(2).map(|pair| serde_json::json!({
+        "from": pair[0]["stage"],
+        "to": pair[1]["stage"],
+        "deltaCU": pair[0]["remainingCU"].as_u64().unwrap()
+            - pair[1]["remainingCU"].as_u64().unwrap(),
+    })).collect()
+}
+
+/// Fixed public fixtures, same address and input bytes as the matched release
+/// benchmark. This test is intentionally ignored by ordinary Cargo runs.
+#[test]
+#[ignore = "run npm run benchmark:amm:phases to build diagnostic ELFs"]
+fn amm_phase_diagnostic_identical_fixtures() {
+    let interface = "build/amm-phases/checked.interface.json";
+    let mut bend = Amm::with_program_interface("build/amm-phases/bend.so", true, interface);
+    let mut rust = Amm::with_program_interface("build/amm-phases/rust.so", true, interface);
+    assert_eq!(bend.f.program, rust.f.program);
+    assert_eq!(bend.f.state.pubkey(), rust.f.state.pubkey());
+    assert_eq!(bend.f.custody, rust.f.custody);
+    assert_eq!(bend.keys(), rust.keys());
+    assert_eq!(bend.snapshot(), rust.snapshot());
+    for amm in [&mut bend, &mut rust] {
+        amm.f.send(&[amm.f.create(amm.f.state.pubkey(), amm.f.size, amm.f.program)])
+            .unwrap();
+    }
+    let cases = [
+        ("initialize", 0, [100_000, 400_000, 199_000], false, None, 3, 7),
+        ("reject_zero_input", 3, [0, 0, 0], true, Some(260), 0, 4),
+        ("reject_slippage", 3, [1_000, u64::MAX, 0], true, Some(261), 0, 4),
+        ("swap_base", 3, [1_000, 1, 0], true, None, 2, 7),
+    ];
+    let mut rows = Vec::new();
+    for (name, op, values, direction, error, token_cpis, reached) in cases {
+        let bi = bend.instruction(op, values, direction);
+        let ri = rust.instruction(op, values, direction);
+        assert_eq!(bi.data, ri.data, "instruction bytes: {name}");
+        assert_eq!(bi, ri, "account metadata: {name}");
+        assert_eq!(bend.snapshot(), rust.snapshot(), "before {name}");
+        let before = bend.snapshot();
+        let br = bend.f.send(&[bi]);
+        let rr = rust.f.send(&[ri]);
+        let (bm, rm) = match error {
+            None => (br.unwrap(), rr.unwrap()),
+            Some(code) => {
+                let b = br.unwrap_err();
+                let r = rr.unwrap_err();
+                assert_eq!(b.err, r.err, "rejection: {name}");
+                assert_eq!(b.err,
+                    TransactionError::InstructionError(0, InstructionError::Custom(code)));
+                assert_eq!(bend.snapshot(), before, "Bend rollback: {name}");
+                assert_eq!(rust.snapshot(), before, "Rust rollback: {name}");
+                (b.meta, r.meta)
+            }
+        };
+        assert_eq!(bend.snapshot(), rust.snapshot(), "after {name}");
+        assert_eq!(bm.return_data, rm.return_data, "return data: {name}");
+        let outcome = if error.is_some() { "failed" } else { "success" };
+        let bend_invocations = benchmark_invocation_json(
+            &bm.logs, bend.f.program, token_cpis, outcome, bm.compute_units_consumed);
+        let rust_invocations = benchmark_invocation_json(
+            &rm.logs, rust.f.program, token_cpis, outcome, rm.compute_units_consumed);
+        let bend_readings = phase_readings(&bm.logs, reached);
+        let rust_readings = phase_readings(&rm.logs, reached);
+        rows.push(serde_json::json!({
+            "operation": name,
+            "error": error,
+            "bend": {
+                "readings": bend_readings,
+                "intervals": phase_intervals(&bend_readings),
+                "totalCU": bm.compute_units_consumed,
+                "invocations": bend_invocations,
+            },
+            "rust": {
+                "readings": rust_readings,
+                "intervals": phase_intervals(&rust_readings),
+                "totalCU": rm.compute_units_consumed,
+                "invocations": rust_invocations,
+            },
+        }));
+    }
+    let report = serde_json::json!({
+        "runtime": "LiteSVM 0.7.1",
+        "target": "SBF v0 / generic",
+        "fixture": "fixed public test seeds 1..12; program bytes [42;32]",
+        "markers": PHASE_MARKERS,
+        "measurement": "Remaining-CU readings from sol_log_compute_units_; each interval includes marker syscall overhead and compiled diagnostic code. Token Program child CU is inclusive in the parent interval and must not be added again. No overhead correction is claimed.",
+        "boundaryDifferences": "parsed_pda follows account parsing, PDA derivation, and state owner/size/writable checks. decoded_clock follows state and instruction decoding and the clock syscall; Bend also constructs a context. transition follows the business call but precedes rejection mapping. validated follows state encoding, Bend effect extraction, and effect validation. token_executed follows the CPI loop. state_written precedes return-data publication. Marker locations reflect each implementation's control flow, not identical intrinsic operations.",
+        "rows": rows,
+    });
+    let destination = "build/amm-phases/report.json";
+    std::fs::write(format!("{destination}.tmp"),
+        serde_json::to_string_pretty(&report).unwrap() + "\n").unwrap();
+    std::fs::rename(format!("{destination}.tmp"), destination).unwrap();
+    println!("AMM phase diagnostic: {report}");
 }
 
 #[test]
