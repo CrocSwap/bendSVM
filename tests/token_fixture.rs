@@ -29,6 +29,17 @@ impl TokenFixture {
         Self::with_program_seeded(stem, elf, false)
     }
     pub(super) fn with_program_seeded(stem: &str, elf: &str, deterministic: bool) -> Self {
+        Self::with_program_seeded_interface(
+            elf,
+            deterministic,
+            &format!("build/{stem}.interface.json"),
+        )
+    }
+    pub(super) fn with_program_seeded_interface(
+        elf: &str,
+        deterministic: bool,
+        interface_path: &str,
+    ) -> Self {
         let key = |marker| {
             if deterministic {
                 Keypair::new_from_array([marker; 32])
@@ -37,8 +48,7 @@ impl TokenFixture {
             }
         };
         let interface: serde_json::Value =
-            serde_json::from_slice(&std::fs::read(format!("build/{stem}.interface.json")).unwrap())
-                .unwrap();
+            serde_json::from_slice(&std::fs::read(interface_path).unwrap()).unwrap();
         let primary = if interface["version"] == 2 {
             &interface["stateAccounts"][0]
         } else {
