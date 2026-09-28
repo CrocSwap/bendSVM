@@ -84,7 +84,7 @@ def mul(a: U64, b: U64) -> Checked:
     case U64{+al, +ah} U64{+bl, +bh}:
       mul_parts(mul32(al, bl), mul32(al, bh), mul32(ah, bl), Bool.and(Bool.not(U32.is_zero(ah)), Bool.not(U32.is_zero(bh))))
 
-# Fixed 64-step restoring division. Every step shifts one dividend bit into
+# Restoring division. Every step shifts one dividend bit into
 # the remainder. The extra carry bit must participate in the subtraction test.
 # This is ordinary first-order Bend, with bounded composition instead of unsafe
 # recursion; generated SBF needs neither a heap nor a recursive call stack.
@@ -150,12 +150,40 @@ def div_finish(s: DivState) -> DivResult:
     case DivState{q, r, d}:
       DivOk{Division{q, r}}
 
-def div_guard(is_zero: Bool, a: U64, b: U64) -> DivResult:
+def div_high(a: U64, b: U64) -> DivResult:
+  match a:
+    case U64{lo, hi}:
+      div_finish(div32(DivState{U64{0, lo}, U64{hi, 0}, b}))
+
+def div_high_route(high_is_zero: Bool, +a: U64, b: U64) -> DivResult:
+  match high_is_zero:
+    case True{}:
+      div_finish(div64(DivState{a, zero(), b}))
+    case False{}:
+      div_high(a, b)
+
+def div_one_route(is_one: Bool, a: U64, +b: U64) -> DivResult:
+  match is_one:
+    case True{}:
+      DivOk{Division{a, zero()}}
+    case False{}:
+      match b:
+        case U64{lo, hi}:
+          div_high_route(U32.is_zero(hi), a, b)
+
+def div_less_route(is_less: Bool, a: U64, +b: U64) -> DivResult:
+  match is_less:
+    case True{}:
+      DivOk{Division{zero(), a}}
+    case False{}:
+      div_one_route(equal(b, U64{1, 0}), a, b)
+
+def div_guard(is_zero: Bool, +a: U64, +b: U64) -> DivResult:
   match is_zero:
     case True{}:
       DivErr{3}
     case False{}:
-      div_finish(div64(DivState{a, zero(), b}))
+      div_less_route(less(a, b), a, b)
 
 def divmod(a: U64, +b: U64) -> DivResult:
   div_guard(equal(b, zero()), a, b)

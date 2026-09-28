@@ -8,7 +8,7 @@ import sys
 import time
 import z3 as z
 from prove import Evaluator
-from division_loop import induction, wrappers
+from division_loop import induction, fast_paths, wrappers
 
 
 def audit_composition(program,prefix=''):
@@ -66,12 +66,14 @@ def prove_program(program,prefix='',public=True):
     # Summaries may only be used after their step and induction obligations pass.
     if status==z.unsat:
         report['induction']=induction()
-        if public and all(c['result']=='unsat' for c in report['induction']):report['wrappers']=wrappers(program)
+        if public and all(c['result']=='unsat' for c in report['induction']):
+            report['fastPaths']=fast_paths()
+            if all(c['result']=='unsat' for c in report['fastPaths']):report['wrappers']=wrappers(program)
     return report
 
 
 if __name__=='__main__':
     if z.get_version_string()!='5.1.0':raise RuntimeError('Requires Z3 5.1.0')
     report=prove(sys.argv[1]);print(json.dumps(report,indent=2))
-    claims=[report['step'],*report.get('induction',[]),*report.get('wrappers',[])]
+    claims=[report['step'],*report.get('induction',[]),*report.get('fastPaths',[]),*report.get('wrappers',[])]
     sys.exit(0 if 'wrappers' in report and all(c['result']=='unsat' for c in claims) else 1)
