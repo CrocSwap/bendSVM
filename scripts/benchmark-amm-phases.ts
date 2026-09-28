@@ -68,6 +68,8 @@ async function main() {
     'extern u64 sol_get_clock_sysvar(void *);\nextern void sol_log_compute_units_(void);');
   source = substitute(source, 'u64 entrypoint(const u8 *input) {',
     'u64 entrypoint(const u8 *input) {\n  sol_log_compute_units_(); /* baseline */');
+  source = substitute(source, '  u8 bump; u64 setup = bend_custody(accounts,program,&bump);',
+    '  sol_log_compute_units_(); /* accounts_parsed */\n  u8 bump; u64 setup = bend_custody(accounts,program,&bump);');
   source = substitute(source, '  if (state.size != 216) return 4;',
     '  if (state.size != 216) return 4;\n  sol_log_compute_units_(); /* parsed_pda */');
   source = substitute(source, '  bend_amm_2e_Outcome_t outcome = bend_amm_2e_process(context, before, instruction);',
@@ -96,6 +98,8 @@ async function main() {
     'unsafe fn run(input: *const u8) -> Result<(), u64> {\n    sol_log_compute_units_(); // baseline');
   rs = substitute(rs, '    if state.data_len != wire::STATE_BYTES as u64 {\n        return Err(4);\n    }',
     '    if state.data_len != wire::STATE_BYTES as u64 {\n        return Err(4);\n    }\n    sol_log_compute_units_(); // parsed_pda');
+  rs = substitute(rs, '    if !accounts[2].executable || *accounts[2].key() != TOKEN {',
+    '    sol_log_compute_units_(); // accounts_parsed\n    if !accounts[2].executable || *accounts[2].key() != TOKEN {');
   rs = substitute(rs, '    let (after, effects) = transition::process(accounts[1].signer, before, instruction)\n        .map_err(|code| 256 + u64::from(code))?;',
     '    sol_log_compute_units_(); // decoded_clock\n    let transition = transition::process(accounts[1].signer, before, instruction);\n    sol_log_compute_units_(); // transition\n    let (after, effects) = transition.map_err(|code| 256 + u64::from(code))?;');
   rs = substitute(rs, '    for effect in &effects {\n        if execute(effect, accounts, bump) != 0 {',

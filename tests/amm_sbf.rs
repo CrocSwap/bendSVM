@@ -946,8 +946,9 @@ fn amm_benchmark_identical_fixtures() {
     println!("{report}");
 }
 
-const PHASE_MARKERS: [&str; 7] = [
+const PHASE_MARKERS: [&str; 8] = [
     "baseline",
+    "accounts_parsed",
     "parsed_pda",
     "decoded_clock",
     "transition",
@@ -1023,10 +1024,10 @@ fn amm_phase_diagnostic_identical_fixtures() {
             .unwrap();
     }
     let cases = [
-        ("initialize", 0, [100_000, 400_000, 199_000], false, None, 3, 7),
-        ("reject_zero_input", 3, [0, 0, 0], true, Some(260), 0, 4),
-        ("reject_slippage", 3, [1_000, u64::MAX, 0], true, Some(261), 0, 4),
-        ("swap_base", 3, [1_000, 1, 0], true, None, 2, 7),
+        ("initialize", 0, [100_000, 400_000, 199_000], false, None, 3, 8),
+        ("reject_zero_input", 3, [0, 0, 0], true, Some(260), 0, 5),
+        ("reject_slippage", 3, [1_000, u64::MAX, 0], true, Some(261), 0, 5),
+        ("swap_base", 3, [1_000, 1, 0], true, None, 2, 8),
     ];
     let mut rows = Vec::new();
     for (name, op, values, direction, error, token_cpis, reached) in cases {
@@ -1083,7 +1084,7 @@ fn amm_phase_diagnostic_identical_fixtures() {
         "fixture": "fixed public test seeds 1..12; program bytes [42;32]",
         "markers": PHASE_MARKERS,
         "measurement": "Remaining-CU readings from sol_log_compute_units_; each interval includes marker syscall overhead and compiled diagnostic code. Token Program child CU is inclusive in the parent interval and must not be added again. No overhead correction is claimed.",
-        "boundaryDifferences": "parsed_pda follows account parsing, PDA derivation, and state owner/size/writable checks. decoded_clock follows state and instruction decoding and the clock syscall; Bend also constructs a context. transition follows the business call but precedes rejection mapping. validated follows state encoding, Bend effect extraction, and effect validation. token_executed follows the CPI loop. state_written precedes return-data publication. Marker locations reflect each implementation's control flow, not identical intrinsic operations.",
+        "boundaryDifferences": "accounts_parsed follows account parsing and initial instruction checks. parsed_pda follows the Token Program check, PDA derivation, and state owner/size/writable checks. decoded_clock follows state and instruction decoding and the clock syscall; Bend also constructs a context. transition follows the business call but precedes rejection mapping. validated follows state encoding, Bend effect extraction, and effect validation. token_executed follows the CPI loop. state_written precedes return-data publication. Marker locations reflect each implementation's control flow, not identical intrinsic operations.",
         "rows": rows,
     });
     let destination = "build/amm-phases/report.json";
