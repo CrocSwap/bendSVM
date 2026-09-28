@@ -71,6 +71,28 @@ test wire adapter and return-data syscall, not a complete financial application.
 The six SDK laws passed and all three guard/zero-divisor implementation mutations
 were rejected. Undefined-behavior sanitization reported no failures.
 
+## Matched SBF compute probe
+
+Run `npm run benchmark:arithmetic-probe` to build checked Bend arithmetic and an
+independent Rust baseline with pinned Anza tools. The command executes the same
+nine 17-byte instructions in LiteSVM, checks identical 12-byte return data and
+outer outcomes, repeats CU measurements, and records source, toolchain and ELF
+hashes in `build/arithmetic-probe-benchmark.json`. Both programs use SBF v0,
+generic CPU and optimization level 2. The Rust baseline is in
+`benchmarks/arithmetic-probe-rust/`.
+
+In this first matched fixture set, checked addition and comparison were about 1.4×
+the Rust CU cost, checked multiplication about 1.8×, and full-width division and
+modulo 3,138 versus 128 CU (24.52×). Zero-division returns an error code from
+both programs without failing the outer instruction. The large division gap is
+consistent with Bend's fixed 64-step restoring algorithm and warrants a targeted
+arithmetic investigation; the probe does not isolate individual machine
+instructions or establish how much division contributes to an application call.
+These costs include the small instruction harness, return-data syscall and
+LiteSVM transaction overhead, but exclude application account validation,
+storage, token effects and CPI. They are fixture measurements, not worst-case
+limits or a general Bend/Rust performance ratio.
+
 ## Full-precision multiply/divide
 
 `sdk/wide.bend` computes a complete 128-bit product from four 32×32 partial

@@ -1,7 +1,7 @@
 # Arithmetic and application refinement checks
 
 Run every supported refinement command with `npm run verify:all`. It fails on
-any failed command and records hashes of the fifteen reports in
+any failed command and records hashes of the seventeen reports in
 `build/refinement-suite.json`. These checks remain separate from `npm test` and
 from production program builds. See the [three-application audit](acceptance-audit.md)
 and [AMM audit](amm-acceptance-audit.md) for historical integrated milestone
@@ -89,6 +89,17 @@ specifications, Z3 and surrounding report code. It is a separate solver-backed
 verification path, not a proof term checked by Bend. It does not prove the
 generated C, LLVM transformations, SBF binary, adapter or external effects correct.
 Differential/sanitizer/SBF tests provide separate evidence for those paths.
+
+`npm run test:lowering` adds a focused check of representative compiler lowering:
+U32/Bool operations, records and variants, calls and locals, pattern matches,
+and bounded Nat iteration. It compares 449 deterministic checked Bend reference
+cases with sanitizer-enabled native C and the emitted SBF program in LiteSVM,
+requires eight malformed wire inputs to reject in both target paths, and
+requires a compiled field-selection mutation to produce a semantic mismatch.
+`npm test` includes the same cases in its ordinary SBF regression run. The
+mutation checks one deliberately faulty C emission, while the source refinements
+above do not verify C lowering or the SBF binary. This remains test evidence for
+the exercised cases, not a compiler preservation proof.
 
 Application transition invariants, multiplication and wide division/rounding
 are covered by the separate commands below. Ordinary `npm test` retains its

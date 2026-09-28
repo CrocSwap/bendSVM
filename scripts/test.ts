@@ -126,4 +126,5 @@ await (await import('../tests/amm.ts')).testAmm();
 await (await import('../tests/sqrt.ts')).testSqrt();
 await (await import('../tests/arithmetic.ts')).testArithmetic();
 await (await import('../tests/builds.ts')).testBuilds();
+await import('./test-lowering.ts');
 run('cargo', ['test', '--locked', '--test', 'sbf', '--', '--nocapture']);

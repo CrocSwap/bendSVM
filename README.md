@@ -91,7 +91,10 @@ npm test
 
 `npm test` runs source-law mutations, Bend/reference/native/SBF comparisons,
 canonical codec checks, application lifecycles, adversarial transactions, CPI
-integration and reproducible builds. `verify:all` runs all seventeen separate source
+integration, a compiler lowering mutation gate and reproducible builds.
+`npm run benchmark:arithmetic-probe` measures selected arithmetic operations
+against an independent Rust SBF program; see [arithmetic semantics](docs/arithmetic.md).
+`verify:all` runs all seventeen separate source
 refinement commands and writes `build/refinement-suite.json`; it is optional and
 requires the pinned Z3 virtualenv described above. See
 [refinement.md](docs/refinement.md) for their assumptions and negative checks.

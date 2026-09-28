@@ -207,4 +207,4 @@ compileSbf(`${stem}-sbf.c`, stem);
 
 console.log(`${vectors.length} Bend/reference/native cases and ${invalid.length} native malformed-wire rejections passed`);
 console.log(`Emitter field mutation compiled and was caught on ${vectors[mutationCase].name}`);
-run('cargo', ['test', '--locked', '--test', 'sbf', 'lowering_', '--', '--nocapture']);
+if (import.meta.main) run('cargo', ['test', '--locked', '--test', 'sbf', 'lowering_', '--', '--nocapture']);

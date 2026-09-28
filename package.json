@@ -47,6 +47,8 @@
     "test:generics": "bun scripts/test-generics.ts",
     "test:amm": "bun scripts/test-amm.ts",
     "test:amm-math": "bun scripts/test-amm-math.ts",
+    "test:lowering": "bun scripts/test-lowering.ts",
+    "benchmark:arithmetic-probe": "bun scripts/benchmark-arithmetic-probe.ts",
     "test:token-sdk": "bun scripts/test-token-sdk.ts",
     "test": "bun scripts/test.ts"
   },
