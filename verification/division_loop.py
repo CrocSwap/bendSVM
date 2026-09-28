@@ -86,6 +86,33 @@ def fast_paths():
     return reports
 
 
+def wide_fast_paths():
+    """A zero-high wide dividend can begin its last 32 steps at the prefix.
+
+    These lemmas use the same packing invariant and checked div32 composition
+    established by prove_program; the div32 summary is gated on their results.
+    """
+    base=1<<32;limit=1<<64
+    low,d=z.Ints('wide_low wide_divisor')
+    prefix=low/base;suffix=low%base
+    guard=z.Or(prefix==0,d>=base)
+    bounds=[low>=0,low<limit,d>0,d<limit,guard]
+    reports=[obligation('wide-div32-transformed-state',bounds,
+        z.And(prefix>=0,prefix<d,suffix>=0,suffix<base,
+            low==prefix*base+suffix,
+            # At step 32: V=0, R=prefix, U=suffix, S=2^32.
+            low==(d*0+prefix)*base+suffix,
+            suffix*base<limit),[low,d])]
+    for i in range(1,33):
+        consumed=low/(1<<(64-i))
+        previous=low/(1<<(65-i))
+        incoming=consumed%2
+        reports.append(obligation(f'wide-div32-skipped-prefix-{i}',bounds,
+            z.And(incoming>=0,incoming<=1,consumed==2*previous+incoming,
+                consumed>=0,consumed<d),[low,d]))
+    return reports
+
+
 def wrappers(program):
     reports=[]
     for root in ['divmod','div','mod']:

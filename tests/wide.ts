@@ -13,6 +13,10 @@ export async function testWide() {
     }
     triples.push([max,max,0n],[max,max,1n],[max,max,max-1n],[max,2n,2n],
       [max-1n,max-1n,max-2n]);
+    // Exercise each guarded division route and the zero-before-overflow order.
+    triples.push([3n,2n,2n],[(1n<<32n),2n,1n<<32n],
+      [1n<<32n,2n,2n],[1n<<32n,1n<<32n,1n<<32n],
+      [1n,max,1n],[1n<<32n,1n<<32n,0n]);
     let seed=0x9175bac;
     const word=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return BigInt(seed>>>0);};
     const random=()=> (word()<<32n)|word();
