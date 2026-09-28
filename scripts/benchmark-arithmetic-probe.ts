@@ -93,8 +93,13 @@ const fixtures = [
   makeCase('mul_wide_intermediate', 2, (1n << 32n) + 3n, (1n << 16n) + 5n),
   makeCase('mul_overflow', 2, max, 2n),
   makeCase('div_wide_operands', 3, 0xfedcba9876543210n, 0x102030405n),
+  makeCase('div_small_operands', 3, 400_000n, 300n),
+  makeCase('div_by_one', 3, 0xfedcba9876543210n, 1n),
+  makeCase('div_large_divisor', 3, 400_000n, 0x102030405n),
   makeCase('div_by_zero', 3, 0xfedcba9876543210n, 0n),
   makeCase('mod_wide_operands', 4, 0xfedcba9876543210n, 0x102030405n),
+  makeCase('mod_small_operands', 4, 400_000n, 300n),
+  makeCase('mod_by_one', 4, 0xfedcba9876543210n, 1n),
   makeCase('sub_no_underflow', 5, 0xfedcba9876543210n, 0x123456789abcdefn),
   makeCase('sub_underflow', 5, 0n, 1n),
 ];

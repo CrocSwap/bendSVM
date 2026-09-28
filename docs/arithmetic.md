@@ -75,7 +75,7 @@ were rejected. Undefined-behavior sanitization reported no failures.
 
 Run `npm run benchmark:arithmetic-probe` to build checked Bend arithmetic and an
 independent Rust baseline with pinned Anza tools. The command executes the same
-nine 17-byte instructions in LiteSVM, checks identical 12-byte return data and
+fourteen 17-byte instructions in LiteSVM, checks identical 12-byte return data and
 outer outcomes, repeats CU measurements, and records source, toolchain and ELF
 hashes in `build/arithmetic-probe-benchmark.json`. Both programs use SBF v0,
 generic CPU and optimization level 2. The Rust baseline is in
@@ -83,7 +83,10 @@ generic CPU and optimization level 2. The Rust baseline is in
 
 In this first matched fixture set, checked addition and comparison were about 1.4×
 the Rust CU cost, checked multiplication about 1.8×, and full-width division and
-modulo 3,138 versus 128 CU (24.52×). Zero-division returns an error code from
+modulo 3,138 versus 128 CU (24.52×) for the original wide-operand fixture.
+Small-operand division still uses 3,116 versus 128 CU, division by one uses
+3,339 versus 128 CU, and an input smaller than its divisor uses 3,069 versus
+128 CU. Zero-division returns an error code from
 both programs without failing the outer instruction. The large division gap is
 consistent with Bend's fixed 64-step restoring algorithm and warrants a targeted
 arithmetic investigation; the probe does not isolate individual machine
