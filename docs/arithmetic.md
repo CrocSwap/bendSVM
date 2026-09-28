@@ -109,12 +109,10 @@ LiteSVM transaction overhead, but exclude application account validation,
 storage, token effects and CPI. They are fixture measurements, not worst-case
 limits or a general Bend/Rust performance ratio.
 
-The AMM still calls the separate wide division route, which starts with a
-possibly nonzero high remainder. Its rebuilt 63,480-byte ELF has the same
-SHA-256 (`aef0205fd10d39e8186444a8e8c321ce969df0c7d1786594bbcb08931e64e9ec`)
-as the saved pre-change AMM benchmark artifact. The public u64 fast paths
-therefore did not change that compiled AMM program; its CU benchmark was not
-rerun for this edit.
+The public u64 fast paths did not affect the AMM's separate wide division.
+A subsequent wide-division optimization is measured in the
+[AMM benchmark](amm-benchmark.md). Its full 64-step route remains available
+when the 128-bit dividend has a nonzero high word.
 
 ## Full-precision multiply/divide
 
@@ -130,13 +128,16 @@ intermediate product above u64 is supported, but an unrepresentable final result
 is rejected. For example, `floor(MAX,MAX,MAX)` succeeds with MAX, while
 `floor(MAX,MAX,1)` fails.
 
-Division first rejects a zero denominator. If the product's high limb is at
-least the denominator, the quotient cannot fit in u64. Otherwise the existing
-64-step restoring division starts with that high limb as the remainder and
-consumes the low limb's bits. This is ordinary first-order Bend code using the
-same backend, without new arithmetic intrinsics, recursion or a heap.
+Division first rejects a zero denominator. If the product's high word is at
+least the denominator, the quotient cannot fit in u64. On fitting inputs, a
+divisor of one returns the low word directly. When the high word is zero and
+the low word's upper 32 bits are below the denominator, the first 32 restoring
+steps cannot subtract; the remaining 32 steps start with that prefix as the
+remainder. Other fitting inputs retain the 64-step route, including a nonzero
+high word as its initial remainder. This is ordinary first-order Bend code
+using the same backend, without new arithmetic intrinsics, recursion or a heap.
 
-`tests/wide.ts` defines 410 cases against independent BigInt arithmetic. Cases
+`tests/wide.ts` defines 414 cases against independent BigInt arithmetic. Cases
 cover full-width products, zero divisors, quotient overflow, both rounding
 directions and the boundary where floor fits at MAX but ceil overflows. The
 shared `tests/pure.ts` harness checks Bend evaluation and generated native C with

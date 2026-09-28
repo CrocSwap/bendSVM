@@ -21,19 +21,23 @@ The Rust toolchain's installed target is named `sbpf-solana-solana`; the build
 checks that its ELF flags select SBF v0. Rust uses its native u128 arithmetic;
 Bend uses the ordinary limb-based SDK definitions compiled through C.
 
-| Transaction | Bend CU | Rust CU | Bend / Rust |
-| --- | ---: | ---: | ---: |
-| Initialize | 83,277 | 36,082 | 2.31× |
-| Deposit | 72,397 | 28,512 | 2.54× |
-| Swap base for quote | 64,221 | 22,684 | 2.83× |
-| Swap quote for base | 64,210 | 22,684 | 2.83× |
-| Withdraw | 72,687 | 28,548 | 2.55× |
-| Reject slippage | 35,318 | 6,958 | 5.08× |
-| Reject zero input | 28,531 | 6,509 | 4.38× |
-| Reject locked-share withdrawal | 28,438 | 6,414 | 4.43× |
+| Transaction | Prior Bend CU | Current Bend CU | Rust CU | Current Bend / Rust |
+| --- | ---: | ---: | ---: | ---: |
+| Initialize | 83,277 | 83,277 | 36,082 | 2.31× |
+| Deposit | 72,397 | 69,551 | 28,512 | 2.44× |
+| Swap base for quote | 64,221 | 61,375 | 22,684 | 2.71× |
+| Swap quote for base | 64,210 | 61,364 | 22,684 | 2.71× |
+| Withdraw | 72,687 | 69,841 | 28,548 | 2.45× |
+| Reject slippage | 35,318 | 32,472 | 6,958 | 4.67× |
+| Reject zero input | 28,531 | 28,531 | 6,509 | 4.38× |
+| Reject locked-share withdrawal | 28,438 | 28,438 | 6,414 | 4.43× |
 
-The Bend ELF is 63,480 bytes; the Rust ELF is 43,304 bytes. These are complete
-program measurements, including decoding, validation, custody derivation,
+The guarded wide-division route saves 2,846 CU in each fixture that executes
+two wide divisions. The prior report is preserved locally at
+`build/amm-benchmark-before-division-20260928.json`; the current report is
+`build/amm-benchmark.json`. The Bend ELF grew from 63,480 to 63,904 bytes;
+the Rust ELF remains 43,304 bytes. These are complete program measurements,
+including decoding, validation, custody derivation,
 arithmetic, token CPIs, state serialization and return data. They show useful
 execution with a material compute overhead; they do not establish worst-case
 costs or performance for other programs or input distributions.

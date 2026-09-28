@@ -120,7 +120,8 @@ def prove(program_path,math_path,wide_path):
     program=json.load(open(program_path));wide=json.load(open(wide_path))
     report={'binding':bind_floor(program,wide),'payout':payout(program_path),'wide':wide_proof(math_path,wide_path),'claims':[]}
     if not all(v['result']=='unsat' for v in report['payout']['claims']):return report
-    if len(report['wide']['claims'])!=6 or not all(v['result']=='unsat' for v in report['wide']['claims']):return report
+    if len(report['wide']['fastPaths'])!=33 or not all(v['result']=='unsat' for v in report['wide']['fastPaths']):return report
+    if len(report['wide']['claims'])!=12 or not all(v['result']=='unsat' for v in report['wide']['claims']):return report
     report['claims']=entitlement(program)
     if all(v['result']=='unsat' for v in report['claims']):report['claims']+=entrypoint(program)
     return report

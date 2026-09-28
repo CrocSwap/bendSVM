@@ -73,7 +73,9 @@ def transitions(program):
 def prove(program_path,math_path,wide_path):
     program=json.load(open(program_path));wide=json.load(open(wide_path))
     report={'binding':bind_floor(program,wide,'ceil'),'wide':wide_proof(math_path,wide_path),'claims':[]}
-    if len(report['wide']['claims'])==6 and all(c['result']=='unsat' for c in report['wide']['claims']):report['claims']=transitions(program)
+    fast=report['wide']['fastPaths'];claims=report['wide']['claims']
+    if len(fast)==33 and all(c['result']=='unsat' for c in fast) and len(claims)==12 and all(c['result']=='unsat' for c in claims):
+        report['claims']=transitions(program)
     return report
 
 

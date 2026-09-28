@@ -256,15 +256,23 @@ Before using summaries, it reruns all fourteen multiplication obligations on
 the exported models and proves the wide module's actual imported restoring
 step, composition tree and 68 induction obligations. This binds the argument to
 the implementation used by the wide API, including its nonzero initial remainder.
-It then establishes six additional obligations:
+Thirty-three skipped-prefix obligations establish the guarded 32-step starting
+state when the dividend's high word is zero and its next 32-bit prefix is below
+the divisor. It then checks six core API obligations and six route-specific
+restrictions of the wide `divide` wrapper claim. The route-specific restrictions
+make error and branch cases explicit; they do not strengthen the universal
+wrapper theorem.
 
 - For `N = high*2^64 + low` and a positive u64 divisor `d`, the quotient overflows
   u64 exactly when `high >= d`.
 - Euclidean quotient/remainder characterize floor and ceiling:
   `floor(N/d) = q`, `ceil(N/d) = q + (r != 0)`.
 - The checked `divide` wrapper returns error 3 for zero divisor, error 1 for
-  quotient overflow, and otherwise calls the proved loop exactly once with
-  `(low, high, d)` and returns its correct quotient/remainder fields.
+  quotient overflow, and `(low, 0)` for a fitting divisor of one. It takes the
+  32-step route only under the proved prefix guard, with the transformed
+  quotient/remainder state. The 64-step fallback retains `(low, high, d)`,
+  including a nonzero high word. Separate obligations check these guards,
+  error precedence and route results.
 - The checked `mul_div` composes the exact product with wide division, using the
   correct arguments and divisor.
 - The checked `floor` forwards errors and returns the quotient.
@@ -278,19 +286,20 @@ guards and result handling without rebuilding a monolithic multiplication/
 division circuit. The soundness of this composition remains a trusted part of
 the verifier, not a proof term checked by Bend.
 
-Seven source mutations discard the high dividend, reverse the overflow guard,
-change the zero-divisor error, swap multiplier/divisor inputs, return the
-remainder instead of the floor, reverse the exact-rounding guard and discard the
-ceiling increment. Each must produce SAT for its targeted obligation while the
-product/loop prerequisites still pass. Each also has an independent concrete
-Bend/BigInt witness; these are not presented as replays of abstract SMT inputs.
+Twelve source mutations include a discarded high dividend, reversed overflow
+guard, changed zero-divisor error, corrupt short-path guards or state, lost
+zero-error precedence, swapped multiplier/divisor inputs, returned remainder
+instead of floor, reversed exact-rounding guard and discarded ceiling increment.
+Each must produce SAT for its targeted obligation while the product/loop
+prerequisites still pass. Each also has an independent concrete Bend/BigInt
+witness; these are not presented as replays of abstract SMT inputs.
 Unknown/timeouts are rejected for all positive and negative obligations.
 
 `build/wide-refinement.{math.model.json,model.json,json}` contains the checked
-models and the report, including all prerequisite results, six API obligations,
-seven mutation witnesses and source/verifier hashes. These claims cover the
-shared arithmetic, not the vesting/exchange economic invariants or compiled
-C/LLVM/SBF behavior.
+models and the report, including all prerequisite results, 33 fast-path lemmas,
+six core API obligations, six route-specific checks, twelve mutation witnesses
+and source/verifier hashes. These claims cover the shared arithmetic, not the
+vesting/exchange economic invariants or compiled C/LLVM/SBF behavior.
 
 ## Vesting funding and payout accounting
 

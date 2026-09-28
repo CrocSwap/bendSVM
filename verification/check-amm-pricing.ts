@@ -21,7 +21,9 @@ async function check(source:string,stem:string,status:number) {
   assert.equal(report.checkedArithmetic.length,2);
   assert(report.checkedArithmetic.every((c:any)=>c.result==='unsat'));
   assert(report.bindings.every((b:any)=>b.result==='checked'));
-  assert.equal(report.wide.claims.length,6);
+  assert.equal(report.wide.fastPaths.length,33);
+  assert(report.wide.fastPaths.every((c:any)=>c.result==='unsat'));
+  assert.equal(report.wide.claims.length,12);
   assert(report.wide.claims.every((c:any)=>c.result==='unsat'));
   assert(report.claims.every((c:any)=>['sat','unsat'].includes(c.result)),'UNKNOWN cannot pass');
   if(status===0)assert(report.claims.every((c:any)=>c.result==='unsat'));

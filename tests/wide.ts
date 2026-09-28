@@ -13,7 +13,7 @@ export async function testWide() {
     }
     triples.push([max,max,0n],[max,max,1n],[max,max,max-1n],[max,2n,2n],
       [max-1n,max-1n,max-2n]);
-    // Exercise each guarded division route and the zero-before-overflow order.
+    // Add explicit arithmetic and error-order witnesses; the boundary grid also covers the routes.
     triples.push([3n,2n,2n],[(1n<<32n),2n,1n<<32n],
       [1n<<32n,2n,2n],[1n<<32n,1n<<32n,1n<<32n],
       [1n,max,1n],[1n<<32n,1n<<32n,0n]);

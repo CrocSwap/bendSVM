@@ -16,7 +16,8 @@ async function run(source:string,stem:string,status:number) {
   const result=spawnSync(process.env.PYTHON??'python3',['-B','verification/exchange.py',stem+'.model.json',mathPath,widePath],{encoding:'utf8'});
   assert.equal(result.status,status,result.stderr||result.stdout);
   const report=JSON.parse(result.stdout);assert.equal(report.binding.result,'checked');
-  assert.equal(report.wide.claims.length,6);assert.ok(report.wide.claims.every((c:any)=>c.result==='unsat'));
+  assert.equal(report.wide.fastPaths.length,33);assert.ok(report.wide.fastPaths.every((c:any)=>c.result==='unsat'));
+  assert.equal(report.wide.claims.length,12);assert.ok(report.wide.claims.every((c:any)=>c.result==='unsat'));
   assert.equal(report.claims.length,11);assert.ok(report.claims.every((c:any)=>['sat','unsat'].includes(c.result)));
   if(status===0)assert.ok(report.claims.every((c:any)=>c.result==='unsat'));
   return report;

@@ -18,7 +18,8 @@ async function run(source:string,stem:string,status:number) {
   const report=JSON.parse(result.stdout);
   assert.equal(report.binding.result,'checked');
   assert.ok(report.payout.claims.every((c:any)=>c.result==='unsat'));
-  assert.equal(report.wide.claims.length,6);assert.ok(report.wide.claims.every((c:any)=>c.result==='unsat'));
+  assert.equal(report.wide.fastPaths.length,33);assert.ok(report.wide.fastPaths.every((c:any)=>c.result==='unsat'));
+  assert.equal(report.wide.claims.length,12);assert.ok(report.wide.claims.every((c:any)=>c.result==='unsat'));
   assert.ok(report.claims.every((c:any)=>['sat','unsat'].includes(c.result)));
   if(status===0){assert.equal(report.claims.length,6);assert.ok(report.claims.every((c:any)=>c.result==='unsat'));}
   return report;

@@ -120,7 +120,8 @@ def prove(program_path,math_path,wide_path):
     program=json.load(open(program_path));wide=json.load(open(wide_path))
     bindings=[bind_floor(program,wide,root) for root in ['floor','ceil']]
     arithmetic=wide_proof(math_path,wide_path)
-    assert len(arithmetic['claims'])==6 and all(c['result']=='unsat' for c in arithmetic['claims']), 'Wide proof failed'
+    assert len(arithmetic['fastPaths'])==33 and all(c['result']=='unsat' for c in arithmetic['fastPaths']), 'Wide fast-path proof failed'
+    assert len(arithmetic['claims'])==12 and all(c['result']=='unsat' for c in arithmetic['claims']), 'Wide proof failed'
     helpers=checked_arithmetic(program)
     assert all(c['result']=='unsat' for c in helpers),'Imported add/sub proof failed'
     return {'bindings':bindings,'wide':arithmetic,'checkedArithmetic':helpers,'claims':quotes(program)+economics()}
