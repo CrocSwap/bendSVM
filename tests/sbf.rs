@@ -431,6 +431,51 @@ fn collection_windows_execute_in_sbf() {
     run_oracles(&["collection"], 860);
 }
 
+#[test]
+fn lowering_emitter_vectors_execute_in_sbf() {
+    run_oracles(&["lowering"], 400);
+}
+
+#[test]
+fn lowering_rejects_malformed_wire_in_sbf() {
+    #[derive(Deserialize)]
+    struct Case {
+        name: String,
+        input: Vec<u8>,
+    }
+    let cases: Vec<Case> = serde_json::from_slice(
+        &std::fs::read("build/lowering-invalid-vectors.json")
+            .expect("run scripts/test-lowering.ts to generate malformed vectors"),
+    )
+    .unwrap();
+    assert_eq!(cases.len(), 8);
+    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let program = Pubkey::new_unique();
+    svm.add_program_from_file(program, "build/lowering.so").unwrap();
+    let payer = Keypair::new();
+    svm.airdrop(&payer.pubkey(), 1_000_000_000).unwrap();
+    for case in cases {
+        let mut data = vec![0; 8];
+        data.extend_from_slice(&(case.input.len() as u64).to_le_bytes());
+        data.extend_from_slice(&case.input);
+        let ix = Instruction { program_id: program, accounts: vec![], data };
+        let tx = Transaction::new(
+            &[&payer],
+            Message::new(&[ix], Some(&payer.pubkey())),
+            svm.latest_blockhash(),
+        );
+        let error = svm.send_transaction(tx).expect_err(&case.name);
+        assert_eq!(
+            error.err,
+            TransactionError::InstructionError(0, InstructionError::Custom(2)),
+            "{}: {:?}",
+            case.name,
+            error.meta.logs
+        );
+    }
+    println!("{} malformed lowering wire vectors rejected in LiteSVM", 8);
+}
+
 fn run_oracles(stems: &[&str], minimum_cases: usize) {
     for stem in stems {
         #[derive(Deserialize)]
