@@ -26,7 +26,7 @@ implementations are Bend code, rather than compiler intrinsics.
 | `equal`, `less` | Unsigned 64-bit comparison |
 | `add`, `sub` | Checked addition/subtraction |
 | `mul` | Checked multiplication, using 16-bit partial products |
-| `divmod` | Quotient and remainder from fixed 64-step restoring division |
+| `divmod` | Checked quotient and remainder with direct exits, a guarded 32-step route and a 64-step fallback |
 | `div`, `mod` | Checked quotient or remainder |
 | `add_wrap`, `sub_wrap` | Explicit modular helpers; not safe financial defaults |
 
@@ -35,9 +35,12 @@ Checked arithmetic returns `Ok{value}` or `Err{code}`: 1 overflow, 2 underflow,
 `DivErr{code}`. `mul` rejects an overflowing product. Use the separate wide
 multiply/divide API below when the product exceeds u64 but the quotient fits.
 
-The division implementation composes a fixed number of steps. Its top carry bit
-participates in the remainder comparison, so it supports divisors throughout the
-full u64 range. It does not require runtime recursion or allocation.
+Division returns directly for a smaller dividend or divisor one. A divisor with
+a nonzero high limb starts after the first 32 restoring steps, which cannot
+subtract that divisor; the remaining 32 steps process the low dividend limb.
+Other nonzero cases retain the 64-step route. The step's top carry bit
+participates in the remainder comparison, so the routes support divisors
+throughout the full u64 range. They require no runtime recursion or allocation.
 
 ## Assurance boundary
 
@@ -81,20 +84,37 @@ hashes in `build/arithmetic-probe-benchmark.json`. Both programs use SBF v0,
 generic CPU and optimization level 2. The Rust baseline is in
 `benchmarks/arithmetic-probe-rust/`.
 
-In this first matched fixture set, checked addition and comparison were about 1.4×
-the Rust CU cost, checked multiplication about 1.8×, and full-width division and
-modulo 3,138 versus 128 CU (24.52×) for the original wide-operand fixture.
-Small-operand division still uses 3,116 versus 128 CU, division by one uses
-3,339 versus 128 CU, and an input smaller than its divisor uses 3,069 versus
-128 CU. Zero-division returns an error code from
-both programs without failing the outer instruction. The large division gap is
-consistent with Bend's fixed 64-step restoring algorithm and warrants a targeted
-arithmetic investigation; the probe does not isolate individual machine
+In the initial 2026-09-28 matched fixture set, checked addition and comparison
+were about 1.4× the Rust CU cost and checked multiplication about 1.8×.
+The public u64 division optimization then changed selected Bend costs while
+all 14 fixture results and Rust costs stayed the same:
+
+| Division fixture | Before Bend CU | After Bend CU | Rust CU |
+| --- | ---: | ---: | ---: |
+| High-limb divisor | 3,138 | 1,744 | 128 |
+| Divisor one | 3,339 | 210 | 128 |
+| Dividend below divisor | 3,069 | 205 | 128 |
+| Small operands, 64-step fallback | 3,116 | 3,160 | 128 |
+| Zero divisor | 168 | 193 | 124 |
+
+The before report is preserved at `build/arithmetic-probe-baseline-20260928.json`;
+the after report is `build/arithmetic-probe-benchmark.json`. Modulo uses the same
+costs as division for corresponding fixtures. Zero-division returns an error
+code from both programs without failing the outer instruction. The large division gap is
+consistent with the remaining restoring steps and warrants further arithmetic
+investigation; the probe does not isolate individual machine
 instructions or establish how much division contributes to an application call.
 These costs include the small instruction harness, return-data syscall and
 LiteSVM transaction overhead, but exclude application account validation,
 storage, token effects and CPI. They are fixture measurements, not worst-case
 limits or a general Bend/Rust performance ratio.
+
+The AMM still calls the separate wide division route, which starts with a
+possibly nonzero high remainder. Its rebuilt 63,480-byte ELF has the same
+SHA-256 (`aef0205fd10d39e8186444a8e8c321ce969df0c7d1786594bbcb08931e64e9ec`)
+as the saved pre-change AMM benchmark artifact. The public u64 fast paths
+therefore did not change that compiled AMM program; its CU benchmark was not
+rerun for this edit.
 
 ## Full-precision multiply/divide
 

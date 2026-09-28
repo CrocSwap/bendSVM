@@ -134,7 +134,8 @@ even though the low 64 bits of the shifted remainder look smaller than `d`.
 
 A structural check on the **exported checked terms** verifies that `div2` calls
 `div_step` twice, each subsequent composition doubles its predecessor, and
-`div64` consequently contains exactly 64 steps. This checks the composition tree;
+`div32` and `div64` consequently contain 32 and 64 steps. This checks the
+composition tree;
 it does not infer correctness merely from function names or comments.
 
 Negative checks discard the remainder carry and discard the quotient shift.
@@ -160,20 +161,27 @@ obligations in `verification/division_loop.py`:
   `N = D*quotient + remainder`, with `0 <= remainder < D`.
 
 The checked composition tree links those induction obligations to the actual
-64 applications of the proved source step. Only after these checks pass may
-the wrapper evaluator use the established division result as a summary for
+source steps. Another 33 obligations prove that the first 32 dividend-prefix
+steps cannot subtract a divisor with a nonzero high limb, and that the
+`(low limb shifted into quotient, high limb as remainder)` state correctly
+starts the remaining 32 steps. Only after these checks pass may the wrapper
+evaluator use the established division result as a summary for `div32` and
 `div64`. It verifies the checked public `divmod`, `div` and `mod` definitions:
-they initialize `(dividend, zero remainder, divisor)`, call the loop exactly once
-on the nonzero-divisor path, return its correct fields, and return error 3 when
-the divisor is zero. The final integer identity and remainder bound characterize
-the unsigned Euclidean quotient/remainder used by the summary.
+zero divisor returns error 3; a smaller dividend or divisor one returns its
+direct exact result; a high-limb divisor takes the guarded 32-step path; all
+other nonzero cases take the 64-step path. It checks source guards, initial
+states, returned fields and path coverage. The final integer identity and
+remainder bound characterize the unsigned Euclidean quotient/remainder.
 
-Two more source mutations swap the returned quotient/remainder and change the
-zero-divisor error. Both leave the step/induction intact but fail wrapper checks;
-their solver inputs are replayed in Bend against BigInt division/remainder.
+Four wrapper source mutations swap the returned quotient/remainder, change the
+zero-divisor error, corrupt the smaller-dividend exit, and corrupt the
+high-divisor initial quotient state. They leave the step/induction intact but
+fail wrapper checks; their solver inputs are replayed in Bend against BigInt
+division/remainder.
 
-All step, induction and wrapper obligations return UNSAT. Four semantic mutations
-produce replayed counterexamples and the missing-step mutation is rejected.
+All step, induction, fast-path and wrapper obligations return UNSAT. Six
+semantic mutations produce replayed counterexamples and the missing-step
+mutation is rejected.
 The older `verify:division-step` command remains an alias for the complete check.
 
 This is a compositional verification argument: the solver obligations, induction
