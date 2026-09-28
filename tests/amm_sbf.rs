@@ -623,6 +623,217 @@ fn amm_donations_and_external_lp_burns_do_not_change_recorded_pricing() {
     a.solvent();
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct InvocationObservation {
+    program_id: String,
+    depth: usize,
+    parent: Option<usize>,
+    outcome: Option<&'static str>,
+    inclusive_compute_units: Option<u64>,
+}
+
+/// Parse LiteSVM's stable program invocation and compute-consumption log lines.
+/// CU values belong to individual invocations and include work done by nested
+/// calls because they use the transaction's shared compute meter.
+fn parse_invocation_observations(logs: &[String]) -> Result<Vec<InvocationObservation>, String> {
+    let mut observations: Vec<InvocationObservation> = Vec::new();
+    let mut stack: Vec<usize> = Vec::new();
+
+    for line in logs {
+        let Some(rest) = line.strip_prefix("Program ") else {
+            continue;
+        };
+
+        if let Some(invoke) = rest.strip_suffix(']') {
+            if let Some((program_id, depth)) = invoke.rsplit_once(" invoke [") {
+                let depth = depth
+                    .parse::<usize>()
+                    .map_err(|_| format!("invalid invocation depth in log: {line}"))?;
+                if program_id.is_empty() || depth != stack.len() + 1 {
+                    return Err(format!("unexpected invocation nesting in log: {line}"));
+                }
+                let index = observations.len();
+                observations.push(InvocationObservation {
+                    program_id: program_id.to_owned(),
+                    depth,
+                    parent: stack.last().copied(),
+                    outcome: None,
+                    inclusive_compute_units: None,
+                });
+                stack.push(index);
+                continue;
+            }
+        }
+
+        if let Some(consumed) = rest.strip_suffix(" compute units") {
+            if let Some((program_id, counts)) = consumed.split_once(" consumed ") {
+                let (used, remaining_at_entry) = counts
+                    .split_once(" of ")
+                    .ok_or_else(|| format!("invalid compute-consumption log: {line}"))?;
+                let used = used
+                    .parse::<u64>()
+                    .map_err(|_| format!("invalid consumed CU value in log: {line}"))?;
+                remaining_at_entry
+                    .parse::<u64>()
+                    .map_err(|_| format!("invalid remaining CU value in log: {line}"))?;
+                let Some(index) = stack.last().copied() else {
+                    return Err(format!(
+                        "compute-consumption log outside invocation: {line}"
+                    ));
+                };
+                let invocation = &mut observations[index];
+                if invocation.program_id != program_id
+                    || invocation.inclusive_compute_units.is_some()
+                {
+                    return Err(format!(
+                        "compute-consumption log does not match active invocation: {line}"
+                    ));
+                }
+                invocation.inclusive_compute_units = Some(used);
+                continue;
+            }
+        }
+
+        let completion = rest
+            .strip_suffix(" success")
+            .map(|program_id| (program_id, "success"))
+            .or_else(|| {
+                rest.split_once(" failed: ")
+                    .map(|(program_id, _)| (program_id, "failed"))
+            });
+        if let Some((program_id, outcome)) = completion {
+            let Some(index) = stack.pop() else {
+                return Err(format!("program completion outside invocation: {line}"));
+            };
+            let invocation = &mut observations[index];
+            if invocation.program_id != program_id || invocation.outcome.is_some() {
+                return Err(format!(
+                    "program completion does not match active invocation: {line}"
+                ));
+            }
+            invocation.outcome = Some(outcome);
+        }
+    }
+
+    if !stack.is_empty() {
+        return Err("LiteSVM logs ended with an unclosed program invocation".to_owned());
+    }
+    if observations
+        .iter()
+        .any(|invocation| invocation.outcome.is_none())
+    {
+        return Err("LiteSVM invocation is missing a completion log".to_owned());
+    }
+    Ok(observations)
+}
+
+fn benchmark_invocation_json(
+    logs: &[String],
+    program_id: Pubkey,
+    token_cpi_count: usize,
+    expected_outcome: &'static str,
+    transaction_compute_units: u64,
+) -> serde_json::Value {
+    let observations = parse_invocation_observations(logs).unwrap_or_else(|error| {
+        panic!("cannot parse benchmark transaction logs: {error}\n{logs:#?}")
+    });
+    assert_eq!(
+        observations.len(),
+        1 + token_cpi_count,
+        "unexpected invocation count or CPI structure: {logs:#?}"
+    );
+    let root = &observations[0];
+    assert_eq!(
+        root.program_id,
+        program_id.to_string(),
+        "root invocation: {logs:#?}"
+    );
+    assert_eq!(root.depth, 1, "root invocation depth: {logs:#?}");
+    assert_eq!(root.parent, None, "root invocation parent: {logs:#?}");
+    assert_eq!(
+        root.outcome,
+        Some(expected_outcome),
+        "root outcome: {logs:#?}"
+    );
+    let root_compute_units = root
+        .inclusive_compute_units
+        .expect("benchmark root invocation must log inclusive compute units");
+    assert_eq!(
+        root_compute_units, transaction_compute_units,
+        "root inclusive CU must agree with LiteSVM transaction CU: {logs:#?}"
+    );
+
+    let token_program = spl_token::id().to_string();
+    let child_cpis: Vec<_> = observations
+        .iter()
+        .skip(1)
+        .map(|invocation| {
+            assert_eq!(
+                invocation.program_id, token_program,
+                "unexpected child program: {logs:#?}"
+            );
+            assert_eq!(invocation.depth, 2, "Token Program CPI depth: {logs:#?}");
+            assert_eq!(
+                invocation.parent,
+                Some(0),
+                "Token Program CPI parent: {logs:#?}"
+            );
+            assert_eq!(
+                invocation.outcome,
+                Some("success"),
+                "Token Program CPI outcome: {logs:#?}"
+            );
+            serde_json::json!({
+                "depth": invocation.depth,
+                "outcome": invocation.outcome,
+                "inclusiveComputeUnits": invocation.inclusive_compute_units
+                    .expect("Token Program CPI must log inclusive compute units"),
+                "parentInvocation": invocation.parent,
+            })
+        })
+        .collect();
+    assert_eq!(
+        child_cpis.len(),
+        token_cpi_count,
+        "Token Program CPI count: {logs:#?}"
+    );
+    let observed_token_cpi_count = child_cpis.len();
+
+    serde_json::json!({
+        "root": {
+            "programId": root.program_id,
+            "depth": root.depth,
+            "outcome": root.outcome,
+            "inclusiveComputeUnits": root_compute_units,
+        },
+        "childTokenProgramCpis": child_cpis,
+        "tokenCpiCount": observed_token_cpi_count,
+    })
+}
+
+#[test]
+fn amm_invocation_log_parser_tracks_nested_inclusive_cu_by_invocation() {
+    let program = "Amm111111111111111111111111111111111111111";
+    let token = spl_token::id().to_string();
+    let logs = [
+        format!("Program {program} invoke [1]"),
+        format!("Program {token} invoke [2]"),
+        format!("Program {token} consumed 4000 of 180000 compute units"),
+        format!("Program {token} success"),
+        format!("Program {program} consumed 12000 of 200000 compute units"),
+        format!("Program {program} success"),
+    ];
+    let parsed = parse_invocation_observations(&logs).unwrap();
+    assert_eq!(parsed.len(), 2);
+    assert_eq!(parsed[0].depth, 1);
+    assert_eq!(parsed[0].inclusive_compute_units, Some(12_000));
+    assert_eq!(parsed[1].depth, 2);
+    assert_eq!(parsed[1].parent, Some(0));
+    assert_eq!(parsed[1].inclusive_compute_units, Some(4_000));
+    // The root's 12,000 CU already includes the 4,000 CU child; summing these
+    // invocation readings would double count the Token Program work.
+}
+
 /// Compare complete transactions with fixed public test keys, the same program
 /// address, and byte-identical account fixtures. These are observed costs, not
 /// worst-case bounds. Kept explicit because it requires the separate Rust ELF.
@@ -644,22 +855,32 @@ fn amm_benchmark_identical_fixtures() {
     }
     let mut rows = Vec::new();
     let scenarios = [
-        ("initialize", 0, [100_000, 400_000, 199_000], false, None),
-        ("deposit", 1, [10_000, 5_000, 20_000], false, None),
-        ("swap_base", 3, [1_000, 1, 0], true, None),
-        ("swap_quote", 3, [1_000, 1, 0], false, None),
-        ("withdraw", 2, [10_000, 1, 1], false, None),
-        ("reject_slippage", 3, [1_000, u64::MAX, 0], true, Some(261)),
-        ("reject_zero_input", 3, [0, 0, 0], true, Some(260)),
+        // Successful fixture CPI counts: transfer/transfer/mint, transfer/transfer/mint,
+        // transfer/transfer, transfer/transfer, and burn/transfer/transfer.
+        ("initialize", 0, [100_000, 400_000, 199_000], false, None, 3),
+        ("deposit", 1, [10_000, 5_000, 20_000], false, None, 3),
+        ("swap_base", 3, [1_000, 1, 0], true, None, 2),
+        ("swap_quote", 3, [1_000, 1, 0], false, None, 2),
+        ("withdraw", 2, [10_000, 1, 1], false, None, 3),
+        (
+            "reject_slippage",
+            3,
+            [1_000, u64::MAX, 0],
+            true,
+            Some(261),
+            0,
+        ),
+        ("reject_zero_input", 3, [0, 0, 0], true, Some(260), 0),
         (
             "reject_locked_shares",
             2,
             [u64::MAX, 0, 0],
             false,
             Some(262),
+            0,
         ),
     ];
-    for (name, op, values, direction, error) in scenarios {
+    for (name, op, values, direction, error, expected_token_cpis) in scenarios {
         let bi = bend.instruction(op, values, direction);
         let ri = rust.instruction(op, values, direction);
         assert_eq!(bi, ri);
@@ -684,10 +905,29 @@ fn amm_benchmark_identical_fixtures() {
         };
         assert_eq!(bend.snapshot(), rust.snapshot(), "after {name}");
         assert_eq!(bm.return_data, rm.return_data, "return data: {name}");
-        rows.push(
-            serde_json::json!({"operation":name,"bendCU":bm.compute_units_consumed,
-            "rustCU":rm.compute_units_consumed,"error":error}),
+        let expected_outcome = if error.is_some() { "failed" } else { "success" };
+        let bend_invocations = benchmark_invocation_json(
+            &bm.logs,
+            bend.f.program,
+            expected_token_cpis,
+            expected_outcome,
+            bm.compute_units_consumed,
         );
+        let rust_invocations = benchmark_invocation_json(
+            &rm.logs,
+            rust.f.program,
+            expected_token_cpis,
+            expected_outcome,
+            rm.compute_units_consumed,
+        );
+        rows.push(serde_json::json!({
+            "operation": name,
+            "bendCU": bm.compute_units_consumed,
+            "rustCU": rm.compute_units_consumed,
+            "bendInvocations": bend_invocations,
+            "rustInvocations": rust_invocations,
+            "error": error,
+        }));
     }
     let report = serde_json::json!({"runtime":"LiteSVM 0.7.1", "target":"SBF v0 / generic",
         "fixture":"fixed public test seeds 1..12; program bytes [42;32]",
