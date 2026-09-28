@@ -22,7 +22,7 @@ fn arithmetic_probe_conformance_and_measurement() {
         &std::fs::read("build/arithmetic-probe-vectors.json").expect("run benchmark builder first"),
     )
     .unwrap();
-    assert_eq!(cases.len(), 9);
+    assert_eq!(cases.len(), 14);
 
     let program = Pubkey::new_from_array([42; 32]);
     let payer = Keypair::new_from_array([7; 32]);

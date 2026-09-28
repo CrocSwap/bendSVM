@@ -92,12 +92,14 @@ Differential/sanitizer/SBF tests provide separate evidence for those paths.
 
 `npm run test:lowering` adds a focused check of representative compiler lowering:
 U32/Bool operations, records and variants, calls and locals, pattern matches,
-and bounded Nat iteration. It compares 449 deterministic checked Bend reference
+and bounded Nat iteration. It compares 454 deterministic checked Bend reference
 cases with sanitizer-enabled native C and the emitted SBF program in LiteSVM,
 requires eight malformed wire inputs to reject in both target paths, and
-requires a compiled field-selection mutation to produce a semantic mismatch.
+requires five independently compiled emitter mutations to produce semantic
+mismatches on named vectors: field selection, primitive expression, constructor
+branch, argument order and bounded iteration.
 `npm test` includes the same cases in its ordinary SBF regression run. The
-mutation checks one deliberately faulty C emission, while the source refinements
+mutations check deliberately faulty C emissions, while the source refinements
 above do not verify C lowering or the SBF binary. This remains test evidence for
 the exercised cases, not a compiler preservation proof.
 
