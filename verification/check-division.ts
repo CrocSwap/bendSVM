@@ -36,6 +36,8 @@ const positive=await run('sdk/math.bend','build/division-refinement',0);
 const source=fs.readFileSync('sdk/math.bend','utf8');
 assert.equal(positive.induction.length,68);
 assert.ok(positive.induction.every((c:any)=>c.result==='unsat'));
+assert.equal(positive.fastPaths.length,33);
+assert.ok(positive.fastPaths.every((c:any)=>c.result==='unsat'));
 assert.deepEqual(positive.wrappers.map((c:any)=>[c.claim,c.result]),[['divmod','unsat'],['div','unsat'],['mod','unsat']]);
 const mutations=[];
 for(const [name,before,after] of [
@@ -60,6 +62,8 @@ const wrapperMutations=[];
 for(const [name,before,after] of [
   ['swap quotient and remainder','DivOk{Division{q, r}}','DivOk{Division{r, q}}'],
   ['wrong zero-divisor error','DivErr{3}','DivErr{0}'],
+  ['wrong less-than direct exit','DivOk{Division{zero(), a}}','DivOk{Division{a, zero()}}'],
+  ['wrong high-divisor quotient state','DivState{U64{0, lo}, U64{hi, 0}, b}','DivState{U64{lo, 0}, U64{hi, 0}, b}'],
 ]) {
   const dir=fs.mkdtempSync('build/division-wrapper-negative-');
   try {
@@ -69,6 +73,7 @@ for(const [name,before,after] of [
     assert.equal(output.status,1,output.stderr||output.stdout);
     const report=JSON.parse(output.stdout);
     assert.equal(report.step.result,'unsat');assert.ok(report.induction.every((c:any)=>c.result==='unsat'));
+    assert.ok(report.fastPaths.every((c:any)=>c.result==='unsat'));
     assert.ok(report.wrappers.some((c:any)=>c.result==='sat'));
     assert.ok(report.wrappers.every((c:any)=>['sat','unsat'].includes(c.result)),'No timeout is acceptable');
     const book=await checkedBook(`${dir}/math.bend`);
@@ -96,4 +101,4 @@ for(const [name,before,after] of [
 const files=['sdk/math.bend','verification/model.ts','verification/prove.py','verification/division_step.py','verification/division_loop.py','verification/check-division.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/division-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,wrapperMutations,missing_step_rejected:true,hashes},null,2)+'\n');
-console.log('Universal division refinement passed: step, composition, 68 induction obligations and public wrappers; four semantic mutations replayed; missing step rejected');
+console.log('Universal division refinement passed: step, composition, 68 induction and 33 fast-path obligations, public wrappers; six semantic mutations replayed; missing step rejected');
