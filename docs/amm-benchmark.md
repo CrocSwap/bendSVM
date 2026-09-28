@@ -42,6 +42,15 @@ arithmetic, token CPIs, state serialization and return data. They show useful
 execution with a material compute overhead; they do not establish worst-case
 costs or performance for other programs or input distributions.
 
+The report also checks each LiteSVM invocation log against the transaction CU
+total and expected Token Program call count. Token Program child invocations use
+the same inclusive CU under Bend and Rust: 16,899 for the three calls in
+initialization or deposit, 12,400 for the two calls in either swap, and 17,108
+for the three calls in withdrawal. Rejected fixtures make no Token Program call.
+Child CU is already included in the root total. The observed Bend/Rust gap is
+therefore outside the Token Program's execution; the report does not separate
+caller-side CPI setup from validation, arithmetic or serialization.
+
 ## How the comparison stays matched
 
 The fixtures use fixed public test seeds and the same program address, state
