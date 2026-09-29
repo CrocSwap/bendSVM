@@ -21,22 +21,24 @@ The Rust toolchain's installed target is named `sbpf-solana-solana`; the build
 checks that its ELF flags select SBF v0. Rust uses its native u128 arithmetic;
 Bend uses the ordinary limb-based SDK definitions compiled through C.
 
-| Transaction | Before key change Bend CU | Current Bend CU | Rust CU | Current Bend / Rust |
+| Transaction | Before this pass Bend CU | Current Bend CU | Rust CU | Current Bend / Rust |
 | --- | ---: | ---: | ---: | ---: |
-| Initialize | 83,277 | 60,916 | 36,082 | 1.69× |
-| Deposit | 69,551 | 47,266 | 28,512 | 1.66× |
-| Swap base for quote | 61,375 | 39,374 | 22,684 | 1.74× |
-| Swap quote for base | 61,364 | 39,363 | 22,684 | 1.74× |
-| Withdraw | 69,841 | 47,555 | 28,548 | 1.67× |
-| Reject slippage | 32,472 | 11,403 | 6,958 | 1.64× |
-| Reject zero input | 28,531 | 7,462 | 6,509 | 1.15× |
-| Reject locked-share withdrawal | 28,438 | 7,369 | 6,414 | 1.15× |
+| Initialize | 60,916 | 49,246 | 36,082 | 1.36× |
+| Deposit | 47,266 | 36,156 | 28,512 | 1.27× |
+| Swap base for quote | 39,374 | 29,949 | 22,684 | 1.32× |
+| Swap quote for base | 39,363 | 29,938 | 22,684 | 1.32× |
+| Withdraw | 47,555 | 36,473 | 28,548 | 1.28× |
+| Reject slippage | 11,403 | 9,973 | 6,958 | 1.43× |
+| Reject zero input | 7,462 | 6,032 | 6,509 | 0.93× |
+| Reject locked-share withdrawal | 7,369 | 5,939 | 6,414 | 0.93× |
 
-The diagnostic below located most of the previous gap in the duplicate-account
-key comparisons. Account keys are public, so `equal_key` now returns on the
-first unequal byte while still checking all 32 bytes for equal keys. The matched
-benchmark fell by 21,069–22,361 CU per transaction. The current report is
-`build/amm-benchmark.json`; the Bend ELF is 62,896 bytes and the Rust ELF is
+The preceding pass located most of the earlier gap in duplicate-account key
+comparisons and reduced these fixtures by 21,069–22,361 CU with a bytewise
+early exit. This pass compares public keys in four alignment-safe 8-byte chunks,
+stopping at the first unequal chunk, and clears each encoded ADT wire region
+once before writing nested active fields. Together these changes save
+1,430–11,670 CU per transaction against the preceding pass. The current report
+is `build/amm-benchmark.json`; the Bend ELF is 62,568 bytes and the Rust ELF is
 43,304 bytes. Earlier guarded wide-division work saved 2,846 CU in fixtures
 that execute two wide divisions; its earlier report is preserved locally at
 `build/amm-benchmark-before-division-20260928.json`. These are complete program measurements,
@@ -44,7 +46,7 @@ including decoding, validation, custody derivation,
 arithmetic, token CPIs, state serialization and return data. They show useful
 execution with a material compute overhead; they do not establish worst-case
 costs or performance for other programs or input distributions. In particular,
-the early-exit comparison's cost depends on how many leading bytes two public
+the key comparison's cost depends on how many leading 8-byte chunks two public
 keys share.
 
 The report also checks each LiteSVM invocation log against the transaction CU
@@ -114,13 +116,14 @@ data publication. The phase diagnostic's swap follows initialization directly,
 whereas the release benchmark's swap follows a deposit, so compare each report
 within its own fixture sequence.
 
-Before the key comparison change, the diagnostic zero-input rejection spent
-22,744 CU from baseline to accounts parsed in Bend. With the change, that
-interval is 1,797 CU in Bend and 1,353 CU in Rust. The Rust checkpoint also
-moved just before its Token Program check to match the Bend boundary more
-closely. The diagnostic's successful swap now spends 40,380 CU in Bend versus
-23,703 CU in Rust. Bend spends 3,395 CU from transition to state encoded,
-363 CU on effect conversion, and 6,753 CU on effect validation; Rust spends
+The diagnostic zero-input rejection spent 22,744 CU from baseline to accounts
+parsed in Bend before bytewise early exit, 1,797 CU after that change, and
+1,220 CU with chunk comparisons. Rust currently spends 1,353 CU in that
+interval. Its checkpoint moved just before the Token Program check in the
+second diagnostic version to match the Bend boundary more closely. The
+diagnostic's successful swap now spends 30,958 CU in Bend versus 23,703 CU in
+Rust. Bend spends 1,557 CU from transition to state encoded, 363 CU on effect
+conversion, and 596 CU on effect validation; Rust spends
 147 CU on result mapping, 239 CU on payload encoding, and 757 CU on effect
 validation. The Bend/Rust decoded/clock-to-transition gap is 3,650 CU. These
 figures include marker overhead and apply only to the recorded fixtures and

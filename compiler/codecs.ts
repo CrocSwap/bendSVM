@@ -39,6 +39,7 @@ export function emitCodecs(schema: RuntimeSchema): string {
     if (t.kind === 'adt') {
       // The public encoder clears its full region once. Nested writers inherit
       // that clear, so their active fields need no overlapping initialization.
+      lines.push(`/* Internal writer: p must already be zeroed for ${n} bytes. */`);
       lines.push(`static inline int ${id}_write(unsigned char *p, const ${t.cType} *value) {`);
       lines.push('  switch (value->tag) {');
       for (const v of t.variants) {

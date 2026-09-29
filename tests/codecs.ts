@@ -155,6 +155,7 @@ int main(void) {
   if (bend_Envelope_encode(output, sizeof output - 1, &value)) return 4;
   for (unsigned i = 0; i < sizeof output; ++i) if (output[i] != 0xa5) return 5;
   value.tag = 255;
+  memset(output, 0xa5, sizeof output);
   if (bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, empty, sizeof output)) return 6;
   bend_Packet_t bad_packet = bend_Idle_make();
   bad_packet.tag = 255;
