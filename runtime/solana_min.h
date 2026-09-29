@@ -18,8 +18,14 @@ static inline void write_le(u8 *p, u64 v, unsigned n) {
   for (unsigned i = 0; i < n; ++i) p[i] = (u8)(v >> (8 * i));
 }
 static inline unsigned equal_key(const u8 *a, const u8 *b) {
-  /* Account keys are public; stop at the first differing byte. */
-  for (unsigned i = 0; i < 32; ++i) if (a[i] != b[i]) return 0;
+  /* Account keys are public. Copy into scalars so unaligned pointers and
+   * strict aliasing are safe; stop at the first differing eight-byte chunk. */
+  for (unsigned i = 0; i < 32; i += 8) {
+    u64 left, right;
+    __builtin_memcpy(&left, a + i, 8);
+    __builtin_memcpy(&right, b + i, 8);
+    if (left != right) return 0;
+  }
   return 1;
 }
 typedef struct {
