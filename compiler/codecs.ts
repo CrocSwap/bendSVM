@@ -36,6 +36,26 @@ export function emitCodecs(schema: RuntimeSchema): string {
       lines.push('  default: return 0;', '  }');
     }
     lines.push('}');
+    if (t.kind === 'adt') {
+      // The public encoder clears its full region once. Nested writers inherit
+      // that clear, so their active fields need no overlapping initialization.
+      lines.push(`static inline int ${id}_write(unsigned char *p, const ${t.cType} *value) {`);
+      lines.push('  switch (value->tag) {');
+      for (const v of t.variants) {
+        lines.push(`  case ${v.tag}:`, `    p[0] = ${v.tag};`);
+        let offset = 1;
+        v.fields.forEach((f, i) => {
+          const field = types.get(f.type)!;
+          const call = field.kind === 'adt'
+            ? `${mangle(f.type)}_write(p + ${offset}, &value->as.c${v.tag}.f${i})`
+            : `${mangle(f.type)}_encode(p + ${offset}, ${sizes.get(f.type)}, &value->as.c${v.tag}.f${i})`;
+          lines.push(`    if (!${call}) return 0;`);
+          offset += sizes.get(f.type)!;
+        });
+        lines.push('    return 1;');
+      }
+      lines.push('  default: return 0;', '  }', '}');
+    }
     lines.push(`static inline int ${id}_encode(unsigned char *p, unsigned long long n, const ${t.cType} *value) {`);
     lines.push(`  if (n != ${n}u) return 0;`);
     if (t.kind === 'u32') {
@@ -44,17 +64,8 @@ export function emitCodecs(schema: RuntimeSchema): string {
     } else if (t.kind === 'bool') {
       lines.push('  if (*value > 1) return 0;', '  p[0] = (unsigned char)*value;', '  return 1;');
     } else {
-      lines.push(`  for (unsigned i = 0; i < ${n}; ++i) p[i] = 0;`, '  switch (value->tag) {');
-      for (const v of t.variants) {
-        lines.push(`  case ${v.tag}:`, `    p[0] = ${v.tag};`);
-        let offset = 1;
-        v.fields.forEach((f, i) => {
-          lines.push(`    if (!${mangle(f.type)}_encode(p + ${offset}, ${sizes.get(f.type)}, &value->as.c${v.tag}.f${i})) return 0;`);
-          offset += sizes.get(f.type)!;
-        });
-        lines.push('    return 1;');
-      }
-      lines.push('  default: return 0;', '  }');
+      lines.push(`  for (unsigned i = 0; i < ${n}; ++i) p[i] = 0;`);
+      lines.push(`  return ${id}_write(p, value);`);
     }
     lines.push('}');
   };
