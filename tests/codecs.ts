@@ -5,6 +5,8 @@ import { spawnSync } from 'node:child_process';
 import * as B from '../.deps/bend/bend2/bend.ts';
 import { Backend, checkedBook } from '../compiler/backend.ts';
 import { writeArtifacts } from '../compiler/artifacts.ts';
+import { emitCodecs } from '../compiler/codecs.ts';
+import type { RuntimeSchema } from '../compiler/schema.ts';
 import { wireCodec, type WireValue } from '../sdk/wire.ts';
 import { compileSbf, run } from '../scripts/build.ts';
 
@@ -78,6 +80,7 @@ export async function testCodecs() {
   }
   fs.writeFileSync('build/codecs-native.c', `#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "codecs.dispatch.h"
 int main(void) {
   unsigned length, capacity, byte;
@@ -86,9 +89,17 @@ int main(void) {
     unsigned char *input = malloc(length ? length : 1), *output = malloc(capacity ? capacity : 1);
     if (!input || !output) return 2;
     for (unsigned i = 0; i < length; ++i) { if (scanf("%u", &byte) != 1 || byte > 255) return 3; input[i] = byte; }
+    memset(output, 0xa5, capacity ? capacity : 1);
     unsigned long long written = 777;
     int ok = bend_wire_dispatch(input, length, output, capacity, &written);
     if (!ok && written != 0) return 4;
+    if (ok) {
+      bend_Packet_t decoded;
+      if (!bend_Packet_decode(output, written, &decoded)) return 5;
+      memset(output, 0xa5, capacity);
+      if (!bend_Packet_encode(output, written, &decoded)) return 6;
+      for (unsigned long long i = written; i < capacity; ++i) if (output[i] != 0xa5) return 7;
+    }
     printf("%d", ok);
     if (ok) for (unsigned long long i = 0; i < written; ++i) printf(" %u", output[i]);
     puts(""); free(input); free(output);
@@ -101,8 +112,66 @@ int main(void) {
     input: nativeCases.map(c => `${c.input.length} ${c.capacity ?? 1024} ${c.input.join(' ')}`).join('\n') + '\n' });
   assert.equal(native.status, 0, native.stderr);
   assert.deepEqual(native.stdout.trim().split('\n'), nativeCases.map(c => c.expected === null ? '0' : `1 ${c.expected.join(' ')}`));
+
+  // A nested inactive constructor has padding inside its parent's active field.
+  const nestedSchema: RuntimeSchema = { ...emitted.schema, types: [...emitted.schema.types, {
+    kind: 'adt', name: 'Envelope', cType: 'bend_Envelope_t', variants: [
+      { name: 'EmptyEnvelope', tag: 0, fields: [], cMaker: 'bend_EmptyEnvelope_make' },
+      { name: 'Wrapped', tag: 1, fields: [{ name: 'packet', type: 'Packet' }], cMaker: 'bend_Wrapped_make' },
+    ],
+  }] };
+  fs.writeFileSync('build/codecs-nested.wire.h', emitCodecs(nestedSchema));
+  fs.writeFileSync('build/codecs-nested.c', `#include <string.h>
+#include "codecs.h"
+typedef struct {
+  bend_u32 tag;
+  union {
+    struct { bend_u32 unused; } c0;
+    struct { bend_Packet_t f0; } c1;
+  } as;
+} bend_Envelope_t;
+static inline bend_Envelope_t bend_EmptyEnvelope_make(void) {
+  return (bend_Envelope_t){ .tag = 0 };
+}
+static inline bend_Envelope_t bend_Wrapped_make(bend_Packet_t packet) {
+  return (bend_Envelope_t){ .tag = 1, .as.c1 = { .f0 = packet } };
+}
+#include "codecs-nested.wire.h"
+int main(void) {
+  unsigned char output[bend_Envelope_WIRE_SIZE];
+  const unsigned char wrapped_idle[bend_Envelope_WIRE_SIZE] = { 1 };
+  const unsigned char wrapped_enabled[bend_Envelope_WIRE_SIZE] = { 1, 1, 1 };
+  const unsigned char empty[bend_Envelope_WIRE_SIZE] = { 0 };
+  bend_Envelope_t value = bend_Wrapped_make(bend_Idle_make());
+  memset(output, 0xa5, sizeof output);
+  if (!bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, wrapped_idle, sizeof output)) return 1;
+  value = bend_Wrapped_make(bend_Enabled_make(1));
+  memset(output, 0xa5, sizeof output);
+  if (!bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, wrapped_enabled, sizeof output)) return 2;
+  value = bend_EmptyEnvelope_make();
+  memset(output, 0xa5, sizeof output);
+  if (!bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, empty, sizeof output)) return 3;
+  memset(output, 0xa5, sizeof output);
+  if (bend_Envelope_encode(output, sizeof output - 1, &value)) return 4;
+  for (unsigned i = 0; i < sizeof output; ++i) if (output[i] != 0xa5) return 5;
+  value.tag = 255;
+  if (bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, empty, sizeof output)) return 6;
+  bend_Packet_t bad_packet = bend_Idle_make();
+  bad_packet.tag = 255;
+  value = bend_Wrapped_make(bad_packet);
+  memset(output, 0xa5, sizeof output);
+  if (bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, wrapped_idle, sizeof output)) return 7;
+  value = bend_Wrapped_make(bend_Enabled_make(2));
+  memset(output, 0xa5, sizeof output);
+  const unsigned char invalid_bool[bend_Envelope_WIRE_SIZE] = { 1, 1 };
+  if (bend_Envelope_encode(output, sizeof output, &value) || memcmp(output, invalid_bool, sizeof output)) return 8;
+  return 0;
+}\n`);
+  run(process.env.CC ?? 'clang', ['-std=c17', '-O1', '-g', '-Wall', '-Wextra', '-Werror', '-Wno-unused-function',
+    '-fsanitize=address,undefined', '-fno-sanitize-recover=all', 'build/codecs-nested.c', '-o', 'build/codecs-nested']);
+  run(path.resolve('build/codecs-nested'), []);
   fs.writeFileSync('build/codecs-sbf.c', '#include "solana_min.h"\n#include "codecs.dispatch.h"\n#include "invoke.h"\n');
   compileSbf('build/codecs-sbf.c', 'build/codecs');
   fs.writeFileSync('build/codecs-vectors.json', JSON.stringify(cases) + '\n');
-  console.log(`${nativeCases.length} typed interface cases passed (Bend/client/native, ASan/UBSan); SBF module built`);
+  console.log(`${nativeCases.length} typed interface cases and nested dirty-output encodes passed (Bend/client/native, ASan/UBSan); SBF module built`);
 }
