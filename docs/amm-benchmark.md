@@ -49,6 +49,11 @@ costs or performance for other programs or input distributions. In particular,
 the key comparison's cost depends on how many leading 8-byte chunks two public
 keys share.
 
+On this combined source, `npm test` passed 81 Rust SBF tests (four intentionally
+ignored), the typed codec and lowering checks, arithmetic oracles, source-law
+negative mutations, rollback cases, and reproducible program builds. The
+application SMT refinement suite was not rerun for this adapter/runtime change.
+
 The report also checks each LiteSVM invocation log against the transaction CU
 total and expected Token Program call count. Token Program child invocations use
 the same inclusive CU under Bend and Rust: 16,899 for the three calls in

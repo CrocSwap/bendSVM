@@ -1,5 +1,36 @@
 # Director handoff — 2026-09-20
 
+## Update — 2026-09-28: AMM compute comparison
+
+The active priorities are compiler assurance and compiled CU relative to an
+independent Rust SBF implementation. The current matched AMM report is
+`build/amm-benchmark.json`; run `npm run benchmark:amm` to regenerate it and
+`npm run benchmark:amm:phases` for separate instrumented ELFs and interval
+readings in `build/amm-phases/report.json`. The production base swap is now
+29,949 CU in Bend versus 22,684 CU in Rust (1.32×), compared with 61,375 CU
+versus 22,684 CU before the recent key-comparison work. The fixed-fixture
+zero-input rejection is 6,032 versus 6,509 CU. See `docs/amm-benchmark.md`
+for the full comparison and scope; the report records source and ELF hashes.
+
+The latest generic changes clear each canonical ADT output once before nested
+writers, and compare public account keys in four alignment-safe 8-byte chunks.
+The generated encoder change is in `compiler/codecs.ts`, and the key helper is
+in `runtime/solana_min.h`; dirty-buffer, nested-padding, unaligned-key, and
+all-byte mismatch cases were added. The isolated diagnostic attributes much
+of the remaining successful-swap gap to the checked Bend transition; it does
+not yet separate wide arithmetic from aggregate movement. A generic state
+copy in the storage adapter is another measured lead. These are recommendations
+for further work, not established CU savings or compiler verification claims.
+
+For the combined source, `npm run benchmark:amm` passed matched conformance and
+repeatability, `npm run benchmark:amm:phases` passed two identical diagnostic
+runs, and `npm test` passed 81 Rust SBF tests (four intentionally ignored), 299
+typed codec cases plus nested dirty-output checks, 454 lowering SBF cases,
+2,928 arithmetic SBF cases, the source-law negative mutations, and reproducible
+program builds. These runtime tests and independent Rust comparisons remain
+separate from Bend law checking and application SMT refinements. No application
+SMT suite ran in this pass, and the compiler is not formally verified.
+
 ## Update — 2026-09-22
 
 The fresh-developer workflow is implemented. Start with
