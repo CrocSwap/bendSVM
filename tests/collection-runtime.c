@@ -3,7 +3,28 @@
 #include <string.h>
 #include "bend_collection_runtime.h"
 
+static void test_equal_key(void) {
+  u8 left[40], right[40];
+  for (unsigned i = 0; i < sizeof(left); ++i) left[i] = (u8)(i * 37 + 11);
+  for (unsigned left_offset = 0; left_offset < 8; ++left_offset) {
+    const u8 *a = left + left_offset;
+    assert(equal_key(a, a));
+    for (unsigned right_offset = 0; right_offset < 8; ++right_offset) {
+      u8 *b = right + right_offset;
+      memcpy(b, a, 32);
+      assert(equal_key(a, b) && equal_key(b, a));
+      for (unsigned byte = 0; byte < 32; ++byte) {
+        b[byte] ^= 1;
+        assert(!equal_key(a, b) && !equal_key(b, a));
+        b[byte] ^= 1;
+      }
+      assert(equal_key(a, b));
+    }
+  }
+}
+
 int main(void) {
+  test_equal_key();
   u8 program[32] = {1}, state[32] = {2}, header[20] = {66,68,67,49,7};
   const u32 capacities[] = {0,1,16,4096}, strides[] = {1,4,37};
   unsigned checks = 0;
