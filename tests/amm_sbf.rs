@@ -946,12 +946,26 @@ fn amm_benchmark_identical_fixtures() {
     println!("{report}");
 }
 
-const PHASE_MARKERS: [&str; 8] = [
+const BEND_PHASE_MARKERS: [&str; 10] = [
     "baseline",
     "accounts_parsed",
     "parsed_pda",
     "decoded_clock",
     "transition",
+    "state_encoded",
+    "effects_extracted",
+    "validated",
+    "token_executed",
+    "state_written",
+];
+const RUST_PHASE_MARKERS: [&str; 10] = [
+    "baseline",
+    "accounts_parsed",
+    "parsed_pda",
+    "decoded_clock",
+    "transition",
+    "effects_ready",
+    "state_encoded",
     "validated",
     "token_executed",
     "state_written",
@@ -959,7 +973,7 @@ const PHASE_MARKERS: [&str; 8] = [
 
 /// The diagnostic copies emit one `sol_log_compute_units_` line per reached
 /// boundary. LiteSVM also emits CPI logs, so only root invocation readings count.
-fn phase_readings(logs: &[String], reached: usize) -> Vec<serde_json::Value> {
+fn phase_readings(logs: &[String], reached: usize, markers: &[&str]) -> Vec<serde_json::Value> {
     let mut depth = 0usize;
     let mut readings = Vec::new();
     for line in logs {
@@ -982,7 +996,7 @@ fn phase_readings(logs: &[String], reached: usize) -> Vec<serde_json::Value> {
             let index = readings.len();
             assert!(index < reached, "unexpected extra CU marker: {logs:#?}");
             readings.push(serde_json::json!({
-                "stage": PHASE_MARKERS[index],
+                "stage": markers[index],
                 "remainingCU": remaining,
                 "rawLog": line,
             }));
@@ -1024,10 +1038,10 @@ fn amm_phase_diagnostic_identical_fixtures() {
             .unwrap();
     }
     let cases = [
-        ("initialize", 0, [100_000, 400_000, 199_000], false, None, 3, 8),
+        ("initialize", 0, [100_000, 400_000, 199_000], false, None, 3, 10),
         ("reject_zero_input", 3, [0, 0, 0], true, Some(260), 0, 5),
         ("reject_slippage", 3, [1_000, u64::MAX, 0], true, Some(261), 0, 5),
-        ("swap_base", 3, [1_000, 1, 0], true, None, 2, 8),
+        ("swap_base", 3, [1_000, 1, 0], true, None, 2, 10),
     ];
     let mut rows = Vec::new();
     for (name, op, values, direction, error, token_cpis, reached) in cases {
@@ -1059,8 +1073,8 @@ fn amm_phase_diagnostic_identical_fixtures() {
             &bm.logs, bend.f.program, token_cpis, outcome, bm.compute_units_consumed);
         let rust_invocations = benchmark_invocation_json(
             &rm.logs, rust.f.program, token_cpis, outcome, rm.compute_units_consumed);
-        let bend_readings = phase_readings(&bm.logs, reached);
-        let rust_readings = phase_readings(&rm.logs, reached);
+        let bend_readings = phase_readings(&bm.logs, reached, &BEND_PHASE_MARKERS);
+        let rust_readings = phase_readings(&rm.logs, reached, &RUST_PHASE_MARKERS);
         rows.push(serde_json::json!({
             "operation": name,
             "error": error,
@@ -1082,9 +1096,9 @@ fn amm_phase_diagnostic_identical_fixtures() {
         "runtime": "LiteSVM 0.7.1",
         "target": "SBF v0 / generic",
         "fixture": "fixed public test seeds 1..12; program bytes [42;32]",
-        "markers": PHASE_MARKERS,
+        "markers": {"bend": BEND_PHASE_MARKERS, "rust": RUST_PHASE_MARKERS},
         "measurement": "Remaining-CU readings from sol_log_compute_units_; each interval includes marker syscall overhead and compiled diagnostic code. Token Program child CU is inclusive in the parent interval and must not be added again. No overhead correction is claimed.",
-        "boundaryDifferences": "accounts_parsed follows account parsing and initial instruction checks. parsed_pda follows the Token Program check, PDA derivation, and state owner/size/writable checks. decoded_clock follows state and instruction decoding and the clock syscall; Bend also constructs a context. transition follows the business call but precedes rejection mapping. validated follows state encoding, Bend effect extraction, and effect validation. token_executed follows the CPI loop. state_written precedes return-data publication. Marker locations reflect each implementation's control flow, not identical intrinsic operations.",
+        "boundaryDifferences": "accounts_parsed follows account parsing and initial instruction checks. parsed_pda follows the Token Program check, PDA derivation, and state owner/size/writable checks. decoded_clock follows state and instruction decoding and the clock syscall; Bend also constructs a context. transition follows the business call but precedes rejection mapping. Bend state_encoded follows outcome mapping and canonical state encoding, effects_extracted follows runtime descriptor conversion, and validated follows effect validation. Rust effects_ready follows result mapping, state_encoded follows payload encoding, and validated follows effect validation; Rust constructs its typed effects inside transition. token_executed follows the CPI loop. state_written precedes return-data publication. Marker locations reflect each implementation's control flow, not identical intrinsic operations.",
         "rows": rows,
     });
     let destination = "build/amm-phases/report.json";

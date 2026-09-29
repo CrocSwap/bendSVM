@@ -74,6 +74,10 @@ async function main() {
     '  if (state.size != 216) return 4;\n  sol_log_compute_units_(); /* parsed_pda */');
   source = substitute(source, '  bend_amm_2e_Outcome_t outcome = bend_amm_2e_process(context, before, instruction);',
     '  sol_log_compute_units_(); /* decoded_clock */\n  bend_amm_2e_Outcome_t outcome = bend_amm_2e_process(context, before, instruction);\n  sol_log_compute_units_(); /* transition */');
+  source = substitute(source, '  BendTransfer transfers[3];',
+    '  sol_log_compute_units_(); /* state_encoded */\n  BendTransfer transfers[3];');
+  source = substitute(source, '  for (unsigned i = 0; i < 3; ++i) {\n    u64 error = bend_transfer_validate',
+    '  sol_log_compute_units_(); /* effects_extracted */\n  for (unsigned i = 0; i < 3; ++i) {\n    u64 error = bend_transfer_validate');
   source = substitute(source, '  for (unsigned i = 0; i < 3; ++i) {\n    if (bend_transfer_execute',
     '  sol_log_compute_units_(); /* validated */\n  for (unsigned i = 0; i < 3; ++i) {\n    if (bend_transfer_execute');
   source = substitute(source, '  for (unsigned i = 0; i < 20; ++i) state.data[i] = header[i];',
@@ -102,6 +106,10 @@ async function main() {
     '    sol_log_compute_units_(); // accounts_parsed\n    if !accounts[2].executable || *accounts[2].key() != TOKEN {');
   rs = substitute(rs, '    let (after, effects) = transition::process(accounts[1].signer, before, instruction)\n        .map_err(|code| 256 + u64::from(code))?;',
     '    sol_log_compute_units_(); // decoded_clock\n    let transition = transition::process(accounts[1].signer, before, instruction);\n    sol_log_compute_units_(); // transition\n    let (after, effects) = transition.map_err(|code| 256 + u64::from(code))?;');
+  rs = substitute(rs, '    let (after, effects) = transition.map_err(|code| 256 + u64::from(code))?;',
+    '    let (after, effects) = transition.map_err(|code| 256 + u64::from(code))?;\n    sol_log_compute_units_(); // effects_ready');
+  rs = substitute(rs, '    let encoded = wire::payload(after);',
+    '    let encoded = wire::payload(after);\n    sol_log_compute_units_(); // state_encoded');
   rs = substitute(rs, '    for effect in &effects {\n        if execute(effect, accounts, bump) != 0 {',
     '    sol_log_compute_units_(); // validated\n    for effect in &effects {\n        if execute(effect, accounts, bump) != 0 {');
   rs = substitute(rs, '    ptr::copy_nonoverlapping(wire::HEADER.as_ptr(), state.data, 20);',

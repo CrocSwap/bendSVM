@@ -98,7 +98,10 @@ remaining-CU log reading; adjacent readings yield interval deltas. Root total
 CU and nested Token Program CU are recorded separately. The child CU is already
 included in the root and in the interval spanning token execution. Rejections
 reach only the baseline, accounts parsed, parsed/PDA, decoded/clock, and transition markers.
-The successful cases reach effect validation, token execution, and state write.
+The successful cases also reach state encoding, effect handling, validation,
+token execution, and state write. Bend converts source effects to runtime
+descriptors after the transition; Rust constructs its typed effects inside
+the transition, so the report uses separate marker names and orders.
 
 These intervals include logging syscall overhead and code changes caused by
 instrumentation. They are observed costs of diagnostic binaries, not corrected
@@ -115,8 +118,12 @@ Before the key comparison change, the diagnostic zero-input rejection spent
 22,744 CU from baseline to accounts parsed in Bend. With the change, that
 interval is 1,797 CU in Bend and 1,353 CU in Rust. The Rust checkpoint also
 moved just before its Token Program check to match the Bend boundary more
-closely. The diagnostic's successful swap now spends 40,178 CU in Bend versus 23,501 CU in
-Rust. Its largest remaining interval gaps are 10,300 CU from transition to
-validated (including state encoding and effect extraction) and 3,650 CU from
-decoded/clock to transition. These figures include marker overhead and apply
-only to the recorded fixtures and diagnostic binaries.
+closely. The diagnostic's successful swap now spends 40,380 CU in Bend versus
+23,703 CU in Rust. Bend spends 3,395 CU from transition to state encoded,
+363 CU on effect conversion, and 6,753 CU on effect validation; Rust spends
+147 CU on result mapping, 239 CU on payload encoding, and 757 CU on effect
+validation. The Bend/Rust decoded/clock-to-transition gap is 3,650 CU. These
+figures include marker overhead and apply only to the recorded fixtures and
+diagnostic binaries. Rust's effect construction is included before its
+transition marker, so the 363 CU conversion interval has no matching Rust
+post-transition step.
