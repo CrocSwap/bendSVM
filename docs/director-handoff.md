@@ -244,15 +244,63 @@ failed rows are kept):
 - Passed: `acceptance:alpha` with `RUSTUP_TOOLCHAIN=1.92.0-aarch64-apple-darwin`
   (`build/external-alpha/acceptance.json`, 2026-10-14T18:54Z). Host Rust 1.98.1
   fails doctor, which predates this work.
-- **`acceptance:developer` is blocked** (predates this work). It stages only
-  git-tracked files, and required sources such as
-  `compiler/sbf-call-depth-artifact.ts` are still untracked, so the staged doctor
-  cannot import them. Unblocking it needs a commit, or a user decision to change
-  the copy rule.
+- `acceptance:developer` was blocked while required sources were untracked (it
+  stages only git-tracked files). After the user-requested commits (`7f79e1f`…`eba20bd`,
+  2026-10-14) it passed on the committed tree with Rust 1.92.0
+  (`build/fresh-developer-acceptance/acceptance.json`, 132 s).
 
 GoSVM's 2026-10-14 consumer-build request is answered in
 `docs/coordination/2026-10-14-gosvm-reply.md` (probes under the session
 scratchpad; no library code changed).
+
+## Toolchain ergonomics follow-up — 2026-10-14 (user-requested)
+
+- **Linux v1.57 pins and installer.** `compiler/target-profile.ts` `V157_HOSTS`
+  pins each release archive and its `clang`/`ld.lld`/`llvm-readelf` for
+  macOS arm64, Linux x86_64 and Linux aarch64. The archives were downloaded from
+  the Anza v1.57 GitHub release; the macOS binaries match the earlier pins
+  exactly. `npm run install:platform-tools [-- --root <dir>] [--archive <file>]`
+  (`scripts/install-platform-tools.ts`) checks the archive hash before extraction
+  and the binaries after, never overwrites a mismatched installation, and leaves
+  no partial state. `bootstrap:alpha` runs it unless `SBF_V157_TOOLS` is set or
+  `BEND_SKIP_PLATFORM_TOOLS=1`, and fetches the modern crates. Doctor and the
+  missing-toolchain error name the installer. Controls: `tests/install-platform-tools.ts`.
+  Both Linux pin sets were checked by installing from the real archives with the
+  host override. The Linux binaries have not been *executed* here (no working
+  Docker); CI (Ubuntu x86_64) is the first execution.
+- **CI and acceptance build both targets with no flags.** CI installs v1.57 into
+  `runner.temp` and runs `tests/install-platform-tools.ts`, `test:target-profiles`,
+  `test:sbpf-v3` and `test:project-targets`. `alpha-acceptance`,
+  `fresh-developer-acceptance` (report gains `outputs.solana`; local RPC still
+  uses `outputs.target` = fogo), `project-commands` and `workflow-sbf` no longer
+  pass `--target fogo`.
+- **`rust-toolchain.toml` pins Rust 1.92.0**, so doctor passes without
+  `RUSTUP_TOOLCHAIN`. `test-runner-modern` and `modern-library-runner` were
+  checked to build on 1.92.0.
+- **Path-independent library bundles.** Explicit `--target` library builds pass
+  `-ffile-prefix-map=<output-dir>/=`, so `*.su` and the manifest hash do not
+  depend on the output directory. Two builds per target into different
+  directories gave identical trees. Objects, C and header are byte-identical to
+  the published 2026-10-09 bundles, whose files are unchanged. The historical
+  command is unchanged. The GoSVM reply was updated, and GoSVM was messaged
+  directly.
+- Disk cleanup (user-approved, 2026-10-14): `build/disk-cleanup/cleanup-2026-10-14.py`
+  removes nested Cargo `target/`s and `.deps` copies inside old staging trees,
+  root probe caches (`target/{sha256,mixed-library-cargo,modern-library-cargo,arithmetic-probe}`)
+  and `build/` dirs no tracked file names. Files referenced by any text outside
+  the candidates are kept. Plan and result: `build/disk-cleanup/run-2026-10-14-cleanup/`.
+  `~/.cache/solana/v1.51` is removed too.
+  Result: 12.7 GiB removed, 13,834 referenced files kept; repo 48 → 35 GB.
+- Regression `build/regression/20261014T214935Z-toolchain-ergonomics/exits.tsv`,
+  CI order: all 16 steps exited 0 (doctor without overrides; installer controls;
+  both acceptance gates now building and testing fogo and solana with no flags;
+  `npm test` 592 s with 89 Rust SBF tests passed and 4 ignored; mixed-library;
+  client checks; target-profiles; sbpf-v3; project-targets; workflow-sbf).
+- The Rust 1.92 rebuild changed the `scripts/test-runner` runner hash
+  (`3cd6f111…` → `ed30e400bcd46a0cf5da08a64f9810eb6b6ba932257154ff4ce98a4c724ce1bc`,
+  unchanged sources). It was re-recorded at the user's request in
+  `tests/sha256-qualified-program.ts` and `tests/sha256-short-sbf/prerequisite-hashes.json`;
+  both gates then passed.
 
 Hundreds of paths are dirty/untracked; ignored `build/` holds required
 evidence. Do not reset, git-clean or broadly delete outputs/caches.
