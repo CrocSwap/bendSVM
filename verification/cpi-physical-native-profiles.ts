@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {wireCodec} from '../sdk/wire.ts';
+const run=process.argv[2];assert(run,'expected fresh run directory');
+const input=path.join(run,'fixtures/input.json'),profiles=path.join(run,'profiles.json');
+const data=JSON.parse(fs.readFileSync(input,'utf8')),original=JSON.parse(fs.readFileSync(profiles,'utf8'));
+const rows=data.fixtures.map((fixture:any)=>{
+ const profile=original.rows.find((p:any)=>p.fixture===fixture.name),instruction=structuredClone(profile.instruction);
+ instruction.fields.second_data.fields.a=99;
+ const codec=wireCodec(fixture.schema),type=fixture.schema.exports[0].args[2];
+ const bytes=[...codec.encode(type,instruction)],decoded=codec.decode(type,Uint8Array.from(bytes));
+ assert.deepEqual([...codec.encode(type,decoded)],bytes);
+ assert.equal((decoded as any).fields.second_data.fields.a,99);
+ assert.equal((decoded as any).fields.effect.fields.data.fields.a,42);
+ return {fixture:fixture.name,instruction,bytes,expectedDataBytes:[42,99]};
+});
+const sha=(p:string)=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const files=[import.meta.path,input,profiles,'sdk/wire.ts','compiler/schema.ts'];
+const out=path.join(run,'native-profiles.json');assert(!fs.existsSync(out));
+fs.writeFileSync(out,JSON.stringify({rows,inputs:Object.fromEntries(files.map(p=>[path.resolve(p),sha(p)]))},null,2)+'\n');
+console.log(out);

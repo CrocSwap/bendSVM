@@ -1,0 +1,51 @@
+"""Report omissions and corruptions must not become successful loop proofs."""
+import copy,json,pathlib,sys
+if not __debug__:raise RuntimeError('assertions required')
+sys.path.insert(0,'verification')
+from ranked_report import validate,sha,snapshot
+root=pathlib.Path('build/ranked-lowering');receipt=json.loads((root/'fresh-receipt.json').read_text())
+raw=pathlib.Path(receipt['inputArtifact']).read_bytes();data=json.loads(raw)
+report_raw=pathlib.Path(receipt['reportArtifact']).read_bytes();report=json.loads(report_raw)
+assert receipt['passed'] and receipt['inputSha256']==sha(raw) and receipt['reportSha256']==sha(report_raw)
+validate(report,data,raw);before=snapshot(data['sourceHashes']);assert before==data['sourceHashes']
+rows=[]
+def refuse(name,mutate):
+ r=copy.deepcopy(report);mutate(r)
+ try:validate(r,data,raw)
+ except (ValueError,KeyError,TypeError,IndexError):rows.append(name)
+ else:raise AssertionError('accepted '+name)
+def first(r):return r['results'][0]['proof']
+def loop(r):return next(c for c in first(r)['claims'] if c['loop'])
+refuse('scope inflation',lambda r:r.update(endToEndVerified=True))
+refuse('wrong solver',lambda r:r.update(z3='other'))
+refuse('wrong run',lambda r:r.update(runId='other'))
+refuse('wrong input',lambda r:r.update(inputSha256='0'*64))
+refuse('missing source',lambda r:r['sourceHashes'].pop('verification/ranked_c.py'))
+refuse('missing fixture',lambda r:r['results'].pop())
+refuse('wrong artifact',lambda r:r['results'][0].update(cSha256='0'*64))
+refuse('missing frontend unit',lambda r:r['cSyntax']['units'].pop())
+refuse('missing function',lambda r:first(r)['claims'].pop())
+refuse('duplicate function',lambda r:first(r)['claims'].append(first(r)['claims'][0]))
+refuse('reordered functions',lambda r:first(r)['claims'].reverse())
+refuse('missing loop',lambda r:first(r)['loops'].pop())
+refuse('wrong root',lambda r:first(r).update(roots=[]))
+refuse('missing source rank',lambda r:loop(r)['checks'].pop(0))
+refuse('missing C rank',lambda r:loop(r)['checks'].pop(1))
+refuse('missing preservation',lambda r:loop(r)['checks'].pop())
+refuse('rank unknown',lambda r:loop(r)['checks'][0].update(result='unknown'))
+refuse('rank counterexample',lambda r:loop(r)['checks'][1].update(result='sat'))
+refuse('NaN duration',lambda r:loop(r)['checks'][0].update(seconds=float('nan')))
+refuse('boolean duration',lambda r:loop(r)['checks'][0].update(seconds=True))
+refuse('unexpected witness',lambda r:loop(r)['checks'][0].update(wireArgs=[]))
+refuse('wrong fuel',lambda r:loop(r).update(fuelArgument=1))
+refuse('boolean fuel',lambda r:loop(r).update(fuelArgument=False))
+refuse('lost recursion',lambda r:loop(r).update(sourceRecursions=0))
+refuse('lost continuation',lambda r:loop(r).update(CContinues=0))
+refuse('boolean continuation',lambda r:loop(r).update(CContinues=True))
+refuse('loop relabelled',lambda r:loop(r).update(loop=False))
+refuse('missing dependency',lambda r:loop(r).update(dependencies=[]))
+refuse('extra field',lambda r:r.update(unchecked=True))
+assert snapshot(data['sourceHashes'])==before
+assert pathlib.Path(receipt['inputArtifact']).read_bytes()==raw and pathlib.Path(receipt['reportArtifact']).read_bytes()==report_raw
+(root/'report-controls.json').write_text(json.dumps({'passed':True,'inputSha256':sha(raw),'reportSha256':sha(report_raw),'checkerSha256':sha(pathlib.Path(__file__).read_bytes()),'refusals':rows},indent=2)+'\n')
+print(len(rows),'ranked report corruptions refused')

@@ -82,14 +82,19 @@ def source_claims(program):
     # Check initialization and extraction against an arbitrary loop result.
     q=z.BitVec('root_result',64)
     class Loop(Summary):
-        def __init__(self,p):super().__init__(p);self.calls=[]
+        def __init__(self,p):super().__init__(p);self.calls=[];self.paths=[]
         def call(self,name,args,path):
-            if name=='step64':
-                self.calls.append(z.And(path,args[0]==self.sort('Search').constructor(0)(wide_word(self,'wide.U128',target),word(self,'math.U64',z.BitVecVal(0,64)),word(self,'math.U64',z.BitVecVal(1<<63,64)))))
+            if name in ('step16','step32','step64'):
+                small=z.ULT(target,z.BitVecVal(1<<64,128))
+                narrow=z.ULT(target,z.BitVecVal(1<<32,128))
+                domain=narrow if name=='step16' else z.And(small,z.Not(narrow)) if name=='step32' else z.Not(small)
+                initial_bit=1<<{'step16':15,'step32':31,'step64':63}[name]
+                initial=self.sort('Search').constructor(0)(wide_word(self,'wide.U128',target),word(self,'math.U64',z.BitVecVal(0,64)),word(self,'math.U64',z.BitVecVal(initial_bit,64)))
+                self.calls.append(z.Implies(path,z.And(domain,args[0]==initial)));self.paths.append(path)
                 return self.sort('Search').constructor(0)(wide_word(self,'wide.U128',target),word(self,'math.U64',q),word(self,'math.U64',z.BitVecVal(0,64)))
             return super().call(name,args,path)
-    e=Loop(program);actual=e.call('floor',[wide_word(e,'wide.U128',target)],z.BoolVal(True));assert len(e.calls)==1
-    claims.append(obligation('sqrt-floor-wrapper',[],z.And(value(e,'math.U64',actual)==q,*e.calls,*[z.Not(p) for p in e.dead]),[target,q]))
+    e=Loop(program);actual=e.call('floor',[wide_word(e,'wide.U128',target)],z.BoolVal(True));assert len(e.calls)==3
+    claims.append(obligation('sqrt-floor-wrapper',[],z.And(value(e,'math.U64',actual)==q,*e.calls,z.Or(e.paths),z.And([z.Not(z.And(a,b)) for i,a in enumerate(e.paths) for b in e.paths[i+1:]]),*[z.Not(p) for p in e.dead]),[target,q]))
     a,b=z.BitVecs('a b',64)
     class Mean(Summary):
         def __init__(self,p):super().__init__(p);self.calls=[]
@@ -106,6 +111,8 @@ def source_claims(program):
 def induction():
     t,r=z.Ints('target root');claims=[]
     claims.append(obligation('sqrt-initial-interval',[t>=0,t<(1<<128)],z.And(0<=t,t<(1<<64)**2)))
+    claims.append(obligation('sqrt-small-initial-interval',[t>=0,t<(1<<64)],z.And(0<=t,t<(1<<32)**2)))
+    claims.append(obligation('sqrt-narrow-initial-interval',[t>=0,t<(1<<32)],z.And(0<=t,t<(1<<16)**2)))
     for i in range(64):
         b=1<<(63-i);candidate=r+b
         after=z.If(candidate*candidate<=t,candidate,r)
@@ -128,4 +135,4 @@ def prove(program_path,math_path,wide_path):
 if __name__=='__main__':
     if z.get_version_string()!='5.1.0':raise RuntimeError('Requires Z3 5.1.0')
     report=prove(*sys.argv[1:]);print(json.dumps(report,indent=2))
-    sys.exit(0 if len(report['claims'])==69 and all(c['result']=='unsat' for c in report['claims']) else 1)
+    sys.exit(0 if len(report['claims'])==71 and all(c['result']=='unsat' for c in report['claims']) else 1)

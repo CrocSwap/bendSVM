@@ -6,6 +6,9 @@ import { model } from './model.ts';
 import { prepareBend, BEND_COMMIT } from '../scripts/build.ts';
 
 prepareBend();
+const natModel=spawnSync(process.env.PYTHON??'python3',['-B','tests/source-nat-model.py'],{encoding:'utf8'});
+assert.ifError(natModel.error);
+assert.equal(natModel.status,0,natModel.stderr||natModel.stdout);
 fs.mkdirSync('build',{recursive:true});
 const roots=['count','swaps','toggle','rotate'];
 async function prove(file:string,stem:string,expected:number) {
@@ -33,7 +36,7 @@ for(const [name,before,after] of [
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 }
 const files=['sdk/iteration.bend','tests/iteration.bend','verification/model.ts','verification/prove.py',
-  'verification/iteration.py','verification/check-iteration.ts','compiler/backend.ts','compiler/primitives.ts'];
+  'verification/iteration.py','verification/check-iteration.ts','tests/source-nat-model.py','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/iteration-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,hashes},null,2)+'\n');
 console.log('Bounded iteration refinement: all 65 fuel values verified for arbitrary payloads; two source mutations rejected');

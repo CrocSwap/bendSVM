@@ -1,0 +1,200 @@
+{
+  "div4-composition-report.json": {
+    "keys": [
+      "boundaryFault",
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "interfaces",
+      "logSha256",
+      "modeledInstructions",
+      "passed",
+      "prerequisites",
+      "scope"
+    ],
+    "claims": [
+      "boundary 1 to 2 live registers and stack",
+      "boundary 1 to 2 complete declared entry memory",
+      "boundary 1 to 2 mathematical state",
+      "boundary 2 to 3 live registers and stack",
+      "boundary 2 to 3 complete declared entry memory",
+      "boundary 2 to 3 mathematical state",
+      "boundary 3 to 4 live registers and stack",
+      "boundary 3 to 4 complete declared entry memory",
+      "boundary 3 to 4 mathematical state"
+    ],
+    "inputs": [
+      "build/sbf-division-scout/compose-div4.py",
+      "build/sbf-division-scout/prove-div4-first-step.py",
+      "build/sbf-division-scout/prove-div4-step2.py",
+      "build/sbf-division-scout/prove-div4-last-steps.py",
+      "build/sbf-division-scout/prove-div4.py",
+      "verification/sbf_leaf.py",
+      "verification/sbf_cfg.py",
+      "build/sbf-division-scout/paths-div4.py",
+      "build/sbf-division-scout/paths-div4-frames.py"
+    ],
+    "interfaces": [
+      {
+        "from": 1,
+        "to": 2,
+        "liveRegisters": [
+          4,
+          5,
+          6,
+          7,
+          9,
+          10
+        ],
+        "liveStack": [
+          -24,
+          -16,
+          -8
+        ]
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "liveRegisters": [
+          2,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10
+        ],
+        "liveStack": [
+          -32,
+          -24,
+          -8
+        ]
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "liveRegisters": [
+          2,
+          3,
+          4,
+          5,
+          7,
+          9,
+          10
+        ],
+        "liveStack": [
+          -40,
+          -32,
+          -16,
+          -8
+        ]
+      }
+    ],
+    "modeledInstructions": 229
+  },
+  "div4-first-step-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "entry",
+      "exploratory",
+      "inputHashes",
+      "instructions",
+      "passed",
+      "scope",
+      "stop"
+    ],
+    "claims": [
+      "remainder after first step",
+      "quotient low word after first step",
+      "retained quotient inputs and divisor",
+      "unconditional first-step join"
+    ],
+    "inputs": [
+      "build/sbf-division-scout/prove-div4-first-step.py",
+      "build/sbf-division-scout/prove-div4.py",
+      "build/sbf-division-scout/paths-div4.py",
+      "build/sbf-slice-probe/vesting.so",
+      "verification/sbf_leaf.py",
+      "verification/sbf_cfg.py",
+      "verification/sbf_elf.py"
+    ],
+    "entry": 23632,
+    "stop": 24072,
+    "instructions": 55
+  },
+  "div4-step2-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "entry",
+      "exploratory",
+      "inputHashes",
+      "instructions",
+      "passed",
+      "scope",
+      "stop"
+    ],
+    "claims": [
+      "second-step remainder",
+      "second-step quotient",
+      "retained divisor and previous quotient",
+      "second-step unconditional join",
+      "actual first-step exit satisfies second-step divisor bindings"
+    ],
+    "inputs": [
+      "build/sbf-division-scout/prove-div4-step2.py",
+      "build/sbf-division-scout/prove-div4.py",
+      "build/sbf-division-scout/paths-div4.py",
+      "build/sbf-slice-probe/vesting.so",
+      "verification/sbf_leaf.py",
+      "verification/sbf_cfg.py",
+      "verification/sbf_elf.py"
+    ],
+    "entry": 24072,
+    "stop": 24496,
+    "instructions": 52
+  },
+  "div4-last-steps-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "scope",
+      "steps"
+    ],
+    "claims": [
+      "step3 quotient",
+      "step3 remainder",
+      "step3 next-entry divisor/carry/frame",
+      "step3 unconditional join",
+      "step4 quotient",
+      "step4 remainder",
+      "step4 divisor and all tags",
+      "step4 unconditional join"
+    ],
+    "inputs": [
+      "build/sbf-division-scout/prove-div4-last-steps.py",
+      "build/sbf-division-scout/prove-div4.py",
+      "build/sbf-division-scout/paths-div4-frames.py",
+      "build/sbf-division-scout/paths-div4.py",
+      "build/sbf-slice-probe/vesting.so",
+      "verification/sbf_leaf.py",
+      "verification/sbf_cfg.py",
+      "verification/sbf_elf.py"
+    ],
+    "steps": {
+      "3": {
+        "instructions": 52,
+        "poisonMerges": 0
+      },
+      "4": {
+        "instructions": 70,
+        "poisonMerges": 0
+      }
+    }
+  }
+}

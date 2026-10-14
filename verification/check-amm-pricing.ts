@@ -9,7 +9,7 @@ const { checkedBook } = await import('../compiler/backend.ts');
 const B = await import('../.deps/bend/bend2/bend.ts');
 fs.mkdirSync('build', { recursive: true });
 const mathPath='build/amm-pricing-refinement.math.model.json',widePath='build/amm-pricing-refinement.wide.model.json';
-fs.writeFileSync(mathPath,JSON.stringify(await model('sdk/math.bend',['mul32_parts','mul32','mul_parts','mul'])));
+fs.writeFileSync(mathPath,JSON.stringify(await model('sdk/math.bend',['mul32_parts','mul32','mul_parts','mul','div_step','div2','div4','div8','div16','div32','div64','divmod','div','mod'])));
 fs.writeFileSync(widePath,JSON.stringify(await model('sdk/wide.bend',['add','product_parts','product','divide','mul_div','floor','ceil'])));
 const roots=['fee','swap','deposit','withdraw'];
 async function check(source:string,stem:string,status:number) {
@@ -21,6 +21,9 @@ async function check(source:string,stem:string,status:number) {
   assert.equal(report.checkedArithmetic.length,2);
   assert(report.checkedArithmetic.every((c:any)=>c.result==='unsat'));
   assert(report.bindings.every((b:any)=>b.result==='checked'));
+  assert.equal(report.wide.smallDivision.length,15);
+  assert.ok(report.wide.smallDivision.every((c:any)=>c.result==='unsat'));
+  assert.deepEqual(report.wide.claims.map((c:any)=>c.claim),["wide-quotient-overflow-threshold","integer-floor-ceiling","wide-divide-wrapper","wide-zero-precedence","wide-overflow-error","wide-divisor-one","wide-native64-route","wide-small32-route","wide-div64-route","mul-div-composition","floor-wrapper","ceil-wrapper"]);
   assert.equal(report.wide.fastPaths.length,33);
   assert(report.wide.fastPaths.every((c:any)=>c.result==='unsat'));
   assert.equal(report.wide.claims.length,12);
@@ -71,9 +74,9 @@ for(const root of ['floor','ceil']) {
   const result=spawnSync(process.env.PYTHON??'python3',['-B','verification/amm_pricing.py',path,mathPath,widePath],{encoding:'utf8'});
   assert.notEqual(result.status,0);assert.match(result.stderr,/Imported .* definition mismatch/);
 }
-const files=['examples/amm/pricing.bend','sdk/math.bend','sdk/wide.bend','compiler/primitives.ts','compiler/backend.ts','compiler/schema.ts','package.json','package-lock.json',
+const files=['examples/amm/pricing.bend','sdk/math.bend','sdk/wide.bend','compiler/primitives.ts','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/schema.ts','package.json','package-lock.json',
   'verification/model.ts','verification/prove.py','verification/multiplication.py','verification/division_step.py',
-  'verification/division_loop.py','verification/wide.py','verification/vesting_process.py','verification/amm_pricing.py','verification/check-amm-pricing.ts'];
+  'verification/division_loop.py','verification/wide.py','verification/wide_division.py','verification/small_division.py','verification/vesting_process.py','verification/amm_pricing.py','verification/check-amm-pricing.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/amm-pricing-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,importMismatchesRejected:true,hashes},null,2)+'\n');
 console.log('AMM pricing refinement: 11 obligations, six SAT mutations with concrete Bend witnesses and import negatives passed');

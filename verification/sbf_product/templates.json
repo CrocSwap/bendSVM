@@ -1,0 +1,18 @@
+{
+  "templates/sbf-slice-probe/check.py": "build/sbf-slice-probe/check.py",
+  "templates/sbf-carry-probe/check.py": "build/sbf-carry-probe/check.py",
+  "templates/sbf-carry-probe/compose.py": "build/sbf-carry-probe/compose.py",
+  "templates/sbf-carry-probe/product.py": "build/sbf-carry-probe/product.py",
+  "templates/sbf-operand-probe/layout.py": "build/sbf-operand-probe/layout.py",
+  "templates/sbf-operand-probe/paths.py": "build/sbf-operand-probe/paths.py",
+  "templates/sbf-operand-probe/controls.py": "build/sbf-operand-probe/controls.py",
+  "templates/sbf-operand-probe/link-product.py": "build/sbf-operand-probe/link-product.py",
+  "templates/sbf-product-tail/check.py": "build/sbf-product-tail/check.py",
+  "templates/sbf-entry-product-replay/replay.py": "build/sbf-entry-product-replay/replay.py",
+  "templates/sbf-product-chain/run.py": "build/sbf-product-chain/run.py",
+  "templates/sbf-product-chain/artifact.py": "build/sbf-product-chain/artifact.py",
+  "templates/sbf-product-chain/fresh_source.py": "build/sbf-product-chain/fresh_source.py",
+  "templates/sbf-product-chain/validate.py": "build/sbf-product-chain/validate.py",
+  "templates/sbf-product-chain/report-schema.json": "build/sbf-product-chain/report-schema.json",
+  "templates/sbf-product-chain/report-controls.py": "build/sbf-product-chain/report-controls.py"
+}

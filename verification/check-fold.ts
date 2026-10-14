@@ -37,7 +37,7 @@ for(const [name,target,before,after] of [
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 }
 const files=['sdk/fold.bend','sdk/buffer.bend','sdk/iteration.bend','tests/fold.bend','verification/model.ts',
-  'verification/prove.py','verification/fold.py','verification/check-fold.ts','compiler/backend.ts','compiler/primitives.ts'];
+  'verification/prove.py','verification/fold.py','verification/check-fold.ts','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/fold-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,hashes},null,2)+'\n');
 console.log('Fold refinement: sums, ordered reduction and conjunction verified for all 65 fuels and arbitrary payloads; three source mutations rejected');

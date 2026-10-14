@@ -6,7 +6,9 @@ import { primitives } from '../compiler/primitives.ts';
 // implementation. Backend validation limits this model to its supported subset.
 export async function model(source: string, roots: string[]) {
   const checked=await checkedProgram(source);
-  const emitted=new Backend(checked.book).emit(roots);
+  // Refinements model the checked Bend definitions, including the limb loop.
+  // Native lowering has its own source-to-C obligation and runtime tests.
+  const emitted=new Backend(checked.book,{nativeArithmetic:false}).emit(roots);
   const bare=(t:B.LTerm):B.LTerm => t.$==='Ann'?bare(t.x):t;
   const type=(t:B.LTerm):string=>{
     t=bare(t);

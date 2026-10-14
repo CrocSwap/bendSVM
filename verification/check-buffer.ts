@@ -36,7 +36,7 @@ for(const [name,before,after] of [
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 }
 const files=['sdk/buffer.bend','tests/buffer.bend','verification/model.ts','verification/prove.py',
-  'verification/buffer.py','verification/check-buffer.ts','compiler/backend.ts','compiler/primitives.ts'];
+  'verification/buffer.py','verification/check-buffer.ts','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/buffer-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,hashes},null,2)+'\n');
 console.log('Bounded vector refinement: seven universal claims passed; four source mutations rejected');

@@ -41,7 +41,7 @@ for(const [name,before,after] of [
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 }
 const files=['sdk/collection.bend','sdk/buffer.bend','sdk/context.bend','sdk/math.bend','tests/collection.bend','verification/model.ts','verification/prove.py',
-  'verification/collection.py','verification/check-collection.ts','compiler/backend.ts','compiler/primitives.ts'];
+  'verification/collection.py','verification/check-collection.ts','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/collection-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,hashes},null,2)+'\n');
 console.log('Collection range/read/update/append refinement: nine universal claims passed; five source mutations rejected');

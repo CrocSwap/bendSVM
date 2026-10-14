@@ -1,0 +1,8 @@
+{
+  "templates/prove-div4.py": "build/sbf-division-scout/prove-div4.py",
+  "templates/prove-div4-first-step.py": "build/sbf-division-scout/prove-div4-first-step.py",
+  "templates/prove-div4-step2.py": "build/sbf-division-scout/prove-div4-step2.py",
+  "templates/prove-div4-last-steps.py": "build/sbf-division-scout/prove-div4-last-steps.py",
+  "templates/compose-div4.py": "build/sbf-division-scout/compose-div4.py",
+  "templates/replay-div4.py": "build/sbf-division-scout/replay-div4.py"
+}

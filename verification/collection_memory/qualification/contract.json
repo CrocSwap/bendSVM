@@ -1,0 +1,483 @@
+{
+  "layout-frame.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "total-span-nonwrapping",
+        "result": "unsat"
+      },
+      {
+        "name": "account-0-ordered-extent",
+        "result": "unsat"
+      },
+      {
+        "name": "payloads-disjoint-0-1",
+        "result": "unsat"
+      },
+      {
+        "name": "payloads-disjoint-0-2",
+        "result": "unsat"
+      },
+      {
+        "name": "account-1-ordered-extent",
+        "result": "unsat"
+      },
+      {
+        "name": "payloads-disjoint-1-2",
+        "result": "unsat"
+      },
+      {
+        "name": "account-2-ordered-extent",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-count",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-instruction-and-program",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-metadata-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-metadata-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-metadata-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-rent-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-rent-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-rent-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-other-data-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-0-preserves-other-data-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-count",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-instruction-and-program",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-metadata-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-metadata-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-metadata-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-rent-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-rent-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-rent-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-other-data-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-1-preserves-other-data-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-count",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-instruction-and-program",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-metadata-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-metadata-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-metadata-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-rent-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-rent-1",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-rent-2",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-other-data-0",
+        "result": "unsat"
+      },
+      {
+        "name": "write-2-preserves-other-data-1",
+        "result": "unsat"
+      }
+    ],
+    "maximumSizeWitness": "sat",
+    "scope": "Arithmetic/frame lemma for three contiguous serialized accounts, bounded sizes, aligned base and explicit total-address headroom. Layout expressions matched to runtime header; not full decoder composition, pointer provenance, VM mapping or multi-write commit proof."
+  },
+  "controls.json": {
+    "passed": true,
+    "controls": [
+      {
+        "name": "missing-total-headroom",
+        "result": "sat"
+      },
+      {
+        "name": "missing-write-range",
+        "result": "sat"
+      }
+    ]
+  },
+  "commit-frame.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "records-destination-inside-account",
+        "result": "unsat"
+      },
+      {
+        "name": "header-destination-inside-account",
+        "result": "unsat"
+      },
+      {
+        "name": "length-destination-inside-account",
+        "result": "unsat"
+      },
+      {
+        "name": "key-destination-inside-account",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-count",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-instruction-program",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-metadata-0",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-metadata-1",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-metadata-2",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-rent-0",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-rent-1",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-rent-2",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-other-data-0",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-preserves-other-data-1",
+        "result": "unsat"
+      }
+    ],
+    "twoRecordWriteWitness": "sat",
+    "shiftedDestinationControl": "sat",
+    "scope": "Restricted parsed commit destination families connected to three-account contiguous-layout frame arithmetic under the shared commit precondition, four-byte stride and eight-byte scratch. Single-write frame property supports induction but whole-loop execution, local descriptor stores, object provenance and SBF mapping remain outside this experiment."
+  },
+  "commit-sequence.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "bounded-record-unroll-complete",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-header",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-length",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-key",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-records",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-unchanged",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-outside-addresses-disjoint",
+        "result": "unsat"
+      },
+      {
+        "name": "written-0-global-frame",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-header",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-length",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-key",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-records",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-unchanged",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-outside-addresses-disjoint",
+        "result": "unsat"
+      },
+      {
+        "name": "written-1-global-frame",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-header",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-length",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-key",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-records",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-unchanged",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-outside-addresses-disjoint",
+        "result": "unsat"
+      },
+      {
+        "name": "written-2-global-frame",
+        "result": "unsat"
+      },
+      {
+        "name": "shifted-record-store-control",
+        "result": "sat"
+      }
+    ],
+    "writtenCountWitnesses": [
+      0,
+      1,
+      2
+    ],
+    "scope": "Bounded byte-store sequence matching the parsed commit families, fixed stride4 and scratch8, compared with shared byteFrame under explicit valid-plan/contiguous-layout/stable scratch-header-key assumptions. Local descriptor store, source-key stability induction, pointer provenance, VM mapping and emitted SBF remain outside this experiment."
+  },
+  "key-stability.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "source-key-span-before-collection",
+        "result": "unsat"
+      },
+      {
+        "name": "source-key-does-not-alias-commit-store",
+        "result": "unsat"
+      },
+      {
+        "name": "key-prefix-invariant-base",
+        "result": "unsat"
+      },
+      {
+        "name": "key-prefix-invariant-step",
+        "result": "unsat"
+      },
+      {
+        "name": "records-preserves-key-invariant",
+        "result": "unsat"
+      },
+      {
+        "name": "header-preserves-key-invariant",
+        "result": "unsat"
+      },
+      {
+        "name": "length-preserves-key-invariant",
+        "result": "unsat"
+      },
+      {
+        "name": "key-preserves-key-invariant",
+        "result": "unsat"
+      },
+      {
+        "name": "actual-key-copy-step-equals-frozen-source-step",
+        "result": "unsat"
+      },
+      {
+        "name": "overlapping-key-source-control",
+        "result": "sat"
+      }
+    ],
+    "scope": "Array-read induction for the validated serialized state-key span across arbitrary finite sequences of parsed commit-family data stores. The commit source-key load can be replaced by its original-memory value under this invariant. Plan/local scalars remain stable; descriptor/scratch/header object separation and C/VM provenance remain assumptions. The proof driver composes this invariant with the bounded commit sequence."
+  },
+  "caller/caller-memory.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "entry-discharges-layout-premises",
+        "result": "unsat"
+      },
+      {
+        "name": "account-0-start-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "account-0-data-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "account-1-start-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "account-1-data-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "account-2-start-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "account-2-data-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "actual-caller-discharges-global-commit-precondition",
+        "result": "unsat"
+      },
+      {
+        "name": "caller-state-write-size",
+        "result": "unsat"
+      },
+      {
+        "name": "state-key-source-address",
+        "result": "unsat"
+      },
+      {
+        "name": "commit-is-reachable",
+        "result": "sat"
+      },
+      {
+        "name": "wrong-account-size-binding-control",
+        "result": "sat"
+      },
+      {
+        "name": "wrong-window-start-binding-control",
+        "result": "sat"
+      }
+    ],
+    "scope": "Fresh qualified serialized entry/root namespace discharges contiguous-layout and shared commit-domain preconditions, with parsed actual commit/key/state-copy argument binding. Full post-state/induction models remain separate; local objects, scratch/header separation, provenance and SBF execution not proved."
+  },
+  "caller/state-writes.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "state-copy-complete-canonical-bytes",
+        "result": "unsat"
+      },
+      {
+        "name": "stored-state-calls-follow-source",
+        "result": "unsat"
+      },
+      {
+        "name": "stored-state-constructor-tag",
+        "result": "unsat"
+      },
+      {
+        "name": "outside-state-copy-addresses-disjoint",
+        "result": "unsat"
+      },
+      {
+        "name": "state-copy-global-frame",
+        "result": "unsat"
+      },
+      {
+        "name": "collection-is-outside-state-copy",
+        "result": "unsat"
+      },
+      {
+        "name": "state-copy-preserves-committed-collection",
+        "result": "unsat"
+      },
+      {
+        "name": "counter-wraparound-reachable",
+        "result": "sat"
+      },
+      {
+        "name": "shifted-state-payload-control",
+        "result": "sat"
+      }
+    ],
+    "scope": "Exact generated20+5state-copy destination sequence, connected encoded state outputs and global frame over an arbitrary post-collection array. Preserves committed collection bytes; collection post-state/key lemmas are separate composition evidence. Local scratch separation, valid C objects, return syscall and SBF remain assumptions."
+  }
+}

@@ -84,7 +84,7 @@ for(const name of ['State','Instruction','Outcome']) {
 fs.rmSync('build/queue-negative-binding.model.json',{force:true});
 const files=[source,'sdk/math.bend','sdk/context.bend','sdk/collection.bend','sdk/buffer.bend','sdk/fold.bend','sdk/iteration.bend','sdk/effects.bend','sdk/issuance.bend',
   'verification/model.ts','verification/prove.py','verification/binding.py','verification/check.ts','verification/reference.ts','verification/queue.py','verification/check-queue.ts',
-  'compiler/backend.ts','compiler/primitives.ts','compiler/schema.ts','compiler/diagnostics.ts','build/queue-arithmetic.model.json','build/queue-arithmetic-refinement.json'];
+  'compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts','compiler/schema.ts','compiler/diagnostics.ts','build/queue-arithmetic.model.json','build/queue-arithmetic-refinement.json'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/queue-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive:positive.report,mutations,bindingNegatives,schemaNegatives,hashes},null,2)+'\n');
 console.log('Queue refinement: 428 claims, seven mutation counterexamples with Bend replays, and arithmetic binding negatives passed');

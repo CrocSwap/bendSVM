@@ -18,7 +18,7 @@ async function check(source: string, stem: string, status: number) {
   const result = spawnSync(process.env.PYTHON ?? 'python3', ['-B', 'verification/sqrt.py', stem + '.model.json', mathPath, widePath], { encoding: 'utf8' });
   assert.equal(result.status, status, result.stderr || result.stdout);
   const report = JSON.parse(result.stdout);
-  assert.equal(report.claims.length, 69);
+  assert.equal(report.claims.length, 71);
   assert(report.claims.every((c: any) => ['sat', 'unsat'].includes(c.result)), 'UNKNOWN cannot pass');
   assert.equal(report.binding.result, 'checked');
   assert.equal(report.multiplication.claims.length, 14);
@@ -70,6 +70,21 @@ try {
   const expected = plain(word(1n << 63n));
   assert.notDeepEqual(actual, expected);
   mutations.push({ name: 'missing initial top bit', report: wrapper, concreteWitness: { target: (1n << 126n).toString(), actual, expected } });
+  for(const [name,changed,target,root] of [
+    ['small initial bit',source.replace('Math.U64{2147483648, 0}','Math.U64{1073741824, 0}'),(1n<<64n)-1n,(1n<<32n)-1n],
+    ['width guard uses low word',source.replace('case Wide.U128{lo, +hi}:','case Wide.U128{+lo, +hi}:').replace('Math.equal(hi, Math.zero())','Math.equal(lo, Math.zero())'),1n<<64n,1n<<32n],
+    ['narrow initial bit',source.replace('Math.U64{32768, 0}','Math.U64{16384, 0}'),(1n<<32n)-1n,(1n<<16n)-1n],
+    ['narrow guard uses low limb',source.replace('Math.U64{lo, +hi}, upper}:','Math.U64{+lo, hi}, upper}:').replace('U32.is_eq(hi, 0)','U32.is_eq(lo, 0)'),1n<<32n,1n<<16n],
+  ] as const) {
+    assert.notEqual(changed,source);
+    fs.writeFileSync(path,changed);
+    const report=await check(path,`build/sqrt-negative-width-${mutations.length}`,1);
+    assert.equal(report.claims.find((c:any)=>c.claim==='sqrt-floor-wrapper').result,'sat');
+    const book=await checkedBook(path);
+    const actual=plain(B.term_snf(book,B.App(B.Ref('floor'),wide(target))));
+    const expected=plain(word(root));assert.notDeepEqual(actual,expected);
+    mutations.push({name,report,concreteWitness:{target:target.toString(),actual,expected}});
+  }
   fs.writeFileSync(path, source.replace('step32(step32(state))', 'step32(state)'));
   fs.writeFileSync('build/sqrt-negative-composition.model.json', JSON.stringify(await model(path, roots)));
   const skipped = spawnSync(process.env.PYTHON ?? 'python3', ['-B', 'verification/sqrt.py', 'build/sqrt-negative-composition.model.json', mathPath, widePath], { encoding: 'utf8' });
@@ -86,10 +101,10 @@ try {
   assert.notEqual(helper.status, 0); assert.match(helper.stderr, /Square-root helper proof failed/);
   assert.match(helper.stderr, /sqrt-helper-half.*sat/);
 } finally { fs.rmSync(path, { force: true }); }
-const files = ['sdk/sqrt.bend','sdk/math.bend','sdk/wide.bend','compiler/primitives.ts','compiler/backend.ts','compiler/schema.ts','package.json','package-lock.json',
+const files = ['sdk/sqrt.bend','sdk/math.bend','sdk/wide.bend','compiler/primitives.ts','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/schema.ts','package.json','package-lock.json',
   'verification/model.ts','verification/prove.py','verification/multiplication.py',
   'verification/division_loop.py','verification/vesting_process.py','verification/sqrt.py','verification/check-sqrt.ts'];
 const hashes = Object.fromEntries(files.map(file => [file, crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')]));
 fs.writeFileSync('build/sqrt-refinement.json', JSON.stringify({ bendCommit: BEND_COMMIT, positive, mutations,
   skippedCompositionRejected: true, importedProductMismatchRejected: true, incorrectHelperRejected: true, hashes }, null, 2) + '\n');
-console.log('Square-root refinement: 69 obligations, five SAT mutations with concrete Bend witnesses, composition and import negatives passed');
+console.log('Square-root refinement: 71 obligations, nine SAT mutations with concrete Bend witnesses, composition and import negatives passed');

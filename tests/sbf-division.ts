@@ -1,0 +1,36 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {createHash,randomUUID} from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+const root=path.resolve(import.meta.dir,'..'),output=path.join(root,'build/sbf-division-test.json');
+const run=path.join(root,'build/sbf-division-tests',randomUUID());fs.mkdirSync(run,{recursive:true});
+if(fs.existsSync(output))fs.renameSync(output,path.join(run,'previous.json'));
+const hash=(p:string)=>createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const sources=[import.meta.path,path.join(import.meta.dir,'sbf-division-process.py'),path.join(import.meta.dir,'sbf-division-reports.py')];
+const sourceHashes=Object.fromEntries(sources.map(p=>[p,hash(p)]));
+function child(name:string,args:string[],environment:Record<string,string>={}) {
+ const p=spawnSync(args[0],args.slice(1),{cwd:root,env:{...process.env,...environment},encoding:'utf8',timeout:960000,maxBuffer:8*1024*1024});
+ const log=path.join(run,`${name}.log`);fs.writeFileSync(log,(p.stdout??'')+(p.stderr??'')+(p.error?String(p.error):''));
+ assert.ifError(p.error);assert.equal(p.signal,null);assert.equal(p.status,0,`${name} failed; ${log}`);
+ return {stdout:p.stdout,log,logSha256:hash(log)};
+}
+const model=child('model',[process.execPath,'tests/sbf-machine.ts']);
+const modelReport=path.join(run,'model.json');fs.copyFileSync('build/sbf-machine-test.json',modelReport,fs.constants.COPYFILE_EXCL);
+const modelRecord={report:modelReport,sha256:hash(modelReport)};
+const qualification=path.join(run,'qualification');
+const positive=child('positive',[process.execPath,'verification/check-sbf-division.ts'],{SBF_DIVISION_OUTPUT:qualification});
+const latest=path.join(qualification,'latest.json'),pointer=JSON.parse(fs.readFileSync(latest,'utf8'));
+const reportPath=path.join(pointer.runRoot,'report.json');assert.equal(hash(reportPath),pointer.reportSha256);
+const protectedHashes={[latest]:hash(latest),[reportPath]:hash(reportPath),[modelReport]:modelRecord.sha256};
+const processControls=child('process',[process.env.PYTHON??'python3','-B','tests/sbf-division-process.py'],{SBF_DIVISION_TEST_DIR:run,SBF_DIVISION_TEST_LATEST:latest});
+const processResult=JSON.parse(processControls.stdout);assert.equal(processResult.passed,true);assert.equal(hash(processResult.report),processResult.sha256);
+const processes=JSON.parse(fs.readFileSync(processResult.report,'utf8'));assert.equal(processes.passed,true);assert.equal(processes.controls.length,4);
+const reportControls=child('reports',[process.env.PYTHON??'python3','-B','tests/sbf-division-reports.py'],{SBF_DIVISION_TEST_LATEST:latest,SBF_DIVISION_TEST_DIR:run});
+const reportResult=JSON.parse(reportControls.stdout);assert.equal(reportResult.passed,true);assert.equal(reportResult.refusals,98);assert.equal(hash(reportResult.report),reportResult.sha256);
+const reports=JSON.parse(fs.readFileSync(reportResult.report,'utf8'));assert.equal(reports.passed,true);assert.equal(reports.refusals.length,98);
+for(const [p,h] of Object.entries(protectedHashes))assert.equal(hash(p),h,'controls changed positive evidence');
+assert.deepEqual(Object.fromEntries(sources.map(p=>[p,hash(p)])),sourceHashes,'test source drift');
+const report={passed:true,endToEndVerified:false,sourceHashes,qualification:{report:reportPath,sha256:hash(reportPath)},model:modelRecord,processControls:{report:processResult.report,sha256:hash(processResult.report)},reportControls:{report:reportResult.report,sha256:hash(reportResult.report)},logs:[model,positive,processControls,reportControls].map(({log,logSha256})=>({log,logSha256}))};
+const pending=path.join(run,'accepted.json');fs.writeFileSync(pending,JSON.stringify(report,null,2)+'\n');fs.renameSync(pending,output);
+console.log('SBF division leaf qualification, model tests, four process controls and 98 report refusals passed');

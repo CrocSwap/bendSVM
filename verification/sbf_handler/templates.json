@@ -1,0 +1,19 @@
+{
+  "templates/check-payout-entry.py": "build/sbf-division-scout/check-payout-entry.py",
+  "templates/check-payout-guards.py": "build/sbf-division-scout/check-payout-guards.py",
+  "templates/check-payout-frame.py": "build/sbf-division-scout/check-payout-frame.py",
+  "templates/check-authorization.py": "build/sbf-division-scout/check-authorization.py",
+  "templates/check-authorization-frame.py": "build/sbf-division-scout/check-authorization-frame.py",
+  "templates/check-authorization-payout-frame.py": "build/sbf-division-scout/check-authorization-payout-frame.py",
+  "templates/check-native-dispatch.py": "build/sbf-division-scout/check-native-dispatch.py",
+  "templates/check-claim-output.py": "build/sbf-division-scout/check-claim-output.py",
+  "templates/check-claim-output-frame.py": "build/sbf-division-scout/check-claim-output-frame.py",
+  "templates/check-rejection-output.py": "build/sbf-division-scout/check-rejection-output.py",
+  "templates/check-initialize-output.py": "build/sbf-division-scout/check-initialize-output.py",
+  "templates/link-claim-output.py": "build/sbf-division-scout/link-claim-output.py",
+  "templates/check-memset-wrapper.py": "build/sbf-division-scout/check-memset-wrapper.py",
+  "templates/replay-native-dispatch.py": "build/sbf-division-scout/replay-native-dispatch.py",
+  "templates/check-output-layout.py": "build/sbf-division-scout/check-output-layout.py",
+  "templates/authorization-layout.py": "build/sbf-authorization-layout/layout.py",
+  "templates/dispatch-layout.py": "build/sbf-dispatch-layout/layout.py"
+}

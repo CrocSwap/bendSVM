@@ -4,6 +4,11 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { prepareBend, BEND_COMMIT } from '../scripts/build.ts';
 
+// Retire prior success before toolchain setup or any proof child can fail.
+const reportPath='build/division-refinement.json';
+const attempt=`build/division-refinement-attempts/${crypto.randomUUID()}`;
+fs.mkdirSync(attempt,{recursive:true});
+if(fs.existsSync(reportPath))fs.renameSync(reportPath,`${attempt}/previous.json`);
 prepareBend();
 const {model}=await import('./model.ts');
 const B=await import('../.deps/bend/bend2/bend.ts');
@@ -13,6 +18,12 @@ fs.mkdirSync('build',{recursive:true});
 async function run(source:string,stem:string,expected:number) {
   fs.writeFileSync(stem+'.model.json',JSON.stringify(await model(source,roots))+'\n');
   const output=spawnSync(process.env.PYTHON??'python3',['-B','verification/division_step.py',stem+'.model.json'],{encoding:'utf8'});
+  const evidence=`${attempt}/${crypto.randomUUID()}`;
+  fs.writeFileSync(evidence+'.log',(output.stdout??'')+(output.stderr??'')+(output.error?String(output.error):''));
+  fs.writeFileSync(evidence+'.json',JSON.stringify({source,model:stem+'.model.json',
+    modelSha256:crypto.createHash('sha256').update(fs.readFileSync(stem+'.model.json')).digest('hex'),
+    expectedExitCode:expected,exitCode:output.status??null,signal:output.signal,error:output.error?String(output.error):null},null,2)+'\n');
+  assert.ifError(output.error);assert.equal(output.signal,null,'division proof child signal');
   assert.equal(output.status,expected,output.stderr||output.stdout);
   const report=JSON.parse(output.stdout);
   assert.equal(report.step.result,expected===0?'unsat':'sat','Timeouts do not satisfy either check');
@@ -64,6 +75,7 @@ for(const [name,before,after] of [
   ['wrong zero-divisor error','DivErr{3}','DivErr{0}'],
   ['wrong less-than direct exit','DivOk{Division{zero(), a}}','DivOk{Division{a, zero()}}'],
   ['wrong high-divisor quotient state','DivState{U64{0, lo}, U64{hi, 0}, b}','DivState{U64{lo, 0}, U64{hi, 0}, b}'],
+  ['inclusive 32-step guard','U32.is_lt(ah, bl)','Bool.not(U32.is_lt(bl, ah))'],
 ]) {
   const dir=fs.mkdtempSync('build/division-wrapper-negative-');
   try {
@@ -71,6 +83,7 @@ for(const [name,before,after] of [
     fs.writeFileSync(`${dir}/model.json`,JSON.stringify(await model(`${dir}/math.bend`,roots)));
     const output=spawnSync(process.env.PYTHON??'python3',['-B','verification/division_step.py',`${dir}/model.json`],{encoding:'utf8'});
     assert.equal(output.status,1,output.stderr||output.stdout);
+    assert.ok(output.stdout.trim(), output.stderr || 'division negative check produced no report');
     const report=JSON.parse(output.stdout);
     assert.equal(report.step.result,'unsat');assert.ok(report.induction.every((c:any)=>c.result==='unsat'));
     assert.ok(report.fastPaths.every((c:any)=>c.result==='unsat'));
@@ -100,5 +113,5 @@ for(const [name,before,after] of [
 }
 const files=['sdk/math.bend','verification/model.ts','verification/prove.py','verification/division_step.py','verification/division_loop.py','verification/check-division.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
-fs.writeFileSync('build/division-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,wrapperMutations,missing_step_rejected:true,hashes},null,2)+'\n');
-console.log('Universal division refinement passed: step, composition, 68 induction and 33 fast-path obligations, public wrappers; six semantic mutations replayed; missing step rejected');
+fs.writeFileSync(reportPath,JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,wrapperMutations,missing_step_rejected:true,hashes},null,2)+'\n');
+console.log('Universal division refinement passed: step, composition, 68 induction and 33 fast-path obligations, public wrappers; seven semantic mutations replayed; missing step rejected');

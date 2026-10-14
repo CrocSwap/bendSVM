@@ -1,0 +1,19 @@
+{
+  "templates/prove-div16-first-two.py": "build/sbf-division-scout/prove-div16-first-two.py",
+  "templates/prove-div16-steps-three-four.py": "build/sbf-division-scout/prove-div16-steps-three-four.py",
+  "templates/prove-div16-rest.py": "build/sbf-division-scout/prove-div16-rest.py",
+  "templates/check-div16-frame.py": "build/sbf-division-scout/check-div16-frame.py",
+  "templates/compose-div16-frame.py": "build/sbf-division-scout/compose-div16-frame.py",
+  "templates/check-caller-calls.py": "build/sbf-division-scout/check-caller-calls.py",
+  "templates/check-call-routes.py": "build/sbf-division-scout/check-call-routes.py",
+  "templates/check-loop-bridge.py": "build/sbf-division-scout/check-loop-bridge.py",
+  "templates/check-entry.py": "build/sbf-division-scout/check-entry.py",
+  "templates/link-denominator.py": "build/sbf-division-scout/link-denominator.py",
+  "templates/link-caller-entry.py": "build/sbf-division-scout/link-caller-entry.py",
+  "templates/instantiate-caller-summary.py": "build/sbf-division-scout/instantiate-caller-summary.py",
+  "templates/test-div16-faults.py": "build/sbf-division-scout/test-div16-faults.py",
+  "templates/replay-div16-faults.py": "build/sbf-division-scout/replay-div16-faults.py",
+  "templates/replay-caller.py": "build/sbf-division-scout/replay-caller.py",
+  "templates/check-native-quotient.py": "build/sbf-division-scout/check-native-quotient.py",
+  "templates/check-small-quotient.py": "build/sbf-division-scout/check-small-quotient.py"
+}

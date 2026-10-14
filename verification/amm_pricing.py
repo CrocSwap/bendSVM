@@ -120,8 +120,9 @@ def prove(program_path,math_path,wide_path):
     program=json.load(open(program_path));wide=json.load(open(wide_path))
     bindings=[bind_floor(program,wide,root) for root in ['floor','ceil']]
     arithmetic=wide_proof(math_path,wide_path)
+    assert len(arithmetic.get('smallDivision',[]))==15 and all(c['result']=='unsat' for c in arithmetic['smallDivision']), 'Small-divisor proof failed'
     assert len(arithmetic['fastPaths'])==33 and all(c['result']=='unsat' for c in arithmetic['fastPaths']), 'Wide fast-path proof failed'
-    assert len(arithmetic['claims'])==12 and all(c['result']=='unsat' for c in arithmetic['claims']), 'Wide proof failed'
+    assert [c['claim'] for c in arithmetic['claims']]==['wide-quotient-overflow-threshold', 'integer-floor-ceiling', 'wide-divide-wrapper', 'wide-zero-precedence', 'wide-overflow-error', 'wide-divisor-one', 'wide-native64-route', 'wide-small32-route', 'wide-div64-route', 'mul-div-composition', 'floor-wrapper', 'ceil-wrapper'] and all(c['result']=='unsat' for c in arithmetic['claims']), 'Wide proof failed: '+str({'count':len(arithmetic['claims']),'failures':[(c['claim'],c['result'],c.get('reason')) for c in arithmetic['claims'] if c['result']!='unsat']})
     helpers=checked_arithmetic(program)
     assert all(c['result']=='unsat' for c in helpers),'Imported add/sub proof failed'
     return {'bindings':bindings,'wide':arithmetic,'checkedArithmetic':helpers,'claims':quotes(program)+economics()}

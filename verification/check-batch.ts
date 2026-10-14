@@ -119,7 +119,7 @@ for(const [name,before,after] of [
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 }
 const files=['examples/batch/batch.bend','sdk/math.bend','sdk/context.bend','sdk/buffer.bend','sdk/fold.bend','sdk/iteration.bend','sdk/effects.bend','sdk/issuance.bend','sdk/effect-buffer.bend',
-  'verification/model.ts','verification/prove.py','verification/binding.py','verification/batch.py','verification/check-batch.ts','verification/reference.ts','compiler/backend.ts','compiler/primitives.ts',
+  'verification/model.ts','verification/prove.py','verification/binding.py','verification/batch.py','verification/check-batch.ts','verification/reference.ts','compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts',
   'build/batch-arithmetic-refinement.json','build/batch-arithmetic.model.json'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/batch-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive:positive.report,mutations,bindingNegatives,uncoveredProtocolRejected:true,hashes},null,2)+'\n');

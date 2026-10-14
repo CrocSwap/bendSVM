@@ -1,0 +1,70 @@
+[
+  {
+    "script": "build/sbf-division-scout/check-payout-entry.py",
+    "report": "build/sbf-division-scout/payout-entry-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-payout-guards.py",
+    "report": "build/sbf-division-scout/payout-guards-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-payout-frame.py",
+    "report": "build/sbf-division-scout/payout-frame-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-authorization.py",
+    "report": "build/sbf-division-scout/authorization-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-authorization-frame.py",
+    "report": "build/sbf-division-scout/authorization-frame-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-authorization-payout-frame.py",
+    "report": "build/sbf-division-scout/authorization-payout-frame-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-native-dispatch.py",
+    "report": "build/sbf-division-scout/native-dispatch-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-claim-output.py",
+    "report": "build/sbf-division-scout/claim-output-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-claim-output-frame.py",
+    "report": "build/sbf-division-scout/claim-output-frame-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-rejection-output.py",
+    "report": "build/sbf-division-scout/rejection-output-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-initialize-output.py",
+    "report": "build/sbf-division-scout/initialize-output-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/link-claim-output.py",
+    "report": "build/sbf-division-scout/claim-output-composition-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-memset-wrapper.py",
+    "report": "build/sbf-division-scout/memset-wrapper-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/check-output-layout.py",
+    "report": "build/sbf-division-scout/output-layout-report.json"
+  },
+  {
+    "script": "build/sbf-authorization-layout/layout.py",
+    "report": "build/sbf-authorization-layout/layout-report.json"
+  },
+  {
+    "script": "build/sbf-dispatch-layout/layout.py",
+    "report": "build/sbf-dispatch-layout/layout-report.json"
+  },
+  {
+    "script": "build/sbf-division-scout/replay-native-dispatch.py",
+    "report": null
+  }
+]

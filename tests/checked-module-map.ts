@@ -1,0 +1,55 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {checkedProgram} from '../compiler/backend.ts';
+
+const dir=fs.mkdtempSync('build/checked-module-map-');
+const real=(p:string)=>fs.realpathSync(p);
+const write=(name:string,text:string)=>{
+  const file=path.join(dir,name);fs.mkdirSync(path.dirname(file),{recursive:true});
+  fs.writeFileSync(file,text);return file;
+};
+write('lib/a.bend','import Base\n\ndef value(x: U32) -> U32:\n  U32.add(x, 1)\n');
+write('lib/b.bend','import ./a.bend as A\n\ndef value(x: U32) -> U32:\n  A.value(x)\n');
+const entry=write('app.bend','import ./lib/b.bend as B\n\ndef process(x: U32) -> U32:\n  B.value(x)\n');
+const first=await checkedProgram(entry);
+assert.deepEqual(first.modules.map(m=>m.file),first.files);
+assert.equal(new Set(first.files).size,first.files.length);
+for(const m of first.modules)assert.equal(m.file,real(m.file));
+const namespaces=new Map(first.modules.map(m=>[m.file,m.namespace]));
+assert.equal(namespaces.get(real(entry)),'');
+assert.equal(namespaces.get(real(path.join(dir,'lib/a.bend'))),'lib/a');
+assert.equal(namespaces.get(real(path.join(dir,'lib/b.bend'))),'lib/b');
+assert.ok(first.book.tlds['lib/a.value']);
+assert.ok(first.book.tlds['lib/b.value']);
+assert.ok(first.book.tlds.process);
+assert.deepEqual(first.modules.find(m=>m.namespace==='lib/a')?.declarations,['lib/a.value']);
+assert.deepEqual(first.modules.find(m=>m.namespace==='lib/b')?.declarations,['lib/b.value']);
+assert.deepEqual(first.modules.find(m=>m.file===real(entry))?.declarations,['process']);
+fs.writeFileSync(entry,fs.readFileSync(entry,'utf8').replace('as B','as DifferentAlias').replace('B.value','DifferentAlias.value'));
+assert.deepEqual((await checkedProgram(entry)).modules,first.modules,'local import aliases do not change resolved namespaces');
+const nested=write('nested/app.bend','import ../lib/b.bend as B\n\ndef process(x: U32) -> U32:\n  B.value(x)\n');
+const relocated=await checkedProgram(nested);
+assert.equal(relocated.modules.find(m=>m.file===real(path.join(dir,'lib/a.bend')))?.namespace,'../lib/a');
+assert.ok(relocated.book.tlds['../lib/a.value']);
+fs.symlinkSync('a.bend',path.join(dir,'lib/alias.bend'));
+const conflicting=write('conflicting.bend','import ./lib/a.bend as A\nimport ./lib/alias.bend as B\n\ndef process(x: U32) -> U32:\n  A.value(x)\n');
+await assert.rejects(()=>checkedProgram(conflicting),/one namespace per file/);
+write('proof/LAWS.bend','import Base\n\nlaw same:\n  {1 == 1 : U32}\n');
+const proof=write('proof/PROOF.bend','import Base\n\ndef process(x: U32) -> U32:\n  x\n');
+await assert.rejects(()=>checkedProgram(proof),/must import the adjacent LAWS/);
+fs.writeFileSync(proof,'import ./LAWS.bend as L\n\ndef process(x: U32) -> U32:\n  x\n');
+await assert.rejects(()=>checkedProgram(proof),/Unresolved proof holes or open laws/);
+fs.writeFileSync(proof,'import ./LAWS.bend as L\n\ndef process(x: U32) -> U32:\n  x\n\ndef L.same():\n  {==}\n');
+const proven=await checkedProgram(proof);
+assert.ok(proven.modules.some(m=>m.file===real(path.join(dir,'proof/LAWS.bend'))&&m.namespace==='LAWS'));
+assert.ok(proven.modules.find(m=>m.namespace==='LAWS')?.declarations.includes('LAWS.same'));
+assert.ok(proven.modules.find(m=>m.file===real(proof))?.declarations.includes('LAWS.same'), 'law definition and proof both retain origin events');
+const sha = await checkedProgram('tests/sha256-reference/PROOF.bend');
+for (const module of ['sha256-reference', 'buffer', 'iteration']) {
+  const loaded = sha.modules.find(m => m.file === real(`sdk/${module}.bend`));
+  assert.equal(loaded?.namespace, `../../sdk/${module}`);
+}
+assert.ok(sha.book.tlds['../../sdk/sha256-reference.hash_short']);
+fs.writeFileSync(path.join(dir,'report.json'),JSON.stringify({scope:'checked loader module metadata only; no source-byte provenance or specialization',modules:first.modules,relocated:relocated.modules,shaModules:sha.modules,refusals:3},null,2)+'\n');
+console.log(`Checked module map: nested imports, aliases, realpaths and three proof/namespace refusals; ${dir}/report.json`);

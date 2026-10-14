@@ -9,7 +9,7 @@ const {checkedBook}=await import('../compiler/backend.ts');
 const B=await import('../.deps/bend/bend2/bend.ts');
 fs.mkdirSync('build',{recursive:true});
 const mathPath='build/vesting-process.math.model.json',widePath='build/vesting-process.wide.model.json';
-fs.writeFileSync(mathPath,JSON.stringify(await model('sdk/math.bend',['mul32_parts','mul32','mul_parts','mul']))+'\n');
+fs.writeFileSync(mathPath,JSON.stringify(await model('sdk/math.bend',['mul32_parts','mul32','mul_parts','mul','div_step','div2','div4','div8','div16','div32','div64','divmod','div','mod']))+'\n');
 fs.writeFileSync(widePath,JSON.stringify(await model('sdk/wide.bend',['add','product_parts','product','divide','mul_div','floor','ceil']))+'\n');
 async function run(source:string,stem:string,status:number) {
   fs.writeFileSync(stem+'.model.json',JSON.stringify(await model(source,['process']))+'\n');
@@ -18,6 +18,9 @@ async function run(source:string,stem:string,status:number) {
   const report=JSON.parse(result.stdout);
   assert.equal(report.binding.result,'checked');
   assert.ok(report.payout.claims.every((c:any)=>c.result==='unsat'));
+  assert.equal(report.wide.smallDivision.length,15);
+  assert.ok(report.wide.smallDivision.every((c:any)=>c.result==='unsat'));
+  assert.deepEqual(report.wide.claims.map((c:any)=>c.claim),["wide-quotient-overflow-threshold","integer-floor-ceiling","wide-divide-wrapper","wide-zero-precedence","wide-overflow-error","wide-divisor-one","wide-native64-route","wide-small32-route","wide-div64-route","mul-div-composition","floor-wrapper","ceil-wrapper"]);
   assert.equal(report.wide.fastPaths.length,33);assert.ok(report.wide.fastPaths.every((c:any)=>c.result==='unsat'));
   assert.equal(report.wide.claims.length,12);assert.ok(report.wide.claims.every((c:any)=>c.result==='unsat'));
   assert.ok(report.claims.every((c:any)=>['sat','unsat'].includes(c.result)));
@@ -68,7 +71,7 @@ for(const [name,before,after,target,signed] of [
     mutations.push({name,...report,concreteWitness:{total:'100',start:'0',end:'10',claimed:'0',now:'5',signed,actorEqualsBeneficiary:true,bend,mathematical}});
   } finally {fs.rmSync(dir,{recursive:true,force:true});}
 }
-const files=['examples/vesting/vesting.bend','sdk/math.bend','sdk/wide.bend','sdk/context.bend','sdk/effects.bend','compiler/primitives.ts','verification/model.ts','verification/prove.py','verification/division_step.py','verification/division_loop.py','verification/multiplication.py','verification/wide.py','verification/vesting.py','verification/vesting_process.py','verification/check-vesting-process.ts'];
+const files=['examples/vesting/vesting.bend','sdk/math.bend','sdk/wide.bend','sdk/context.bend','sdk/effects.bend','compiler/primitives.ts','verification/model.ts','verification/prove.py','verification/division_step.py','verification/division_loop.py','verification/multiplication.py','verification/wide.py','verification/wide_division.py','verification/small_division.py','verification/vesting.py','verification/vesting_process.py','verification/check-vesting-process.ts'];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/vesting-process.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,importMismatchRejected:true,hashes},null,2)+'\n');
 console.log('Vesting entrypoint refinement passed: bound arithmetic imports, entitlement and four dispatch cases; four mutations have concrete Bend witnesses');

@@ -119,9 +119,10 @@ def entrypoint(program):
 def prove(program_path,math_path,wide_path):
     program=json.load(open(program_path));wide=json.load(open(wide_path))
     report={'binding':bind_floor(program,wide),'payout':payout(program_path),'wide':wide_proof(math_path,wide_path),'claims':[]}
+    if len(report['wide'].get('smallDivision',[]))!=15 or not all(c['result']=='unsat' for c in report['wide']['smallDivision']):return report
     if not all(v['result']=='unsat' for v in report['payout']['claims']):return report
     if len(report['wide']['fastPaths'])!=33 or not all(v['result']=='unsat' for v in report['wide']['fastPaths']):return report
-    if len(report['wide']['claims'])!=12 or not all(v['result']=='unsat' for v in report['wide']['claims']):return report
+    if [c['claim'] for c in report['wide']['claims']]!=['wide-quotient-overflow-threshold', 'integer-floor-ceiling', 'wide-divide-wrapper', 'wide-zero-precedence', 'wide-overflow-error', 'wide-divisor-one', 'wide-native64-route', 'wide-small32-route', 'wide-div64-route', 'mul-div-composition', 'floor-wrapper', 'ceil-wrapper'] or not all(v['result']=='unsat' for v in report['wide']['claims']):return report
     report['claims']=entitlement(program)
     if all(v['result']=='unsat' for v in report['claims']):report['claims']+=entrypoint(program)
     return report

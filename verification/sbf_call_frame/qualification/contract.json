@@ -1,0 +1,1253 @@
+{
+  "layout-report.json": {
+    "passed": true,
+    "endToEndVerified": false,
+    "claims": [
+      {
+        "name": "frame-addresses-do-not-wrap",
+        "result": "unsat"
+      },
+      {
+        "name": "caller-output-contained",
+        "result": "unsat"
+      },
+      {
+        "name": "ancestor-output-before-callee-frame",
+        "result": "unsat"
+      },
+      {
+        "name": "callee-store-cannot-touch-ancestor-output",
+        "result": "unsat"
+      },
+      {
+        "name": "native-dispatch-output-disjoint",
+        "result": "unsat"
+      },
+      {
+        "name": "callee-local-store-preserves-output",
+        "result": "unsat"
+      }
+    ],
+    "controls": [
+      {
+        "name": "reused-caller-frame",
+        "result": "sat"
+      },
+      {
+        "name": "unrestricted-callee-write",
+        "result": "sat"
+      }
+    ],
+    "dependency": {
+      "name": "solana-sbpf",
+      "version": "0.11.1",
+      "registryChecksum": "474a2d95dc819898ded08d24f29642d02189d3e1497bbb442a92a3997b7eb55f"
+    },
+    "scope": "Conditional fixed-frame BV64 layout and single-byte store frame theorem for up to64frames with4096-byte frames, optional4096-byte gaps and explicit address headroom. Pinned interpreter snippets are evidence of the intended model, not a Rust/JIT semantics proof. Actual VM frame setup, config, valid mapping and all callee writes staying within the modeled local frame remain assumptions. Ancestor output pointers intentionally passed to a callee are separate authorized accesses. No full handler memory theorem."
+  },
+  "footprint-report.json": {
+    "controls": [
+      {
+        "name": "store-past-local-frame",
+        "reason": "access bounds",
+        "at": 23632
+      },
+      {
+        "name": "store-past-output",
+        "reason": "access bounds",
+        "at": 25384
+      },
+      {
+        "name": "read-uninitialized-local",
+        "reason": "initialized stack read",
+        "at": 23832
+      },
+      {
+        "name": "wrong-nested-target",
+        "reason": "nested target",
+        "at": 23616
+      }
+    ],
+    "passed": true,
+    "endToEndVerified": false,
+    "leaf": {
+      "instructions": 230,
+      "accesses": [
+        {
+          "at": 23632,
+          "kind": "write",
+          "region": "stack",
+          "offset": -40,
+          "bytes": 8
+        },
+        {
+          "at": 23640,
+          "kind": "read",
+          "region": "input",
+          "offset": 20,
+          "bytes": 4
+        },
+        {
+          "at": 23672,
+          "kind": "read",
+          "region": "input",
+          "offset": 24,
+          "bytes": 4
+        },
+        {
+          "at": 23712,
+          "kind": "read",
+          "region": "input",
+          "offset": 12,
+          "bytes": 4
+        },
+        {
+          "at": 23768,
+          "kind": "read",
+          "region": "input",
+          "offset": 36,
+          "bytes": 4
+        },
+        {
+          "at": 23792,
+          "kind": "write",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 23832,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 23880,
+          "kind": "read",
+          "region": "input",
+          "offset": 32,
+          "bytes": 4
+        },
+        {
+          "at": 23888,
+          "kind": "write",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 23944,
+          "kind": "read",
+          "region": "input",
+          "offset": 8,
+          "bytes": 4
+        },
+        {
+          "at": 23984,
+          "kind": "read",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 24008,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24056,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24064,
+          "kind": "write",
+          "region": "stack",
+          "offset": -24,
+          "bytes": 8
+        },
+        {
+          "at": 24184,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24272,
+          "kind": "read",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 24360,
+          "kind": "read",
+          "region": "stack",
+          "offset": -24,
+          "bytes": 8
+        },
+        {
+          "at": 24392,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24448,
+          "kind": "write",
+          "region": "stack",
+          "offset": -32,
+          "bytes": 8
+        },
+        {
+          "at": 24464,
+          "kind": "write",
+          "region": "stack",
+          "offset": -32,
+          "bytes": 8
+        },
+        {
+          "at": 24472,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24768,
+          "kind": "read",
+          "region": "stack",
+          "offset": -24,
+          "bytes": 8
+        },
+        {
+          "at": 24784,
+          "kind": "write",
+          "region": "stack",
+          "offset": -24,
+          "bytes": 8
+        },
+        {
+          "at": 24792,
+          "kind": "read",
+          "region": "stack",
+          "offset": -32,
+          "bytes": 8
+        },
+        {
+          "at": 24840,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24888,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 24904,
+          "kind": "read",
+          "region": "stack",
+          "offset": -24,
+          "bytes": 8
+        },
+        {
+          "at": 25040,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 25128,
+          "kind": "read",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 25216,
+          "kind": "read",
+          "region": "stack",
+          "offset": -32,
+          "bytes": 8
+        },
+        {
+          "at": 25280,
+          "kind": "read",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 25304,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 25328,
+          "kind": "read",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 25360,
+          "kind": "read",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 8
+        },
+        {
+          "at": 25368,
+          "kind": "read",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 8
+        },
+        {
+          "at": 25376,
+          "kind": "read",
+          "region": "stack",
+          "offset": -40,
+          "bytes": 8
+        },
+        {
+          "at": 25384,
+          "kind": "write",
+          "region": "output",
+          "offset": 36,
+          "bytes": 4
+        },
+        {
+          "at": 25392,
+          "kind": "write",
+          "region": "output",
+          "offset": 32,
+          "bytes": 4
+        },
+        {
+          "at": 25400,
+          "kind": "write",
+          "region": "output",
+          "offset": 24,
+          "bytes": 4
+        },
+        {
+          "at": 25408,
+          "kind": "write",
+          "region": "output",
+          "offset": 20,
+          "bytes": 4
+        },
+        {
+          "at": 25416,
+          "kind": "write",
+          "region": "output",
+          "offset": 8,
+          "bytes": 4
+        },
+        {
+          "at": 25456,
+          "kind": "write",
+          "region": "output",
+          "offset": 12,
+          "bytes": 4
+        },
+        {
+          "at": 25464,
+          "kind": "write",
+          "region": "output",
+          "offset": 28,
+          "bytes": 4
+        },
+        {
+          "at": 25472,
+          "kind": "write",
+          "region": "output",
+          "offset": 16,
+          "bytes": 4
+        },
+        {
+          "at": 25480,
+          "kind": "write",
+          "region": "output",
+          "offset": 0,
+          "bytes": 8
+        }
+      ],
+      "calls": []
+    },
+    "parent": {
+      "instructions": 676,
+      "accesses": [
+        {
+          "at": 18136,
+          "kind": "write",
+          "region": "stack",
+          "offset": -80,
+          "bytes": 8
+        },
+        {
+          "at": 18144,
+          "kind": "read",
+          "region": "input",
+          "offset": 20,
+          "bytes": 4
+        },
+        {
+          "at": 18176,
+          "kind": "read",
+          "region": "input",
+          "offset": 24,
+          "bytes": 4
+        },
+        {
+          "at": 18216,
+          "kind": "read",
+          "region": "input",
+          "offset": 12,
+          "bytes": 4
+        },
+        {
+          "at": 18272,
+          "kind": "read",
+          "region": "input",
+          "offset": 36,
+          "bytes": 4
+        },
+        {
+          "at": 18296,
+          "kind": "write",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 18336,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 18384,
+          "kind": "read",
+          "region": "input",
+          "offset": 32,
+          "bytes": 4
+        },
+        {
+          "at": 18392,
+          "kind": "write",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 18448,
+          "kind": "read",
+          "region": "input",
+          "offset": 8,
+          "bytes": 4
+        },
+        {
+          "at": 18488,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 18512,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 18536,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 18568,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 18576,
+          "kind": "write",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 18696,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 18784,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 18872,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 18904,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 18928,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 18952,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 18984,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 19128,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 19216,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 19296,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 19312,
+          "kind": "write",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 19352,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 19376,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 19400,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 19424,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 19440,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 19448,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 19472,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 19608,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 19696,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 19784,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 19816,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 19840,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 19864,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 19896,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20040,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20128,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 20208,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 20240,
+          "kind": "write",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 20280,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20312,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 20328,
+          "kind": "write",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 20344,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20496,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20584,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 20672,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 20704,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 20728,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20768,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 20784,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 20792,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 20800,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 20944,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21104,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 21120,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 21168,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21216,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21368,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21456,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 21536,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 21568,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 21608,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21640,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 21656,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 21672,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21824,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 21912,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22000,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 22024,
+          "kind": "write",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 22048,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22072,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 22096,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22112,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 22128,
+          "kind": "write",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 22144,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 22288,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 22376,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22464,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 22496,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 22504,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22544,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22568,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 22584,
+          "kind": "write",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 22592,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 22816,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22896,
+          "kind": "read",
+          "region": "stack",
+          "offset": -64,
+          "bytes": 8
+        },
+        {
+          "at": 22912,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 22944,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 22984,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 23152,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 23240,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 23328,
+          "kind": "read",
+          "region": "stack",
+          "offset": -72,
+          "bytes": 8
+        },
+        {
+          "at": 23392,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 23416,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 23440,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 23472,
+          "kind": "read",
+          "region": "stack",
+          "offset": -48,
+          "bytes": 8
+        },
+        {
+          "at": 23480,
+          "kind": "read",
+          "region": "stack",
+          "offset": -56,
+          "bytes": 8
+        },
+        {
+          "at": 23488,
+          "kind": "write",
+          "region": "stack",
+          "offset": -4,
+          "bytes": 4
+        },
+        {
+          "at": 23496,
+          "kind": "write",
+          "region": "stack",
+          "offset": -8,
+          "bytes": 4
+        },
+        {
+          "at": 23504,
+          "kind": "write",
+          "region": "stack",
+          "offset": -16,
+          "bytes": 4
+        },
+        {
+          "at": 23512,
+          "kind": "write",
+          "region": "stack",
+          "offset": -20,
+          "bytes": 4
+        },
+        {
+          "at": 23520,
+          "kind": "write",
+          "region": "stack",
+          "offset": -32,
+          "bytes": 4
+        },
+        {
+          "at": 23560,
+          "kind": "write",
+          "region": "stack",
+          "offset": -28,
+          "bytes": 4
+        },
+        {
+          "at": 23568,
+          "kind": "write",
+          "region": "stack",
+          "offset": -12,
+          "bytes": 4
+        },
+        {
+          "at": 23576,
+          "kind": "write",
+          "region": "stack",
+          "offset": -24,
+          "bytes": 4
+        },
+        {
+          "at": 23584,
+          "kind": "write",
+          "region": "stack",
+          "offset": -40,
+          "bytes": 8
+        },
+        {
+          "at": 23608,
+          "kind": "read",
+          "region": "stack",
+          "offset": -80,
+          "bytes": 8
+        }
+      ],
+      "calls": [
+        {
+          "at": 23616,
+          "target": 23632,
+          "output": [
+            "output",
+            0
+          ],
+          "input": [
+            "stack",
+            -40
+          ]
+        }
+      ]
+    },
+    "scope": "Independent conservative acyclic pointer-provenance and complete memory-footprint analysis of recorded div16/div4 bytes. Every syntactically reachable load/store checked, regardless of scalar branch feasibility. Callee local frames and input/output extents remain assumed valid/disjoint; nested40-byte arguments bound. This is a trusted abstract interpreter, not a VM semantics or functional arithmetic proof."
+  },
+  "connection-report.json": {
+    "passed": true,
+    "endToEndVerified": false,
+    "claims": [
+      {
+        "route": "full",
+        "call": 0,
+        "at": 9600,
+        "result": "unsat"
+      },
+      {
+        "route": "full",
+        "call": 1,
+        "at": 9640,
+        "result": "unsat"
+      },
+      {
+        "route": "full",
+        "call": 2,
+        "at": 9680,
+        "result": "unsat"
+      },
+      {
+        "route": "full",
+        "call": 3,
+        "at": 9712,
+        "result": "unsat"
+      }
+    ],
+    "protectedOffsets": [
+      -352,
+      -344,
+      -304,
+      -296,
+      -288,
+      -280,
+      -272,
+      -256,
+      -248,
+      -240,
+      -232,
+      -216,
+      -208,
+      -200,
+      -192,
+      -184,
+      -176
+    ],
+    "control": {
+      "name": "output-bound-to-pending-field",
+      "result": "sat"
+    },
+    "scope": "All byte ranges of actual div16/div4 writes mapped to fixed call frames or the designated caller output; four recorded restoring call instances preserve all seventeen pending output, payout and authorization words. Conditional on verified abstract footprints, fixed-frame VM/CALL mapping, valid allocations and the existing caller bindings. Disjoint write ranges support finite store-sequence framing; not a proof of VM/JIT semantics or whole-handler memory safety."
+  }
+}

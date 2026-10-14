@@ -1,0 +1,22 @@
+{
+  "dcg": {
+    "repository": "/Users/colkitt/sith/toys/crypto/durable-compute-graph",
+    "commit": "40fc9ad6fb1e14b63f65e72b12da6dca5cc0d4b1",
+    "workingTreeClean": true,
+    "documents": {
+      "docs/spec/settlement-pilot-contract.md": "ed3767f2963e7d29c73dff9b8eeab9372a3ca3c76271ff396dd8f3fdf8e9b7c6",
+      "docs/spec/referee-laws.md": "9f01221cb62cb19705221dabe95acf86447fc837d1e2bfb0154377797535789e",
+      "docs/spec/dispute-economics-v2.md": "532d58e4b598029808bc30b14e5f3ff34f74eda53822e8b06037fda47c368372"
+    },
+    "currentRevision8Sources": {
+      "crates/dcg-program/src/unified/challenge.rs": "b60d20e565b254650cf1fbc5ae8aaeb9782ed973fbb9cb68762cf962fe7ab708",
+      "crates/dcg-program/src/unified/document.rs": "ebe04b041ab0208f4f35a77ee0eb63e1eb3ab8f0c59ad37b14bf1d269d7be43c",
+      "crates/dcg-program/src/unified/bond.rs": "f434bcc74ef35758bd36dbae27ff47ab04463db1105ae160bba0d895193849ac",
+      "crates/dcg-program/src/unified/result.rs": "60888949c06ff34ed659775785d54dbf74a0e14bfa3f47e69e0658a31e69a618",
+      "crates/dcg-program/src/unified/terms.rs": "db83a80b938a5910fd1e192ab7c0efc53297d97d017d0af5bbb87b7566ee78da",
+      "tests/golden/dcg/unified_v8/record_layouts_v1.tsv": "bbeb702b6f2100990ac73b209da612d09463d27ada5420d7f01a0959b415add3",
+      "tests/golden/dcg/unified_v8/sizes_v1.tsv": "0c88f2a9b4023b8cdac429eb7b0e3cc48fe22fc3e16713ec25fed3ae208625c1"
+    },
+    "revision9Status": "proposal-only in dispute-economics-v2.md; current handler and golden layouts above remain revision 8 and contain no DPA1"
+  }
+}

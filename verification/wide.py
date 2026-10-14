@@ -1,10 +1,15 @@
 """Wide API refinement, conditional on checked product and division-loop proofs."""
+if not __debug__:
+    raise RuntimeError('Wide refinement requires Python assertions enabled')
+
 import json
 import sys
 import z3 as z
 from prove import Evaluator
 from division_step import prove_program
-from division_loop import obligation, wide_fast_paths
+from division_loop import obligation
+from wide_division import divide, bind_callees, integer_bridge
+from small_division import prove_small
 from multiplication import prove as multiplication, word, value, wide_word, wide_value
 
 
@@ -15,50 +20,6 @@ def ctor(e,name,*args):
 
 def division_result(e,q,r):
     return ctor(e,'math.DivOk',ctor(e,'math.Division',word(e,'math.U64',q),word(e,'math.U64',r)))
-
-
-def divide(program):
-    low,high,d=z.BitVecs('low high d',64)
-    valid=z.And(d!=0,z.ULT(high,d))
-    direct=z.And(valid,d==1)
-    active=z.And(valid,d!=1)
-    prefix=z.Extract(63,32,low)
-    short=z.And(active,high==0,z.Or(prefix==0,z.Extract(63,32,d)!=0))
-    full=z.And(active,z.Not(z.And(high==0,z.Or(prefix==0,z.Extract(63,32,d)!=0))))
-    # The quotient is interpreted over the exact 128-bit dividend. Its fit
-    # follows from high<d, established by the overflow-threshold lemma.
-    n=z.Concat(high,low);denominator=z.ZeroExt(64,d)
-    q=z.Extract(63,0,z.UDiv(n,denominator))
-    r=z.Extract(63,0,z.URem(n,denominator))
-    class Summary(Evaluator):
-        def __init__(self,p):super().__init__(p);self.calls=[]
-        def call(self,name,args,path):
-            if name not in ['math.div32','math.div64']:return super().call(name,args,path)
-            state=self.sort('math.DivState')
-            actual=[value(self,'math.U64',state.accessor(0,i)(args[0])) for i in range(3)]
-            route=short if name=='math.div32' else full
-            expected=([z.Concat(z.Extract(31,0,low),z.BitVecVal(0,32)),
-                z.ZeroExt(32,prefix),d] if name=='math.div32' else [low,high,d])
-            self.calls.append((name,z.And(path==route,z.Implies(path,
-                z.And(*[a==b for a,b in zip(actual,expected)],z.ULT(actual[1],d))))))
-            return ctor(self,'math.DivState',word(self,'math.U64',q),word(self,'math.U64',r),word(self,'math.U64',d))
-    e=Summary(program)
-    actual=e.call('divide',[wide_word(e,'U128',z.Concat(high,low)),word(e,'math.U64',d)],z.BoolVal(True))
-    expected=z.If(d==0,ctor(e,'math.DivErr',z.BitVecVal(3,32)),
-        z.If(z.UGE(high,d),ctor(e,'math.DivErr',z.BitVecVal(1,32)),division_result(e,q,r)))
-    assert sorted(name for name,_ in e.calls)==['math.div32','math.div64']
-    routes=z.And(*[claim for _,claim in e.calls])
-    no_dead=z.And(*[z.Not(p) for p in e.dead])
-    reports=[obligation('wide-divide-wrapper',[],z.And(actual==expected,routes,no_dead),[low,high,d])]
-    for name,conditions in [
-        ('wide-zero-precedence',[d==0]),
-        ('wide-overflow-error',[d!=0,z.UGE(high,d)]),
-        ('wide-divisor-one',[direct]),
-        ('wide-div32-route',[short]),
-        ('wide-div64-route',[full]),
-        ('wide-div64-nonzero-high',[full,high!=0])]:
-        reports.append(obligation(name,conditions,z.And(actual==expected,routes,no_dead),[low,high,d]))
-    return reports
 
 
 def overflow_threshold():
@@ -120,10 +81,16 @@ def prove(math_path,wide_path):
     program=json.load(open(wide_path))
     report={'multiplication':products,'claims':[]}
     if not all(c['result']=='unsat' for c in products['claims']):return report
-    loop=prove_program(program,'math.',public=False);report['loop']=loop
+    math_program=json.load(open(math_path))
+    report['calleeBindings']=bind_callees(program,math_program)
+    loop=prove_program(math_program);report['loop']=loop
     if loop['step']['result']!='unsat' or not all(c['result']=='unsat' for c in loop.get('induction',[])):return report
-    report['fastPaths']=wide_fast_paths()
-    if not all(c['result']=='unsat' for c in report['fastPaths']):return report
+    report['fastPaths']=loop.get('fastPaths',[])
+    if len(report['fastPaths'])!=33 or not all(c['result']=='unsat' for c in report['fastPaths']):return report
+    if [(c['claim'],c['result']) for c in loop.get('wrappers',[])]!=[(n,'unsat') for n in ['divmod','div','mod']]:return report
+    report['divisionBridge']=integer_bridge()
+    if len(report['divisionBridge'])!=9 or not all(c['result']=='unsat' for c in report['divisionBridge']):return report
+    report['smallDivision']=prove_small(program)
     report['claims']=[overflow_threshold(),rounding_identity()]
     if not all(c['result']=='unsat' for c in report['claims']):return report
     report['claims']+=divide(program)
@@ -135,4 +102,4 @@ def prove(math_path,wide_path):
 if __name__=='__main__':
     if z.get_version_string()!='5.1.0':raise RuntimeError('Requires Z3 5.1.0')
     report=prove(sys.argv[1],sys.argv[2]);print(json.dumps(report,indent=2))
-    sys.exit(0 if len(report['claims'])==12 and all(c['result']=='unsat' for c in report['claims']) else 1)
+    sys.exit(0 if len(report['claims'])==12 and len(report.get('smallDivision',[]))==15 and all(c['result']=='unsat' for c in report['claims']+report['smallDivision']) else 1)

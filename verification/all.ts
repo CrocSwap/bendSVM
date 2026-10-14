@@ -1,8 +1,39 @@
-import fs from 'node:fs';
-import assert from 'node:assert/strict';
-import crypto from 'node:crypto';
-import {spawnSync} from 'node:child_process';
-const checks=[
+import {runRefinementSuite, type RefinementCheck} from './suite.ts';
+const checks:RefinementCheck[]=[
+  ['modular-lowering','check-modular-lowering.ts','modular-lowering/fresh-receipt.json'],
+  ['ranked-lowering','check-ranked-lowering.ts','ranked-lowering/fresh-receipt.json'],
+  ['signed-lowering','check-signed-lowering.ts','signed-lowering/fresh-receipt.json'],
+  ['linear-width','check-linear-width.ts','linear-width/fresh-receipt.json'],
+  ['native-handlers','check-native-handlers.ts','native-handler-lowering/fresh-receipt.json'],
+  ['native-body','check-native-body.ts','native-body-lowering/fresh-receipt.json'],
+  ['sbf-product','check-sbf-product.ts','sbf-product/latest.json'],
+  ['sbf-division','check-sbf-division.ts','sbf-division/latest.json'],
+  ['sbf-quotient','check-sbf-quotient.ts','sbf-quotient/latest.json'],
+  ['sbf-handler','check-sbf-handler.ts','sbf-handler/latest.json'],
+  ['sbf-call-frame','check-sbf-call-frame.ts','sbf-call-frame/fresh-receipt.json'],
+  ['acyclic-lowering','check-acyclic-lowering.ts','acyclic-lowering/fresh-receipt.json'],
+  ['tagged-sum-routing','check-tagged-sum-routing.ts','tagged-sum-routing-refinement.json'],
+  ['account-key','check-account-key.ts','account-key-refinement.json'],
+  ['codec-primitives','check-codec-primitives.ts','codec-primitives-refinement.json'],
+  ['codec-structures','check-codec-structures.ts','codec-structures-refinement.json'],
+  ['cpi-validator','check-cpi-validator.ts','cpi-validator-refinement.json'],
+  ['cpi-composition','check-cpi-composition.ts','cpi-composition-refinement.json'],
+  ['token-frame','check-token-frame.ts','token-frame-refinement.json'],
+  ['token-validator','check-token-validator.ts','token-validator-refinement.json'],
+  ['adapter-contract','check-adapter-contract.ts','adapter-contract-refinement.json'],
+  ['multi-adapter-contract','check-multi-adapter-contract.ts','multi-adapter-contract-refinement.json'],
+  ['multi-token-frame','check-multi-token-frame.ts','multi-token-frame/fresh-receipt.json'],
+  ['multi-token-composition','check-multi-token-composition.ts','multi-token-composition/fresh-receipt.json'],
+  ['cpi-adapter','check-cpi-adapter-composition.ts','cpi-adapter-composition-refinement.json'],
+  ['cpi-caller','check-cpi-caller.ts','cpi-caller/fresh-receipt.json'],
+  ['collection-runtime','check-collection-runtime.ts','collection-runtime-refinement.json'],
+  ['collection-lifecycle','check-collection-lifecycle.ts','collection-lifecycle-refinement.json'],
+  ['collection-caller','check-collection-adapter-contract.ts','collection-adapter-contract-refinement.json'],
+  ['collection-composition','check-collection-composition.ts','collection-composition-refinement.json'],
+  ['collection-root','check-collection-root.ts','collection-root/fresh-receipt.json'],
+  ['loader','check-loader.ts','loader/fresh-receipt.json'],
+  ['collection-entry','check-collection-entry.ts','collection-entry/fresh-receipt.json'],
+  ['collection-memory','check-collection-memory.ts','collection-memory/fresh-receipt.json'],
   ['queue','check-queue.ts','queue-refinement.json'],
   ['collection','check-collection.ts','collection-refinement.json'],
   ['batch','check-batch.ts','batch-refinement.json'],
@@ -12,23 +43,19 @@ const checks=[
   ['arithmetic','check.ts','math-refinement.json'],
   ['division','check-division.ts','division-refinement.json'],
   ['multiplication','check-multiplication.ts','multiplication-refinement.json'],
+  ['native-arithmetic','check-native-arithmetic.ts','native-arithmetic-refinement.json'],
   ['wide','check-wide.ts','wide-refinement.json'],
   ['sqrt','check-sqrt.ts','sqrt-refinement.json'],
   ['amm-pricing','check-amm-pricing.ts','amm-pricing-refinement.json'],
   ['amm','check-amm.ts','amm-refinement.json'],
   ['vault','check-vault.ts','vault-refinement.json'],
+  ['vault-adapter','check-vault-adapter.ts','vault-adapter-bridge/fresh-receipt.json'],
+  ['issuance-adapter','check-issuance-adapter.ts','issuance-adapter/fresh-receipt.json'],
+  ['vault-c','check-vault-c.ts','vault-c-refinement.json'],
   ['vesting-payout','check-vesting.ts','vesting-refinement.json'],
   ['vesting-process','check-vesting-process.ts','vesting-process.json'],
   ['exchange','check-exchange.ts','exchange-refinement.json'],
 ];
-fs.mkdirSync('build',{recursive:true});
-const results=[];
-for(const [name,script,artifact] of checks) {
-  console.log(`Checking ${name}`);
-  const result=spawnSync(process.execPath,[`verification/${script}`],{stdio:'inherit'});
-  assert.equal(result.status,0,`${name} refinement failed`);
-  const file=`build/${artifact}`;
-  results.push({name,artifact:file,sha256:crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')});
-}
-fs.writeFileSync('build/refinement-suite.json',JSON.stringify({passed:true,checks:results},null,2)+'\n');
-console.log(`All ${checks.length} source refinement commands passed`);
+runRefinementSuite(checks.map(([name,script,artifact])=>[name,`verification/${script}`,`build/${artifact}`]),
+  'build/refinement-suite.json');
+console.log(`All ${checks.length} refinement and lowering bridge commands passed`);

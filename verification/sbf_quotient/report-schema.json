@@ -1,0 +1,4217 @@
+{
+  "div16-first-two-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "fault",
+      "inputHashes",
+      "instructions",
+      "interfaceLiveRegisters",
+      "interfaceStackReads",
+      "passed",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "instructions": [
+        56,
+        50
+      ],
+      "interfaceLiveRegisters": [
+        3,
+        4,
+        5,
+        6,
+        8,
+        10
+      ],
+      "interfaceStackReads": [
+        -64,
+        -56,
+        -48
+      ]
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/prove-div16-first-two.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "claims": [
+      {
+        "name": "first inline step quotient/remainder",
+        "result": "unsat"
+      },
+      {
+        "name": "first inline step retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "second inline step quotient/remainder",
+        "result": "unsat"
+      },
+      {
+        "name": "second inline step preserved divisor and previous quotient",
+        "result": "unsat"
+      },
+      {
+        "name": "actual first exit supplies every live second input",
+        "result": "unsat"
+      },
+      {
+        "name": "second input mathematical state matches first output",
+        "result": "unsat"
+      }
+    ],
+    "fault": {
+      "result": "sat"
+    }
+  },
+  "div16-steps-three-four-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "interfaces",
+      "passed",
+      "prerequisite",
+      "prerequisiteSha256",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "interfaces": [
+        {
+          "step": 3,
+          "liveRegisters": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10
+          ],
+          "instructions": 57
+        },
+        {
+          "step": 4,
+          "liveRegisters": [
+            2,
+            4,
+            5,
+            7,
+            8,
+            10
+          ],
+          "instructions": 55
+        }
+      ]
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/prove-div16-steps-three-four.py",
+      "stage:build/sbf-division-scout/prove-div16-first-two.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "prerequisite": "stage:build/sbf-division-scout/div16-first-two-report.json",
+    "claims": [
+      {
+        "name": "step 3 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 3 preserved divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 3 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 3 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 4 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 4 preserved divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 4 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 4 mathematical input composition",
+        "result": "unsat"
+      }
+    ]
+  },
+  "div16-rest-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "interfaces",
+      "passed",
+      "prerequisite",
+      "prerequisiteSha256",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "interfaces": [
+        {
+          "step": 5,
+          "liveRegisters": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10
+          ],
+          "instructions": 55
+        },
+        {
+          "step": 6,
+          "liveRegisters": [
+            0,
+            2,
+            4,
+            5,
+            7,
+            8,
+            10
+          ],
+          "instructions": 56
+        },
+        {
+          "step": 7,
+          "liveRegisters": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10
+          ],
+          "instructions": 51
+        },
+        {
+          "step": 8,
+          "liveRegisters": [
+            0,
+            2,
+            4,
+            5,
+            7,
+            8,
+            10
+          ],
+          "instructions": 56
+        },
+        {
+          "step": 9,
+          "liveRegisters": [
+            0,
+            2,
+            4,
+            5,
+            7,
+            9,
+            10
+          ],
+          "instructions": 58
+        },
+        {
+          "step": 10,
+          "liveRegisters": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            10
+          ],
+          "instructions": 55
+        },
+        {
+          "step": 11,
+          "liveRegisters": [
+            4,
+            5,
+            6,
+            7,
+            9,
+            10
+          ],
+          "instructions": 51
+        },
+        {
+          "step": 12,
+          "liveRegisters": [
+            2,
+            3,
+            4,
+            5,
+            6,
+            8,
+            10
+          ],
+          "instructions": 58
+        }
+      ]
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/prove-div16-rest.py",
+      "stage:build/sbf-division-scout/prove-div16-steps-three-four.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "prerequisite": "stage:build/sbf-division-scout/div16-steps-three-four-report.json",
+    "claims": [
+      {
+        "name": "step 5 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 5 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 5 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 5 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 6 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 6 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 6 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 6 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 7 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 7 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 7 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 7 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 8 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 8 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 8 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 8 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 9 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 9 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 9 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 9 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 10 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 10 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 10 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 10 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 11 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 11 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 11 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 11 mathematical input composition",
+        "result": "unsat"
+      },
+      {
+        "name": "step 12 quotient remainder guard",
+        "result": "unsat"
+      },
+      {
+        "name": "step 12 retained divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "step 12 actual live registers and complete memory",
+        "result": "unsat"
+      },
+      {
+        "name": "step 12 mathematical input composition",
+        "result": "unsat"
+      }
+    ]
+  },
+  "div16-frame-report.json": {
+    "keys": [
+      "calleeTarget",
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "fault",
+      "inputHashes",
+      "instructions",
+      "passed",
+      "pointerInterface",
+      "refusals",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "pointerInterface": true,
+      "calleeTarget": 23632,
+      "instructions": 16,
+      "refusals": [
+        "partial write invalidates64slot",
+        "word past frame",
+        "pointer past frame"
+      ]
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/check-div16-frame.py",
+      "stage:build/sbf-division-scout/div16-frame-model.py",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py",
+      "stage:build/sbf-slice-probe/vesting.so"
+    ],
+    "claims": [
+      {
+        "name": "complete tagged next-callee input",
+        "result": "unsat"
+      },
+      {
+        "name": "unconditional call preparation",
+        "result": "unsat"
+      }
+    ],
+    "fault": {
+      "result": "sat"
+    }
+  },
+  "div16-composition-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "frameInstructions",
+      "inlineInstructions",
+      "inputHashes",
+      "nestedLeafInstructions",
+      "passed",
+      "reports",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "inlineInstructions": 658,
+      "frameInstructions": 16,
+      "nestedLeafInstructions": 229
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/compose-div16-frame.py",
+      "stage:build/sbf-division-scout/prove-div16-rest.py",
+      "stage:build/sbf-division-scout/check-div16-frame.py",
+      "stage:build/sbf-slice-probe/vesting.so"
+    ],
+    "reports": [
+      "stage:build/sbf-division-scout/div16-rest-report.json",
+      "stage:build/sbf-division-scout/div16-steps-three-four-report.json",
+      "stage:build/sbf-division-scout/div16-first-two-report.json",
+      "stage:build/sbf-division-scout/div16-frame-report.json",
+      "stage:build/sbf-division-scout/div4-composition-report.json",
+      "leaf-report"
+    ],
+    "claims": [
+      {
+        "name": "actual nested input equals twelve-step tagged state",
+        "result": "unsat"
+      },
+      {
+        "name": "nested leaf arguments preserve full q/r/d",
+        "result": "unsat"
+      }
+    ]
+  },
+  "caller-calls-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "fault",
+      "inputHashes",
+      "passed",
+      "refusals",
+      "routes",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "refusals": [
+        {
+          "name": "wrong callee",
+          "reason": "div16 direct call"
+        },
+        {
+          "name": "aliased call input",
+          "reason": "call regions disjoint"
+        }
+      ],
+      "routes": [
+        {
+          "name": "full",
+          "instructions": 41,
+          "calls": [
+            {
+              "at": 9600,
+              "source": -120,
+              "target": -40
+            },
+            {
+              "at": 9640,
+              "source": -40,
+              "target": -80
+            },
+            {
+              "at": 9680,
+              "source": -80,
+              "target": -40
+            },
+            {
+              "at": 9712,
+              "source": -40,
+              "target": -160
+            }
+          ]
+        }
+      ]
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/check-caller-calls.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_elf.py"
+    ],
+    "claims": [
+      {
+        "name": "full exact folded quotient and saved context",
+        "result": "unsat"
+      }
+    ],
+    "fault": {
+      "result": "sat"
+    }
+  },
+  "call-routes-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/check-call-routes.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "claims": [
+      {
+        "name": "direct exact guard",
+        "result": "unsat"
+      },
+      {
+        "name": "direct valid nonvacuity",
+        "result": "sat"
+      },
+      {
+        "name": "native exact guard",
+        "result": "unsat"
+      },
+      {
+        "name": "complete native slice input binding",
+        "result": "unsat"
+      },
+      {
+        "name": "native valid nonvacuity",
+        "result": "sat"
+      },
+      {
+        "name": "restoring exact guard",
+        "result": "unsat"
+      },
+      {
+        "name": "restoring valid nonvacuity",
+        "result": "sat"
+      },
+      {
+        "name": "small exact guard",
+        "result": "unsat"
+      },
+      {
+        "name": "complete small slice input binding",
+        "result": "unsat"
+      },
+      {
+        "name": "small valid nonvacuity",
+        "result": "sat"
+      },
+      {
+        "name": "exhaustive exclusive router partition",
+        "result": "unsat"
+      },
+      {
+        "name": "direct emitted result and context",
+        "result": "unsat"
+      },
+      {
+        "name": "valid direct input has zero high dividend",
+        "result": "unsat"
+      },
+      {
+        "name": "inverted high word route detected",
+        "result": "sat"
+      }
+    ]
+  },
+  "caller-entry-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "reports",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/link-caller-entry.py",
+      "stage:build/sbf-division-scout/link-denominator.py",
+      "stage:build/sbf-division-scout/check-call-routes.py",
+      "stage:build/sbf-division-scout/check-caller-calls.py",
+      "stage:build/sbf-division-scout/check-small-quotient.py"
+    ],
+    "reports": [
+      "bridge-report",
+      "stage:build/sbf-division-scout/call-routes-report.json",
+      "stage:build/sbf-division-scout/caller-calls-report.json",
+      "stage:build/sbf-division-scout/small-quotient-report.json"
+    ],
+    "claims": [
+      {
+        "name": "actual overflow continuation guard",
+        "result": "unsat"
+      },
+      {
+        "name": "complete modeled route entry registers and declared memory",
+        "result": "unsat"
+      },
+      {
+        "name": "complete restoring caller registers and input words",
+        "result": "unsat"
+      },
+      {
+        "name": "complete small caller registers and input words",
+        "result": "unsat"
+      },
+      {
+        "name": "valid small route supplies bounded dividend and nonzero clock difference",
+        "result": "unsat"
+      }
+    ]
+  },
+  "loop-bridge-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "loop",
+      "nativeEuclideanBound",
+      "passed",
+      "restoringRemainderBound",
+      "scope",
+      "stepBridge"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "stepBridge": "unsat",
+      "restoringRemainderBound": "unsat",
+      "nativeEuclideanBound": "unsat"
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/check-loop-bridge.py",
+      "stage:build/sbf-division-scout/prove-div16-first-two.py",
+      "stage:verification/division_loop.py",
+      "stage:verification/prove.py",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py",
+      "stage:build/sbf-slice-probe/vesting.so"
+    ],
+    "loop": [
+      {
+        "claim": "packing-step-0",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-1",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-2",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-3",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-4",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-5",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-6",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-7",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-8",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-9",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-10",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-11",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-12",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-13",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-14",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-15",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-16",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-17",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-18",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-19",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-20",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-21",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-22",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-23",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-24",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-25",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-26",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-27",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-28",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-29",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-30",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-31",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-32",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-33",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-34",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-35",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-36",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-37",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-38",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-39",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-40",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-41",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-42",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-43",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-44",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-45",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-46",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-47",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-48",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-49",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-50",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-51",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-52",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-53",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-54",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-55",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-56",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-57",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-58",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-59",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-60",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-61",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-62",
+        "result": "unsat"
+      },
+      {
+        "claim": "packing-step-63",
+        "result": "unsat"
+      },
+      {
+        "claim": "integer-remainder-bounds",
+        "result": "unsat"
+      },
+      {
+        "claim": "dividend-invariant-preserved",
+        "result": "unsat"
+      },
+      {
+        "claim": "initial-state",
+        "result": "unsat"
+      },
+      {
+        "claim": "final-euclidean-result",
+        "result": "unsat"
+      }
+    ],
+    "claims": [
+      {
+        "name": "small division intermediates fit U64",
+        "result": "unsat"
+      },
+      {
+        "name": "small quotient limbs fit U32",
+        "result": "unsat"
+      },
+      {
+        "name": "small composed Euclidean identity",
+        "result": "unsat"
+      },
+      {
+        "name": "small combined quotient fits U64",
+        "result": "unsat"
+      }
+    ]
+  },
+  "caller-summary-instantiation-report.json": {
+    "keys": [
+      "argumentOrderFault",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "leafSpecMatchesInlineStep",
+      "passed",
+      "reports",
+      "routes",
+      "scope",
+      "twelvePlusFourDAGIdentical"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "leafSpecMatchesInlineStep": true,
+      "twelvePlusFourDAGIdentical": true,
+      "routes": [
+        {
+          "route": "full",
+          "helperCalls": 4,
+          "restoringSteps": 64,
+          "quotientDAGIdentical": true,
+          "remainderDAGIdentical": true
+        }
+      ],
+      "argumentOrderFault": {
+        "input": [
+          123456789,
+          0,
+          97
+        ],
+        "correct": 8090864123904,
+        "wrong": 65535
+      }
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/instantiate-caller-summary.py",
+      "stage:build/sbf-division-scout/prove-div16-first-two.py",
+      "stage:build/sbf-division-scout/check-caller-calls.py",
+      "stage:build/sbf-division-scout/prove-div4.py",
+      "stage:verification/sbf_elf.py",
+      "stage:build/sbf-slice-probe/vesting.so"
+    ],
+    "reports": [
+      "stage:build/sbf-division-scout/caller-calls-report.json",
+      "stage:build/sbf-division-scout/div16-composition-report.json",
+      "stage:build/sbf-division-scout/div4-composition-report.json"
+    ]
+  },
+  "faults": {
+    "keys": [
+      "baselinePassed",
+      "mutations",
+      "passed",
+      "rows",
+      "scope",
+      "sourceHashes"
+    ],
+    "fixed": {
+      "passed": true,
+      "mutations": 13,
+      "baselinePassed": true
+    },
+    "sourceHashes": [
+      "stage:build/sbf-division-scout/test-div16-faults.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:build/sbf-division-scout/prove-div16-first-two.py",
+      "stage:build/sbf-division-scout/prove-div16-steps-three-four.py",
+      "stage:build/sbf-division-scout/prove-div16-rest.py",
+      "stage:build/sbf-division-scout/check-div16-frame.py",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "rows": [
+      {
+        "name": "baseline",
+        "address": null,
+        "newByte": null,
+        "exitCode": 0,
+        "expectedReason": null
+      },
+      {
+        "name": "step1",
+        "address": 18552,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "first inline step quotient/remainder"
+      },
+      {
+        "name": "step2",
+        "address": 18968,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "second inline step quotient/remainder"
+      },
+      {
+        "name": "step3",
+        "address": 19416,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 3 quotient remainder guard"
+      },
+      {
+        "name": "step4",
+        "address": 19880,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 4 quotient remainder guard"
+      },
+      {
+        "name": "step5",
+        "address": 20320,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 5 quotient remainder guard"
+      },
+      {
+        "name": "step6",
+        "address": 20760,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 6 quotient remainder guard"
+      },
+      {
+        "name": "step7",
+        "address": 21200,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 7 quotient remainder guard"
+      },
+      {
+        "name": "step8",
+        "address": 21648,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 8 quotient remainder guard"
+      },
+      {
+        "name": "step9",
+        "address": 22120,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 9 quotient remainder guard"
+      },
+      {
+        "name": "step10",
+        "address": 22560,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 10 quotient remainder guard"
+      },
+      {
+        "name": "step11",
+        "address": 23000,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 11 quotient remainder guard"
+      },
+      {
+        "name": "step12",
+        "address": 23456,
+        "newByte": 87,
+        "exitCode": 1,
+        "expectedReason": "step 12 quotient remainder guard"
+      },
+      {
+        "name": "frame-word-source",
+        "address": 23561,
+        "newByte": 26,
+        "exitCode": 1,
+        "expectedReason": "complete tagged next-callee input"
+      }
+    ]
+  },
+  "helper-vm": {
+    "keys": [
+      "artifacts",
+      "baselineCases",
+      "endToEndVerified",
+      "executions",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "rows",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "baselineCases": 70,
+      "executions": 96
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/replay-div16-faults.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:build/vesting.h",
+      "stage:verification/sbf_elf.py",
+      "tools:clang",
+      "tools:ld.lld",
+      "stage:target/debug/bend-test-runner",
+      "stage:runtime/sbf.ld",
+      "run:layout.c",
+      "run:layout.log"
+    ],
+    "artifacts": {
+      "baseline": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step1": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step2": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step3": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step4": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step5": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step6": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step7": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step8": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step9": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step10": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step11": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "step12": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      },
+      "frame": {
+        "bodyOffset": 328,
+        "bodyBytes": 7360
+      }
+    },
+    "rows": [
+      {
+        "kind": "baseline",
+        "input": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          18446744073709551615,
+          18446744073709551615,
+          18446744073709551615
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          1,
+          1,
+          0
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          0,
+          9223372036854775808,
+          18446744073709551615
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          9223372036854775808,
+          0,
+          4294967296
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          6146344620313527693,
+          13520899969304437229,
+          9847350580137464764
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          11730337238601826848,
+          11438270602968009224,
+          6481209676434068540
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          8055375015926137195,
+          7257339538038791538,
+          1065910698507749593
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          2768180039595093661,
+          2390968993209667778,
+          14890470184406402791
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          13503153662101083819,
+          2227621731907700496,
+          6683849232113034358
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          939577221499882025,
+          15623081392388165336,
+          2934119236035289697
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          11402705687562119231,
+          9601142864877853586,
+          11081450533502846884
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          13349446427172011891,
+          9577215772923400017,
+          8307529289573083207
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          14519274437551976714,
+          9289534242945391297,
+          14786238567681695511
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          17562369845867929953,
+          14094338983531416911,
+          14650941487980663374
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          2341551183623288395,
+          8066367509925965608,
+          3017802401579222806
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          5939079901094882328,
+          4951203179267283070,
+          7823044779268892550
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          10707168961176187467,
+          16548813322324449606,
+          4176058606572694013
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          18018615056032835968,
+          2667792176485566270,
+          11291693721706168477
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          14093450678102287576,
+          12570192941163005918,
+          3576129969620233009
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          2925357180117636589,
+          2126097543865303991,
+          13272424136524145734
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          15120522184038505113,
+          9623514172220993466,
+          14849028812696638391
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          12506796316356612625,
+          17974190186454219217,
+          17156524461970262982
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          12449883287590966964,
+          5909569652533918103,
+          9911077607806778680
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          13602373233501552480,
+          10234083072801584871,
+          11568918437714272965
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          10027419533731164365,
+          11475511691662792121,
+          17171245920107838402
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          17415599567664970425,
+          6535821669898314368,
+          15311417622520806941
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          14329636932298748173,
+          3212351227900132850,
+          5404576483401892405
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          7171169604134065809,
+          14531721682474614840,
+          7117154737145103142
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          8505782596952509415,
+          1238230683241263056,
+          13277454260736662517
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          2638045600619144,
+          4571916975635234591,
+          13998032049745388279
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          10154576050951226196,
+          8742743304352684181,
+          11153220248094744618
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          12584445368377426169,
+          1181597704194482801,
+          6382907943337719786
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          7227894018953051019,
+          17165533354027077128,
+          7465075025557036637
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          15833147794687810103,
+          7163472344566147313,
+          15193182286015758028
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          5545352767965751292,
+          444181350671197324,
+          6458494717013472945
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          11701924014701192505,
+          1945101191936837555,
+          1602918089189714298
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          5270459680121122447,
+          12152660803482955973,
+          5939001830393154245
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          8184773646023709075,
+          14777719965828618194,
+          2949307099328280627
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          16861708158056040063,
+          7390834678983400808,
+          14498766341702667499
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          16727360810048496013,
+          11312156481556104590,
+          1258495322716954292
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          2564214517675714282,
+          4455640870834146126,
+          9886535694960602389
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          367627966772029107,
+          7089631329511623700,
+          12357690975643723422
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          13343361864447471843,
+          4037083648901609100,
+          10764677068546148086
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          17862401744228941002,
+          11020468797326859218,
+          18090025831686909692
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          4529340964465656754,
+          11438256843511421776,
+          4036751601799868100
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          376668367274648823,
+          3940135621745671461,
+          9762430938255287088
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          8915391046910974471,
+          15056104065170414061,
+          8845387027953368182
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          2593256724439080924,
+          7164425198357017531,
+          337102682356195404
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          7392014922747024731,
+          10421845759887119241,
+          13865807078549701418
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          3507069907649178156,
+          9900790361531581306,
+          5837823051928807132
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          16315395768369115733,
+          4256794113121003292,
+          7651242346584927065
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          7148773487662540881,
+          10443408929728120291,
+          10348301636053097182
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          12285898290567161602,
+          3984853712067501323,
+          7859210287984570810
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          11818470166083262730,
+          12502426726329078224,
+          6283421070804084702
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          11743566863343216388,
+          10126273135528071629,
+          6945883835170589755
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          1591086845860730462,
+          15304768412562508760,
+          2929873367356917835
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          700110145717971448,
+          777684021443211032,
+          7170724225217319407
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          457061011327565150,
+          17870390865816271533,
+          8049880534097188648
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          6667675257085535734,
+          5678423136813918173,
+          839685741339532739
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          14399894553966796492,
+          14977319509385769834,
+          17350171760034540094
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          13966632678303129706,
+          16413261904174066123,
+          10500257889253457602
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          18021174222705156510,
+          8914328616514235348,
+          9974868957603798611
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          15546868776704616538,
+          10476484667049837235,
+          17856806612175773040
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          4500753453296771865,
+          6976422491613814608,
+          13210716638753114044
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          3658444961647104419,
+          15555282990324874789,
+          3117100387327058180
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          17515574755036991069,
+          270395955537266195,
+          17893509712013996223
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          4845946518536131479,
+          12811559370594985863,
+          14970425951934236430
+        ]
+      },
+      {
+        "kind": "baseline",
+        "input": [
+          8145419617890220222,
+          312706652415286610,
+          16600513475299624189
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step1",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step1",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step2",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step2",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step3",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step3",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step4",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step4",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step5",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step5",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step6",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step6",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step7",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step7",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step8",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step8",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step9",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step9",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step10",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step10",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step11",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step11",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "step12",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "step12",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ]
+      },
+      {
+        "kind": "mutant-spec",
+        "fault": "frame",
+        "input": [
+          81985529216486895,
+          0,
+          1147797409030816545
+        ]
+      },
+      {
+        "kind": "mutant-model",
+        "fault": "frame",
+        "input": [
+          81985529216486895,
+          0,
+          1147797409030816545
+        ]
+      }
+    ]
+  },
+  "caller-vm": {
+    "keys": [
+      "artifacts",
+      "baselineCases",
+      "endToEndVerified",
+      "executions",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "rows",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "baselineCases": 182,
+      "executions": 191
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/replay-caller.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_elf.py",
+      "tools:clang",
+      "tools:ld.lld",
+      "stage:target/debug/bend-test-runner",
+      "stage:runtime/sbf.ld"
+    ],
+    "artifacts": {
+      "baseline": {},
+      "wrong-route": {},
+      "wrong-result-word": {},
+      "wrong-inline-bit": {},
+      "small-first-division": {},
+      "small-second-division": {},
+      "small-remainder-multiply": {}
+    },
+    "rows": [
+      {
+        "kind": "baseline",
+        "route": "direct",
+        "input": [
+          0,
+          0,
+          1
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "direct",
+        "input": [
+          18446744073709551615,
+          0,
+          1
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          18446744073709551615,
+          0,
+          2
+        ],
+        "expected": 9223372036854775807
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          18446744073709551615,
+          0,
+          4294967296
+        ],
+        "expected": 4294967295
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          0,
+          18446744073709551614,
+          18446744073709551615
+        ],
+        "expected": 18446744073709551614
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          18446744073709551615,
+          18446744073709551614,
+          18446744073709551615
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          14398358148095627526,
+          1789932624384110004,
+          2344218347144423184
+        ],
+        "expected": 14085048464626984913
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          9839715107590160281,
+          8029345701000524531,
+          14387670832181300380
+        ],
+        "expected": 10294597850710008291
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          10827715300253743716,
+          1724007076689182001,
+          7471896801598458195
+        ],
+        "expected": 4256257570118747727
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          9769214684616294265,
+          17703340826848517,
+          62341444588413928
+        ],
+        "expected": 5238393169080022321
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          13275231780278428671,
+          12832424398304940117,
+          17771061444543090154
+        ],
+        "expected": 13320332578864914500
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16473536993998192394,
+          637659400953615806,
+          1056857437855817254
+        ],
+        "expected": 11129920984850028337
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          9621565351386689451,
+          2749045902821671605,
+          6447960596858233193
+        ],
+        "expected": 7864648900140625470
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          7413159372613555072,
+          157699678362596903,
+          849031711122760275
+        ],
+        "expected": 3426309723360288141
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16637326151836899084,
+          3234565592922671806,
+          9859942279466845031
+        ],
+        "expected": 6051475961124743280
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          10106381407198212464,
+          632720764730469385,
+          856431257102666359
+        ],
+        "expected": 13628225173133307724
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          10765253249371159407,
+          6572866568516504406,
+          10056858575383062800
+        ],
+        "expected": 12056248629850814403
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          6962582330198824813,
+          3877434359007403117,
+          4760623174243433996
+        ],
+        "expected": 15024511847565973823
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          8847841830283893028,
+          5906416033329441962,
+          7409446471765109985
+        ],
+        "expected": 14704761735558829032
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          1139213223946966449,
+          1368954487328640330,
+          5390405252564574444
+        ],
+        "expected": 4684759659636588284
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          3025255880485387042,
+          3623552832866599664,
+          4763220724894160435
+        ],
+        "expected": 14033099788156607397
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          838306260826597228,
+          13321709680176294049,
+          13706828169779909287
+        ],
+        "expected": 17928448948989567991
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          13867540517442955480,
+          449581879284588356,
+          1967768753365494803
+        ],
+        "expected": 4214581542244753618
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          3470795521668705111,
+          1317336637212669810,
+          8943554311294282814
+        ],
+        "expected": 2717104515695235345
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          995947030648333846,
+          253846817837071755,
+          11407533947507721536
+        ],
+        "expected": 410487253784511422
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          11353284250592869529,
+          1816970222652319367,
+          7384871450089314872
+        ],
+        "expected": 4538628046993699505
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          18386733641647308756,
+          5605829215280312367,
+          16522614219514437582
+        ],
+        "expected": 6258652261762904896
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          8805424236579143925,
+          12797840192341759355,
+          13905919785465375529
+        ],
+        "expected": 16976833346264096458
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          17097706138163856906,
+          826788642250409594,
+          3197050890486851967
+        ],
+        "expected": 4770508512087081085
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          1441893283808937213,
+          2765731023493203625,
+          4977714333948026366
+        ],
+        "expected": 10249429546237718418
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          800987149359348584,
+          3531796689998525719,
+          12233944052491799470
+        ],
+        "expected": 5325359457362205842
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          6792154352359774837,
+          4792534771632004660,
+          8117218423595889491
+        ],
+        "expected": 10891250892012575247
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          17270135188411492273,
+          862944481662514748,
+          4786084314732951477
+        ],
+        "expected": 3325999910625594180
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          18037905592843643008,
+          441577293057310211,
+          515157762984829172
+        ],
+        "expected": 15811978192066036837
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          17950172718167178572,
+          10407637156261364244,
+          11472096280528576481
+        ],
+        "expected": 16735129686754847870
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          8785090423757490837,
+          1696893146516452733,
+          14498111950998464281
+        ],
+        "expected": 2159050343935645612
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          5255022495769823881,
+          4766840170029479648,
+          17232611394417752152
+        ],
+        "expected": 5102690395797842778
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          6568305554660260448,
+          5021670536339903817,
+          13630368690423262764
+        ],
+        "expected": 6796108990906059374
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          2728895656992150408,
+          10654943954814158981,
+          17482367369666972233
+        ],
+        "expected": 11242700722283221944
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16361194267414749334,
+          8457963068510575897,
+          16006413264324080225
+        ],
+        "expected": 9747460441837481291
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16573353530754600802,
+          632562578918337024,
+          4375142700495107030
+        ],
+        "expected": 2667049009073873030
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          12339253376627803030,
+          9429863210470421704,
+          16991540017345078400
+        ],
+        "expected": 10237463650502977844
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          12253809397028535322,
+          981137454353791423,
+          3099726425021102363
+        ],
+        "expected": 5838835122835740072
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          2636616544218045044,
+          490410900163840662,
+          9831254146420328552
+        ],
+        "expected": 920176025514895488
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16112601400753613222,
+          6899210852083915715,
+          9722843896000141136
+        ],
+        "expected": 13089583486093825354
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          5420543981891538475,
+          4057470653001733005,
+          6120119080937230246
+        ],
+        "expected": 12229684052331889110
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          11977888551824517783,
+          6272056567923421335,
+          14298291916944503593
+        ],
+        "expected": 8091807258963623839
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          568453024623067403,
+          430895450478848374,
+          1694586452461601473
+        ],
+        "expected": 4690594620276073370
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          5118314742449381121,
+          17387610708640059033,
+          17558912217820858661
+        ],
+        "expected": 18266781040686849782
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          2751716653368312228,
+          7472602841345936121,
+          8678644059986802579
+        ],
+        "expected": 15883263701794554531
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          10884196428408608515,
+          1822056638540707968,
+          9464892955825455435
+        ],
+        "expected": 3551124419032867590
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          10335349571443490279,
+          8557088227866336497,
+          9435646092871328122
+        ],
+        "expected": 16729158236960560853
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16556727148458890347,
+          11232979754608654769,
+          15506659928775924370
+        ],
+        "expected": 13362768234434584307
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          9654097450861406560,
+          9199907556841396914,
+          13320945758581479408
+        ],
+        "expected": 12739961807404856257
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          1284603028549849806,
+          3286811206431233911,
+          3765305623801197542
+        ],
+        "expected": 16102534880668887065
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          205734779273140202,
+          2887717059987375395,
+          13025734654382204337
+        ],
+        "expected": 4089518094470854501
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          14292766901403624597,
+          8045999204466464350,
+          10055188657665897461
+        ],
+        "expected": 14760786017566049949
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          47492670959426941,
+          385990184145990570,
+          7988266907349263268
+        ],
+        "expected": 891340039646699518
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16063684386845248892,
+          5254084866043064300,
+          11927228333310772895
+        ],
+        "expected": 8126008503984393083
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          5644005773619301695,
+          3625430447069748460,
+          17984672669511141704
+        ],
+        "expected": 3718576859477971794
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          8118421300706832755,
+          3006668105049700084,
+          6999202407585443075
+        ],
+        "expected": 7924222478311006421
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          9061806002315422066,
+          7431418265387627438,
+          9811022891345506563
+        ],
+        "expected": 13972597186295618878
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          17371893611458267724,
+          6832238150611196521,
+          18019496430159928343
+        ],
+        "expected": 6994232558242518010
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          15509708438184001966,
+          1711467009659130073,
+          11859142371447062829
+        ],
+        "expected": 2662165014039429698
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          15125818939622577708,
+          3419763511362336141,
+          6698411110668801392
+        ],
+        "expected": 9417681483633628844
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          16369480470006535253,
+          3188459360720820466,
+          5798426486904887035
+        ],
+        "expected": 10143561179825530247
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          8020695710008403771,
+          13111033298963697901,
+          16630449745739367868
+        ],
+        "expected": 14542954610703139034
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          6615580369440559751,
+          15488785929710209110,
+          17057625493153788063
+        ],
+        "expected": 16750143223188521642
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          10401803783845428061,
+          7767422428424087090,
+          11802202258178178481
+        ],
+        "expected": 12140416721823606066
+      },
+      {
+        "kind": "baseline",
+        "route": "full",
+        "input": [
+          7727692225748097327,
+          1370852746200296715,
+          1505072203232848990
+        ],
+        "expected": 16801698760751432800
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          9582343552366605236,
+          0,
+          303316010551931829
+        ],
+        "expected": 31
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          1071718796224127051,
+          0,
+          11578481101877876594
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2572005733651327031,
+          0,
+          15456621813856370225
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2664109040613266058,
+          0,
+          2803720204405068812
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          10039437409515422874,
+          0,
+          14668666629100969440
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          16182087232366755646,
+          0,
+          6152920200346678831
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          12995623579402552792,
+          0,
+          4813586428287210526
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          9652488909030826099,
+          0,
+          13782954824930101145
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          10593951990974930297,
+          0,
+          13246508313072920656
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          4533722440508285166,
+          0,
+          9439016707859714038
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          9897506351304646482,
+          0,
+          12000049357812777459
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          18130119941640361362,
+          0,
+          6696037425453602035
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          18413742872909315227,
+          0,
+          7093741835743983267
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          15461028705349942657,
+          0,
+          6944075414399801040
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          14897205018526878519,
+          0,
+          14857274590172323711
+        ],
+        "expected": 1
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          4396275863175293975,
+          0,
+          2027133481523486141
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          3513913904,
+          0,
+          2024376496
+        ],
+        "expected": 1
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2994864390,
+          0,
+          203587208
+        ],
+        "expected": 14
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          3815816177,
+          0,
+          3494040438
+        ],
+        "expected": 1
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          1360480262,
+          0,
+          1372914621
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          3991579816,
+          0,
+          1449615187
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2972957100,
+          0,
+          4014918944
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2582172314,
+          0,
+          3467361153
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          1655825415,
+          0,
+          4152060068
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          676005274,
+          0,
+          3915467808
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2443121241,
+          0,
+          3082171985
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2951217493,
+          0,
+          3749861085
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          2653469918,
+          0,
+          1864648149
+        ],
+        "expected": 1
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          3708226469,
+          0,
+          1712549344
+        ],
+        "expected": 2
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          993592329,
+          0,
+          1605413302
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          1287033662,
+          0,
+          3252754308
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "native",
+        "input": [
+          1935827964,
+          0,
+          2440540764
+        ],
+        "expected": 0
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          2
+        ],
+        "expected": 9223372036854775808
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          2
+        ],
+        "expected": 9223372036854775808
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          2
+        ],
+        "expected": 9264364801463019255
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          2
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          2
+        ],
+        "expected": 9223372036854775808
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          2
+        ],
+        "expected": 9223372036854775808
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          2
+        ],
+        "expected": 9264364801463019255
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          2
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          3
+        ],
+        "expected": 6148914691236517205
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          3
+        ],
+        "expected": 6148914691236517205
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          3
+        ],
+        "expected": 6176243200975346170
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          3
+        ],
+        "expected": 12297829382473034410
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          2,
+          3
+        ],
+        "expected": 12297829382473034410
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          2,
+          3
+        ],
+        "expected": 12297829382473034411
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          2,
+          3
+        ],
+        "expected": 12325157892211863375
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          2,
+          3
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          5
+        ],
+        "expected": 3689348814741910323
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          5
+        ],
+        "expected": 3689348814741910323
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          5
+        ],
+        "expected": 3705745920585207702
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          5
+        ],
+        "expected": 7378697629483820646
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          4,
+          5
+        ],
+        "expected": 14757395258967641292
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          4,
+          5
+        ],
+        "expected": 14757395258967641293
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          4,
+          5
+        ],
+        "expected": 14773792364810938671
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          4,
+          5
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          7
+        ],
+        "expected": 2635249153387078802
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          7
+        ],
+        "expected": 2635249153387078802
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          7
+        ],
+        "expected": 2646961371846576930
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          7
+        ],
+        "expected": 5270498306774157604
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          6,
+          7
+        ],
+        "expected": 15811494920322472813
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          6,
+          7
+        ],
+        "expected": 15811494920322472813
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          6,
+          7
+        ],
+        "expected": 15823207138781970941
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          6,
+          7
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          65536
+        ],
+        "expected": 281474976710656
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          65536
+        ],
+        "expected": 281474976710656
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          65536
+        ],
+        "expected": 282725976607147
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          65536
+        ],
+        "expected": 562949953421311
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          65535,
+          65536
+        ],
+        "expected": 18446462598732840960
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          65535,
+          65536
+        ],
+        "expected": 18446462598732840960
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          65535,
+          65536
+        ],
+        "expected": 18446463849732737451
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          65535,
+          65536
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          1,
+          4294967295
+        ],
+        "expected": 4294967297
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          1,
+          4294967295
+        ],
+        "expected": 4294967297
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          1,
+          4294967295
+        ],
+        "expected": 4314056040
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          1,
+          4294967295
+        ],
+        "expected": 8589934594
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          0,
+          4294967294,
+          4294967295
+        ],
+        "expected": 18446744069414584318
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1,
+          4294967294,
+          4294967295
+        ],
+        "expected": 18446744069414584319
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          81985529216486895,
+          4294967294,
+          4294967295
+        ],
+        "expected": 18446744069433673062
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18446744073709551615,
+          4294967294,
+          4294967295
+        ],
+        "expected": 18446744073709551615
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          17714825984987647356,
+          151126833,
+          795130127
+        ],
+        "expected": 3506090304054180407
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          8877658023553306936,
+          3508614270,
+          3959068312
+        ],
+        "expected": 16347914307201507731
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          7987946498130349760,
+          719460798,
+          3670637905
+        ],
+        "expected": 3615641085622361687
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          6393989750913140250,
+          627189675,
+          702443672
+        ],
+        "expected": 16470512708657527024
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          2054503689837869480,
+          75890112,
+          298737133
+        ],
+        "expected": 4686144845085789242
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          11653922484010016048,
+          178019473,
+          268535607
+        ],
+        "expected": 12228842598968895837
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          3609247884325168863,
+          688548800,
+          1693822007
+        ],
+        "expected": 7498712052965475018
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          89798489370604030,
+          1503286083,
+          2648813766
+        ],
+        "expected": 10469114136565572959
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          17687295948190444908,
+          906222474,
+          4107674007
+        ],
+        "expected": 4069664253035064223
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          8236387412894889970,
+          2209714935,
+          3995671125
+        ],
+        "expected": 10201551783127577715
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          5578121265304012966,
+          1591021532,
+          2142566911
+        ],
+        "expected": 13698133239836733855
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          1013566769276180810,
+          1543536762,
+          2099001184
+        ],
+        "expected": 13565131756490661131
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          8025523321266907164,
+          2272723201,
+          2630265407
+        ],
+        "expected": 15939206414561827301
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          16862807927745873543,
+          131887598,
+          861861259
+        ],
+        "expected": 2822840402976154239
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          17133059543901840680,
+          2605307376,
+          3624586261
+        ],
+        "expected": 13259289462266391913
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          6346695740845509076,
+          3067351492,
+          4086973205
+        ],
+        "expected": 13844633944298601503
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          12220917017193633022,
+          3341317332,
+          4198911891
+        ],
+        "expected": 14679142431349228653
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          14082957997912758204,
+          584675520,
+          2285652411
+        ],
+        "expected": 4718722604443291451
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          12368315282798360956,
+          1803299278,
+          2972315333
+        ],
+        "expected": 11191612112152546128
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          17020539792792405577,
+          467924022,
+          597196123
+        ],
+        "expected": 14453668341707197661
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          15072793567345317659,
+          533806921,
+          1140169325
+        ],
+        "expected": 8636436234183625632
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          10453188513864672201,
+          503063498,
+          1580898895
+        ],
+        "expected": 5870004489366339512
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          8474362287752698419,
+          1315708587,
+          1394119598
+        ],
+        "expected": 17409223443428976380
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          2912209691816807258,
+          3432972807,
+          4157451632
+        ],
+        "expected": 15232208667976995001
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          12301911625543513185,
+          1035460007,
+          1225983192
+        ],
+        "expected": 15580038849335556353
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          12824282229157351540,
+          2126879138,
+          2335261169
+        ],
+        "expected": 16800688363273282275
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          3556745884831979521,
+          2165447284,
+          4246456387
+        ],
+        "expected": 9406773134160106054
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          11121688099653978139,
+          1793311573,
+          2566029530
+        ],
+        "expected": 12891807851749154287
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          6667280074255524708,
+          1818376993,
+          3286580973
+        ],
+        "expected": 10206088120640934805
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          12303771054546849538,
+          523651520,
+          2534932928
+        ],
+        "expected": 3810619791496420135
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          18410337307878964711,
+          3816812921,
+          4053634844
+        ],
+        "expected": 17369046265610087674
+      },
+      {
+        "kind": "baseline",
+        "route": "small",
+        "input": [
+          11029870689834279104,
+          168974934,
+          2184241341
+        ],
+        "expected": 1427057218856949246
+      },
+      {
+        "kind": "fault",
+        "name": "wrong-route",
+        "input": [
+          18446744073709551615,
+          1,
+          4294967297
+        ]
+      },
+      {
+        "kind": "fault",
+        "name": "wrong-result-word",
+        "input": [
+          81985529216486895,
+          1,
+          4294967297
+        ]
+      },
+      {
+        "kind": "fault",
+        "name": "wrong-inline-bit",
+        "input": [
+          18446744073709551615,
+          1,
+          4294967297
+        ]
+      },
+      {
+        "kind": "fault",
+        "name": "small-first-division",
+        "input": [
+          81985529216486895,
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "fault",
+        "name": "small-second-division",
+        "input": [
+          81985529216486895,
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "fault",
+        "name": "small-remainder-multiply",
+        "input": [
+          81985529216486895,
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "outside-domain",
+        "input": [
+          0,
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "outside-domain",
+        "input": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "kind": "outside-domain",
+        "input": [
+          0,
+          2,
+          2
+        ]
+      }
+    ]
+  },
+  "native-quotient-report.json": {
+    "keys": [
+      "claims",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "range",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "range": [
+        9744,
+        10056
+      ]
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/check-native-quotient.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_leaf.py",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "claims": [
+      {
+        "name": "native route guard equals nonzero divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "actual executed division always nonzero",
+        "result": "unsat"
+      },
+      {
+        "name": "actual native quotient and preserved context/frame",
+        "result": "unsat"
+      },
+      {
+        "name": "subtraction instead of division detected",
+        "result": "sat"
+      },
+      {
+        "name": "inverted zero guard unsafe division detected",
+        "result": "refused",
+        "reason": "division nonzero obligation: sat"
+      },
+      {
+        "name": "reserved immediate",
+        "result": "refused"
+      },
+      {
+        "name": "reserved offset",
+        "result": "refused"
+      },
+      {
+        "name": "frame source",
+        "result": "refused"
+      }
+    ]
+  },
+  "small-quotient-report.json": {
+    "keys": [
+      "claims",
+      "divisionChecks",
+      "endToEndVerified",
+      "exploratory",
+      "inputHashes",
+      "passed",
+      "range",
+      "scope"
+    ],
+    "fixed": {
+      "passed": true,
+      "exploratory": true,
+      "endToEndVerified": false,
+      "range": [
+        9856,
+        10056
+      ],
+      "divisionChecks": 2
+    },
+    "inputHashes": [
+      "stage:build/sbf-division-scout/check-small-quotient.py",
+      "stage:build/sbf-division-scout/small-quotient-model.py",
+      "stage:verification/sbf_leaf.py",
+      "stage:build/sbf-slice-probe/vesting.so",
+      "stage:verification/sbf_cfg.py",
+      "stage:verification/sbf_elf.py"
+    ],
+    "claims": [
+      {
+        "name": "actual small clock guard equals nonzero divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "both actual small divisions always nonzero",
+        "result": "unsat"
+      },
+      {
+        "name": "actual first division numerator and divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "actual second division numerator and divisor",
+        "result": "unsat"
+      },
+      {
+        "name": "actual quotient packing ignores unobserved upper limbs",
+        "result": "unsat"
+      },
+      {
+        "name": "actual small context and declared frame preservation",
+        "result": "unsat"
+      },
+      {
+        "name": "first DIV replaced by SUB",
+        "result": "sat"
+      },
+      {
+        "name": "second DIV replaced by SUB",
+        "result": "sat"
+      },
+      {
+        "name": "remainder MUL replaced by OR",
+        "result": "sat"
+      },
+      {
+        "name": "inverted clock guard unsafe division detected",
+        "result": "refused",
+        "reason": "division nonzero obligation: sat"
+      },
+      {
+        "name": "MUL reserved immediate",
+        "result": "refused"
+      },
+      {
+        "name": "MUL reserved offset",
+        "result": "refused"
+      },
+      {
+        "name": "MUL frame source",
+        "result": "refused"
+      },
+      {
+        "name": "0x26b8 DIV reserved immediate",
+        "result": "refused"
+      },
+      {
+        "name": "0x26b8 DIV reserved offset",
+        "result": "refused"
+      },
+      {
+        "name": "0x26b8 DIV frame source",
+        "result": "refused"
+      },
+      {
+        "name": "0x2700 DIV reserved immediate",
+        "result": "refused"
+      },
+      {
+        "name": "0x2700 DIV reserved offset",
+        "result": "refused"
+      },
+      {
+        "name": "0x2700 DIV frame source",
+        "result": "refused"
+      }
+    ]
+  }
+}

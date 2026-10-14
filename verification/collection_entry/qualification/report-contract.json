@@ -1,0 +1,534 @@
+{
+  "report.json": {
+    "passed": true,
+    "entryClaims": [
+      {
+        "name": "all caller paths return",
+        "result": "unsat"
+      },
+      {
+        "name": "reachability: dispatch",
+        "result": "unsat"
+      },
+      {
+        "name": "reachability: length_read",
+        "result": "unsat"
+      },
+      {
+        "name": "reachability: load_0",
+        "result": "unsat"
+      },
+      {
+        "name": "reachability: load_1",
+        "result": "unsat"
+      },
+      {
+        "name": "reachability: load_2",
+        "result": "unsat"
+      },
+      {
+        "name": "reachability: mode_read",
+        "result": "unsat"
+      },
+      {
+        "name": "ordered refusal and success result",
+        "result": "unsat"
+      },
+      {
+        "name": "account loader receives live pointer",
+        "result": "unsat"
+      },
+      {
+        "name": "stage invoked at most once: load_0",
+        "result": "unsat"
+      },
+      {
+        "name": "entry loop stays within three slots",
+        "result": "unsat"
+      },
+      {
+        "name": "account loader receives live pointer",
+        "result": "unsat"
+      },
+      {
+        "name": "stage invoked at most once: load_1",
+        "result": "unsat"
+      },
+      {
+        "name": "entry loop stays within three slots",
+        "result": "unsat"
+      },
+      {
+        "name": "account loader receives live pointer",
+        "result": "unsat"
+      },
+      {
+        "name": "stage invoked at most once: load_2",
+        "result": "unsat"
+      },
+      {
+        "name": "entry loop stays within three slots",
+        "result": "unsat"
+      },
+      {
+        "name": "entry loop stays within three slots",
+        "result": "unsat"
+      },
+      {
+        "name": "instruction length read uses live pointer",
+        "result": "unsat"
+      },
+      {
+        "name": "stage invoked at most once: length_read",
+        "result": "unsat"
+      },
+      {
+        "name": "dispatch count exactly three",
+        "result": "unsat"
+      },
+      {
+        "name": "dispatch canonical instruction bounds",
+        "result": "unsat"
+      },
+      {
+        "name": "stage invoked at most once: dispatch",
+        "result": "unsat"
+      }
+    ],
+    "bindings": [
+      "account_count",
+      "Extract(0, 0, ZeroExt(63, load_0))",
+      "Extract(0, 0, ZeroExt(63, load_1))",
+      "Extract(0, 0, ZeroExt(63, alias_1_0))",
+      "Extract(0, 0, ZeroExt(63, load_2))",
+      "Extract(0, 0, ZeroExt(63, alias_2_0))",
+      "Extract(0, 0, ZeroExt(63, alias_2_1))",
+      "instruction_length",
+      "Extract(7, 0, ZeroExt(56, mode))"
+    ],
+    "dispatchWitness": "sat",
+    "scope": "Exploratory serialized-byte bindings at parsed collection entrypoint calls using qualified decoder expressions and the proved next-account-address summary. Assumes valid loader allocation/preconditions at successful loads, native object separation and key equality byte semantics. Does not yet connect dispatch Account fields to the run model or establish full memory/SBF preservation."
+  },
+  "metadata.json": {
+    "passed": true,
+    "bindings": [
+      "initialize",
+      "state_size",
+      "signer",
+      "writable",
+      "executable",
+      "owner_equal",
+      "collection_size",
+      "collection_signer",
+      "collection_writable",
+      "collection_executable",
+      "collection_owner_equal",
+      "data_0",
+      "data_1",
+      "data_2",
+      "data_3",
+      "data_4",
+      "data_5",
+      "data_6",
+      "data_7",
+      "data_8",
+      "data_9",
+      "data_10",
+      "data_11",
+      "data_12",
+      "data_13",
+      "data_14",
+      "data_15",
+      "data_16",
+      "data_17",
+      "data_18",
+      "data_19",
+      "data_20",
+      "data_21",
+      "data_22",
+      "data_23",
+      "data_24",
+      "instruction_byte_1",
+      "instruction_byte_2",
+      "instruction_byte_3",
+      "instruction_byte_4",
+      "instruction_byte_5",
+      "instruction_byte_6",
+      "instruction_byte_7",
+      "instruction_byte_8",
+      "instruction_byte_9"
+    ],
+    "claims": [
+      {
+        "name": "state-owner-at-commit",
+        "result": "unsat"
+      },
+      {
+        "name": "state-writable-at-commit",
+        "result": "unsat"
+      },
+      {
+        "name": "state-not-executable-at-commit",
+        "result": "unsat"
+      },
+      {
+        "name": "state-initializer-signed",
+        "result": "unsat"
+      },
+      {
+        "name": "collection-owner-at-commit",
+        "result": "unsat"
+      },
+      {
+        "name": "collection-writable-at-commit",
+        "result": "unsat"
+      },
+      {
+        "name": "collection-not-executable-at-commit",
+        "result": "unsat"
+      },
+      {
+        "name": "collection-initializer-signed",
+        "result": "unsat"
+      }
+    ],
+    "initializingCommitWitness": "sat",
+    "scope": "Exploratory serialized entry-to-run metadata, state bytes and instruction bytes. Retains abstract collection content/header/key/zero observations and record payloads; no complete byte-memory or SBF proof."
+  },
+  "content.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "stored-header",
+        "result": "unsat"
+      },
+      {
+        "name": "stored-state-key",
+        "result": "unsat"
+      },
+      {
+        "name": "stored-length-within-capacity",
+        "result": "unsat"
+      }
+    ],
+    "updateCommitWitness": "sat",
+    "controls": [
+      {
+        "name": "omit-collection_header_matches",
+        "result": "sat"
+      },
+      {
+        "name": "omit-collection_state_key_matches",
+        "result": "sat"
+      },
+      {
+        "name": "omit-collection_stored_length",
+        "result": "sat"
+      }
+    ],
+    "scope": "Exploratory guarded stored-header/key/length binding into qualified collection helper contracts. Allocation-zero and record payloads remain abstract. No full-memory or SBF theorem."
+  },
+  "zero.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "initialization-reaches-zero-check",
+        "result": "unsat"
+      },
+      {
+        "name": "zero-predicate-excludes-arbitrary-nonzero-byte",
+        "result": "unsat"
+      },
+      {
+        "name": "initializing-commit-finite-witness",
+        "result": "sat"
+      },
+      {
+        "name": "concrete-witness-satisfies-quantified-binding",
+        "result": "unsat"
+      },
+      {
+        "name": "update-commit-disables-zero-guard",
+        "result": "unsat"
+      },
+      {
+        "name": "update-commit-still-possible",
+        "result": "sat"
+      },
+      {
+        "name": "missing-allocation-zero-binding",
+        "result": "sat"
+      },
+      {
+        "name": "header-only-zero-binding",
+        "result": "sat"
+      }
+    ],
+    "scope": "Exploratory full-allocation quantified byte predicate bound to qualified open helper contract. All supported lengths remain symbolic in universal claim. Does not itself establish loop termination, memory provenance, record payload binding or SBF correctness."
+  },
+  "records.json": {
+    "passed": true,
+    "claims": [
+      {
+        "name": "record-0-offset",
+        "result": "unsat"
+      },
+      {
+        "name": "record-0-allocation-span",
+        "result": "unsat"
+      },
+      {
+        "name": "record-0-decoded-value",
+        "result": "unsat"
+      },
+      {
+        "name": "record-1-offset",
+        "result": "unsat"
+      },
+      {
+        "name": "record-1-allocation-span",
+        "result": "unsat"
+      },
+      {
+        "name": "record-1-decoded-value",
+        "result": "unsat"
+      },
+      {
+        "name": "second-record-inactive-for-this-selector",
+        "result": "unsat"
+      },
+      {
+        "name": "unchanged-record-reaches-encoded-output",
+        "result": "unsat"
+      },
+      {
+        "name": "active-record-commit-witness",
+        "result": "sat"
+      },
+      {
+        "name": "missing-record-byte-0",
+        "result": "sat"
+      },
+      {
+        "name": "missing-record-byte-1",
+        "result": "sat"
+      },
+      {
+        "name": "missing-record-byte-2",
+        "result": "sat"
+      },
+      {
+        "name": "missing-record-byte-3",
+        "result": "sat"
+      }
+    ],
+    "bindings": 8,
+    "activeBindings": 4,
+    "inactiveBindings": 4,
+    "scope": "Exploratory record byte connection using qualified pointer/helper contracts. Slot1 unreachable for fixture selector. Universal checks drop initialization-zero equation; update witnesses disable its guard. No global pointer provenance, commit-memory or SBF theorem."
+  },
+  "binding-domain.json": {
+    "passed": true,
+    "bindings": 99,
+    "extensionClaims": [
+      "account_count",
+      "load_0",
+      "load_1",
+      "alias_1_0",
+      "load_2",
+      "alias_2_0",
+      "alias_2_1",
+      "instruction_length",
+      "mode",
+      "initialize",
+      "state_size",
+      "signer",
+      "writable",
+      "executable",
+      "owner_equal",
+      "collection_size",
+      "collection_signer",
+      "collection_writable",
+      "collection_executable",
+      "collection_owner_equal",
+      "data_0",
+      "data_1",
+      "data_2",
+      "data_3",
+      "data_4",
+      "data_5",
+      "data_6",
+      "data_7",
+      "data_8",
+      "data_9",
+      "data_10",
+      "data_11",
+      "data_12",
+      "data_13",
+      "data_14",
+      "data_15",
+      "data_16",
+      "data_17",
+      "data_18",
+      "data_19",
+      "data_20",
+      "data_21",
+      "data_22",
+      "data_23",
+      "data_24",
+      "instruction_byte_1",
+      "instruction_byte_2",
+      "instruction_byte_3",
+      "instruction_byte_4",
+      "instruction_byte_5",
+      "instruction_byte_6",
+      "instruction_byte_7",
+      "instruction_byte_8",
+      "instruction_byte_9",
+      "state_decode_initial",
+      "state_decode_stored",
+      "collection_header_matches",
+      "collection_state_key_matches",
+      "collection_stored_length",
+      "collection_allocation_zero",
+      "instruction_decode",
+      "selection_tag",
+      "range_tag",
+      "selector_start",
+      "selection_count",
+      "record_0_byte_0",
+      "record_0_byte_1",
+      "record_0_byte_2",
+      "record_0_byte_3",
+      "record_decode_0",
+      "record_1_byte_0",
+      "record_1_byte_1",
+      "record_1_byte_2",
+      "record_1_byte_3",
+      "record_decode_1",
+      "result_tag",
+      "code",
+      "window_tag",
+      "vector_tag",
+      "pair_tag",
+      "after_start",
+      "written",
+      "next",
+      "state_encode",
+      "encoded_state_byte_0",
+      "encoded_state_byte_1",
+      "encoded_state_byte_2",
+      "encoded_state_byte_3",
+      "encoded_state_byte_4",
+      "record_encode_0",
+      "encoded_record_0_byte_0",
+      "encoded_record_0_byte_1",
+      "encoded_record_0_byte_2",
+      "encoded_record_0_byte_3",
+      "record_encode_1",
+      "encoded_record_1_byte_0",
+      "encoded_record_1_byte_1",
+      "encoded_record_1_byte_2",
+      "encoded_record_1_byte_3"
+    ],
+    "controls": [
+      {
+        "name": "duplicate-output",
+        "reason": "duplicate output"
+      },
+      {
+        "name": "self-dependent-output",
+        "reason": "binding dependency cycle"
+      }
+    ],
+    "scope": "Constructive extension of 99 byte/codec/root binding equations, including quantified zero predicate. Helper outputs remain governed by separately qualified contracts; not a non-vacuity theorem for all memory or helper constraints."
+  },
+  "binding-checks.json": {
+    "passed": true,
+    "extension": "unsat",
+    "independentDispatch": "unsat",
+    "controls": [
+      {
+        "name": "missing-account_count",
+        "result": "sat"
+      },
+      {
+        "name": "missing-load_0",
+        "result": "sat"
+      },
+      {
+        "name": "missing-load_1",
+        "result": "sat"
+      },
+      {
+        "name": "missing-alias_1_0",
+        "result": "sat"
+      },
+      {
+        "name": "missing-load_2",
+        "result": "sat"
+      },
+      {
+        "name": "missing-alias_2_0",
+        "result": "sat"
+      },
+      {
+        "name": "missing-alias_2_1",
+        "result": "sat"
+      },
+      {
+        "name": "missing-instruction_length",
+        "result": "sat"
+      },
+      {
+        "name": "missing-mode",
+        "result": "sat"
+      }
+    ]
+  },
+  "metadata-controls.json": {
+    "passed": true,
+    "controls": [
+      {
+        "name": "missing-owner_equal",
+        "result": "sat"
+      },
+      {
+        "name": "missing-writable",
+        "result": "sat"
+      },
+      {
+        "name": "missing-executable",
+        "result": "sat"
+      },
+      {
+        "name": "missing-signer",
+        "result": "sat"
+      },
+      {
+        "name": "missing-collection_owner_equal",
+        "result": "sat"
+      },
+      {
+        "name": "missing-collection_writable",
+        "result": "sat"
+      },
+      {
+        "name": "missing-collection_executable",
+        "result": "sat"
+      },
+      {
+        "name": "missing-collection_signer",
+        "result": "sat"
+      },
+      {
+        "name": "missing-state_size",
+        "result": "sat"
+      },
+      {
+        "name": "missing-collection_size",
+        "result": "sat"
+      }
+    ]
+  }
+}

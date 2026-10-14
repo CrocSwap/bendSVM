@@ -1,0 +1,3038 @@
+{
+  "token-2": {
+    "fixtureKeys": [
+      "activeTransferWitnesses",
+      "actualEffectObligations",
+      "adapter",
+      "binding",
+      "bindingControls",
+      "codecEvidence",
+      "executorEvidence",
+      "extractionEvidence",
+      "fixture",
+      "properties",
+      "rootCallCount",
+      "rootSafety",
+      "sequenceFrame"
+    ],
+    "exact": {
+      "binding": {
+        "outputs": 33,
+        "rows": 24,
+        "claims": [
+          {
+            "name": "assignments-to-shared-outputs-have-disjoint-guards",
+            "result": "unsat"
+          },
+          {
+            "name": "every-base-input-extends-to-output-and-encoding-bindings",
+            "result": "unsat"
+          }
+        ]
+      },
+      "rootSafety": {
+        "name": "actual-root-C-safety",
+        "result": "unsat",
+        "witness": null
+      },
+      "properties": [
+        {
+          "name": "per-field-increment",
+          "result": "unsat",
+          "witness": null
+        },
+        {
+          "name": "unsigned-cannot-succeed",
+          "result": "unsat",
+          "witness": null
+        },
+        {
+          "name": "custody-success-contract",
+          "result": "unsat",
+          "witness": null
+        }
+      ],
+      "bindingControls": [
+        {
+          "name": "missing-output",
+          "reason": "output inventory"
+        },
+        {
+          "name": "missing-equation",
+          "reason": "equation inventory"
+        },
+        {
+          "name": "circular-value",
+          "reason": "circular value"
+        }
+      ],
+      "rootCallCount": 4,
+      "codecEvidence": {
+        "types": 14,
+        "adtTypes": 12,
+        "constructors": 18,
+        "z3Obligations": 100,
+        "claims": [
+          {
+            "name": "../sdk/context.Key constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 4 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 4 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 5 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 5 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 6 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 6 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 7 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 7 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 4 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 4 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 5 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 5 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 6 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 6 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          }
+        ],
+        "maxWireBytes": 193
+      },
+      "extractionEvidence": {
+        "claims": [
+          {
+            "name": "typed-effect-path-coverage",
+            "result": "unsat"
+          },
+          {
+            "name": "typed-effect-never-rejected",
+            "result": "unsat"
+          },
+          {
+            "name": "typed-effect-path-disjointness",
+            "result": "unsat"
+          },
+          {
+            "name": "None-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-1",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-2",
+            "result": "unsat"
+          },
+          {
+            "name": "CheckMint-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-typed-path-coverage",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-typed-path-disjointness",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-fixed-record-never-rejected",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-slot-0-all-fields",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-slot-1-all-fields",
+            "result": "unsat"
+          }
+        ],
+        "singlePaths": 10,
+        "pluralPaths": 4,
+        "slots": 2,
+        "fieldsPerSlot": 139
+      },
+      "executorEvidence": {
+        "conformance": "complete reviewed token body",
+        "infosCapacity": 12,
+        "metasCapacity": 4,
+        "instructionBytes": 10,
+        "syscalls": 1,
+        "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+      },
+      "actualEffectObligations": {
+        "actual-effects: caller-count": 32,
+        "actual-effects: account and data read bounds": 32,
+        "actual-effects: exact error/success contract": 32,
+        "actual-effects: complete return coverage": 32,
+        "actual-effects: executor-mint-index": 32,
+        "actual-effects: executor-decimals-read": 32,
+        "actual-effects: executor-transfer-indices": 32,
+        "actual-effects: executor-transfer-authority": 32,
+        "actual-effects: managed writable-index exclusion": 64,
+        "actual-effects: sequential durable validation": 32,
+        "actual-effects: sequential decimals preserved": 32,
+        "actual-effects: managed writable-key exclusion": 64,
+        "actual-effects: sequential managed bytes preserved": 64
+      },
+      "sequenceFrame": {
+        "executor": {
+          "conformance": "complete reviewed token body",
+          "infosCapacity": 12,
+          "metasCapacity": 4,
+          "instructionBytes": 10,
+          "syscalls": 1,
+          "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+        },
+        "writableRoles": {
+          "1": [
+            "source",
+            "destination"
+          ],
+          "3": [
+            "mint",
+            "destination"
+          ],
+          "4": [
+            "source",
+            "mint"
+          ]
+        },
+        "byteFrame": {
+          "accounts": [
+            4,
+            12
+          ],
+          "mint": {
+            "size": 82,
+            "spans": [
+              [
+                36,
+                44
+              ]
+            ]
+          },
+          "token": {
+            "size": 165,
+            "spans": [
+              [
+                64,
+                108
+              ],
+              [
+                121,
+                129
+              ]
+            ]
+          },
+          "endExclusive": true
+        }
+      }
+    },
+    "adapterKeys": [
+      "adapterSha256",
+      "claims",
+      "dependencies",
+      "extraction",
+      "files",
+      "fixture",
+      "modelObligations",
+      "negativeModels",
+      "paths",
+      "rawPaths",
+      "seconds",
+      "witnesses"
+    ],
+    "adapterExact": {
+      "paths": 70,
+      "rawPaths": 349,
+      "modelObligations": 1247,
+      "claims": {
+        "ordered-return-contract": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "root-context-before-instruction": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "all-encodes-validation-execution-before-commit": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "no-adapter-writes-on-explicit-failure": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "exact-per-account-header-binding-payload-and-reply": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "encode-source-field-binding": {
+          "result": "unsat",
+          "counterexamples": 0
+        }
+      },
+      "witnesses": {},
+      "negativeModels": [],
+      "dependencies": [
+        "cpi_abi.h",
+        "solana_min.h",
+        "token-2.h",
+        "token-2.wire.h",
+        "token.h"
+      ]
+    },
+    "adapterExtraction": {
+      "passed": true,
+      "kind": "token-v1",
+      "extraction": "checked",
+      "scope": "Restricted-grammar path enumeration of the emitted bend_extract_effect/bend_extract_effects bodies against a schema-derived extraction specification, for the given adapter artifact only",
+      "extractionTokens": 938,
+      "effectType": "bend__2e__2e__2f_sdk_2f_effects_2e_Effect_t",
+      "effectsType": "bend__2e__2e__2f_sdk_2f_effects_2e_Effects_t",
+      "single": {
+        "paths": 10,
+        "successPaths": 4,
+        "variants": [
+          {
+            "tag": 0,
+            "name": "None",
+            "selectorCases": 1,
+            "mapping": {}
+          },
+          {
+            "tag": 1,
+            "name": "Transfer",
+            "selectorCases": 3,
+            "mapping": {
+              "active": "1",
+              "source": "value->as.c1.f0",
+              "destination": "value->as.c1.f1",
+              "mint": "value->as.c1.f2",
+              "authority": "value->as.c1.f6.tag",
+              "recipient": "value->as.c1.f4.tag",
+              "amount": "(u64)value->as.c1.f5.as.c0.f0 | (u64)value->as.c1.f5.as.c0.f1 << 32",
+              "mint_key": {
+                "littleEndianLimbs": [
+                  "value->as.c1.f3.as.c0.f0",
+                  "value->as.c1.f3.as.c0.f1",
+                  "value->as.c1.f3.as.c0.f2",
+                  "value->as.c1.f3.as.c0.f3",
+                  "value->as.c1.f3.as.c0.f4",
+                  "value->as.c1.f3.as.c0.f5",
+                  "value->as.c1.f3.as.c0.f6",
+                  "value->as.c1.f3.as.c0.f7"
+                ]
+              },
+              "recipient_key": {
+                "littleEndianLimbs": [
+                  "value->as.c1.f4.as.c2.f0.as.c0.f0",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f1",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f2",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f3",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f4",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f5",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f6",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f7"
+                ]
+              }
+            }
+          },
+          {
+            "tag": 2,
+            "name": "CheckMint",
+            "selectorCases": 1,
+            "mapping": {
+              "active": "2",
+              "mint": "value->as.c2.f0",
+              "mint_key": {
+                "littleEndianLimbs": [
+                  "value->as.c2.f1.as.c0.f0",
+                  "value->as.c2.f1.as.c0.f1",
+                  "value->as.c2.f1.as.c0.f2",
+                  "value->as.c2.f1.as.c0.f3",
+                  "value->as.c2.f1.as.c0.f4",
+                  "value->as.c2.f1.as.c0.f5",
+                  "value->as.c2.f1.as.c0.f6",
+                  "value->as.c2.f1.as.c0.f7"
+                ]
+              }
+            }
+          }
+        ],
+        "guardedTerms": [
+          "value->as.c1.f4.tag",
+          "value->as.c1.f5.tag",
+          "value->as.c1.f6.tag",
+          "value->tag"
+        ],
+        "uncheckedTerms": [
+          "value->as.c1.f3.tag",
+          "value->as.c1.f4.as.c2.f0.tag",
+          "value->as.c2.f1.tag"
+        ]
+      },
+      "plural": {
+        "paths": 4,
+        "slots": 2,
+        "layout": "fixed",
+        "slotSources": [
+          "value->as.c0.f0",
+          "value->as.c0.f1"
+        ],
+        "guardedTerms": [
+          "value->tag"
+        ],
+        "activeLengths": [
+          2
+        ]
+      },
+      "established": [
+        "Both bodies consist only of the accepted statement forms; every token is accounted for.",
+        "Single function: the whole slot is zeroed before any other statement, so every slot member is initialized on every return (success or failure); every later write is an assignment to a named scalar member or a four-byte write_le inside a named byte array of the same slot object.",
+        "Single function: for every well-formed input the function returns 1 and the slot equals the schema-derived mapping of the input variant (opcode, scalars, key limbs, 64-bit amount, zero elsewhere); every return of 0 is explained by a tag or Bool outside its declared domain.",
+        "Single function: a union member of a multi-variant value is read only after its tag was compared equal.",
+        "Plural function: on return 1 every declared slot is either extracted from its schema-derived source by a successful bend_extract_effect call or, for a vector, zeroed when its index is not below the length; slot indices are constants below the slot count; record tags and the length bound are guarded."
+      ],
+      "runtimeConventions": "active: 0 none, 1 transfer (plain or bound), 2 check-mint, 3 mint, 4 burn; recipient: 0 actor, 1 custody, 2 explicit key; authority: 0 actor, 1 custody (mint is pinned to custody, burn to actor); source_bound/destination_bound: 0 any, 1 exact key; keys are eight little-endian 32-bit limbs a..h; amount = lo | hi << 32.",
+      "dependencies": {
+        "includeClosure": [
+          "cpi_abi.h",
+          "solana_min.h",
+          "token-2.h",
+          "token-2.wire.h",
+          "token.h"
+        ],
+        "nativeHeader": "token-2.h",
+        "nativeTypedefsAudited": 6,
+        "slotStruct": "BendTransfer",
+        "slotBytes": 176,
+        "slotPaddingBytes": 0,
+        "layoutBasis": "Derived from reviewed declarations under natural alignment of 8/32/64-bit unsigned types",
+        "sha256": {
+          "cpi_abi.h": "9b12c41fcbd451072ad74fc3335e3b40e9a7daa77c6347bffefc77601155325a",
+          "solana_min.h": "103aa5bd910cf4f0b29dbe8d1b956a6bb7d6cb90e79f156a17857a05b18b8b06",
+          "token-2.h": "ec45c2836c1f28a474de57dd885361d1a9a9002231f94929e518955f088bcf59",
+          "token-2.wire.h": "7e6f894502ff99e16996fa7febbc65537988a8370d7b5c050e9ba27acbe6c9a9",
+          "token.h": "104fa93b072218a955eca1c00c1f1a3aad1c8b46172972cfea7981ef990275c0"
+        },
+        "slotMembers": {
+          "active": {
+            "type": "u32",
+            "offset": 0
+          },
+          "source": {
+            "type": "u32",
+            "offset": 4
+          },
+          "destination": {
+            "type": "u32",
+            "offset": 8
+          },
+          "mint": {
+            "type": "u32",
+            "offset": 12
+          },
+          "authority": {
+            "type": "u32",
+            "offset": 16
+          },
+          "recipient": {
+            "type": "u32",
+            "offset": 20
+          },
+          "mint_key": {
+            "type": "u8[32]",
+            "offset": 24
+          },
+          "recipient_key": {
+            "type": "u8[32]",
+            "offset": 56
+          },
+          "amount": {
+            "type": "u64",
+            "offset": 88
+          },
+          "initialize": {
+            "type": "u32",
+            "offset": 96
+          },
+          "source_bound": {
+            "type": "u32",
+            "offset": 100
+          },
+          "destination_bound": {
+            "type": "u32",
+            "offset": 104
+          },
+          "fresh_destination": {
+            "type": "u32",
+            "offset": 108
+          },
+          "source_key": {
+            "type": "u8[32]",
+            "offset": 112
+          },
+          "destination_key": {
+            "type": "u8[32]",
+            "offset": 144
+          }
+        },
+        "writeLe": "exact body audited; summarized as p[i] = (u8)(v >> 8*i) for i < n"
+      },
+      "preconditions": [
+        "The input is a well-formed checked native value of the schema type: every ADT tag is a declared variant tag, every Bool is 0 or 1, and the union member of the tagged variant holds initialized fields. Behavior on a malformed tag or Bool is reported only where the emitted code was found to reject it (guardedTerms); the terms listed under uncheckedTerms are read without validation and rely on this precondition.",
+        "`value` points to a valid readable object of the recorded native type and `out` to a valid writable slot object (plural function: an array of at least `slots` slot objects). Input and output objects are disjoint.",
+        "unsigned char/unsigned int/unsigned long long are 8/32/64 bits (asserted by the audited headers)."
+      ],
+      "limitations": [
+        "Not a C semantics: the grammar, the abstract interpreter, the integer-conversion rules it admits and the schema-to-typedef bridge are trusted, reviewed code. The checker itself is not verified.",
+        "Clang/LLD/SBF preservation, stack use and compute budget are out of scope.",
+        "Only extraction is covered. Custody setup, effect validation/execution, syscalls, CPI and the adapter entrypoint (including how it calls extraction and whether it reads slots after a failed extraction) are not.",
+        "On a FAILED extraction only the single function guarantees an initialized slot; the plural function may leave later slots unwritten. Callers must not read slots after failure.",
+        "Whether the opcode/field conventions match what token.h/bend_cpi.h validation and execution expect is pinned here by review of those headers (RUNTIME_CONVENTIONS), not proved.",
+        "Macro interference is excluded only for macros defined in the recorded include closure; command-line definitions are assumed absent."
+      ],
+      "trustedBridge": "Exact reviewed text (conformance): slot struct typedefs in token.h/bend_cpi.h, write_le and the integer typedefs in solana_min.h, bend_u32, and one schema-generated typedef per native type reachable from the effects type. write_le(p, v, n) is summarized from its audited body as p[i] = byte i of v for i < n. Parsed and interpreted: every token of both extraction bodies."
+    }
+  },
+  "token-3": {
+    "fixtureKeys": [
+      "activeTransferWitnesses",
+      "actualEffectObligations",
+      "adapter",
+      "binding",
+      "bindingControls",
+      "codecEvidence",
+      "executorEvidence",
+      "extractionEvidence",
+      "fixture",
+      "properties",
+      "rootCallCount",
+      "rootSafety",
+      "sequenceFrame"
+    ],
+    "exact": {
+      "binding": {
+        "outputs": 44,
+        "rows": 56,
+        "claims": [
+          {
+            "name": "assignments-to-shared-outputs-have-disjoint-guards",
+            "result": "unsat"
+          },
+          {
+            "name": "every-base-input-extends-to-output-and-encoding-bindings",
+            "result": "unsat"
+          }
+        ]
+      },
+      "rootSafety": {
+        "name": "actual-root-C-safety",
+        "result": "unsat",
+        "witness": null
+      },
+      "properties": [
+        {
+          "name": "per-field-increment",
+          "result": "unsat",
+          "witness": null
+        },
+        {
+          "name": "unsigned-cannot-succeed",
+          "result": "unsat",
+          "witness": null
+        },
+        {
+          "name": "custody-success-contract",
+          "result": "unsat",
+          "witness": null
+        }
+      ],
+      "bindingControls": [
+        {
+          "name": "missing-output",
+          "reason": "output inventory"
+        },
+        {
+          "name": "missing-equation",
+          "reason": "equation inventory"
+        },
+        {
+          "name": "circular-value",
+          "reason": "circular value"
+        }
+      ],
+      "rootCallCount": 8,
+      "codecEvidence": {
+        "types": 15,
+        "adtTypes": 13,
+        "constructors": 19,
+        "z3Obligations": 106,
+        "claims": [
+          {
+            "name": "../sdk/context.Key constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 4 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 4 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 5 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 5 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 6 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 6 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 7 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 7 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 4 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 4 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 5 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 5 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 6 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 6 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          }
+        ],
+        "maxWireBytes": 198
+      },
+      "extractionEvidence": {
+        "claims": [
+          {
+            "name": "typed-effect-path-coverage",
+            "result": "unsat"
+          },
+          {
+            "name": "typed-effect-never-rejected",
+            "result": "unsat"
+          },
+          {
+            "name": "typed-effect-path-disjointness",
+            "result": "unsat"
+          },
+          {
+            "name": "None-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-1",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-2",
+            "result": "unsat"
+          },
+          {
+            "name": "CheckMint-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-typed-path-coverage",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-typed-path-disjointness",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-fixed-record-never-rejected",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-slot-0-all-fields",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-slot-1-all-fields",
+            "result": "unsat"
+          }
+        ],
+        "singlePaths": 10,
+        "pluralPaths": 4,
+        "slots": 2,
+        "fieldsPerSlot": 139
+      },
+      "executorEvidence": {
+        "conformance": "complete reviewed token body",
+        "infosCapacity": 12,
+        "metasCapacity": 4,
+        "instructionBytes": 10,
+        "syscalls": 1,
+        "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+      },
+      "actualEffectObligations": {
+        "actual-effects: caller-count": 128,
+        "actual-effects: account and data read bounds": 128,
+        "actual-effects: exact error/success contract": 128,
+        "actual-effects: complete return coverage": 128,
+        "actual-effects: executor-mint-index": 128,
+        "actual-effects: executor-decimals-read": 128,
+        "actual-effects: executor-transfer-indices": 128,
+        "actual-effects: executor-transfer-authority": 128,
+        "actual-effects: managed writable-index exclusion": 384,
+        "actual-effects: sequential durable validation": 128,
+        "actual-effects: sequential decimals preserved": 128,
+        "actual-effects: managed writable-key exclusion": 384,
+        "actual-effects: sequential managed bytes preserved": 384
+      },
+      "sequenceFrame": {
+        "executor": {
+          "conformance": "complete reviewed token body",
+          "infosCapacity": 12,
+          "metasCapacity": 4,
+          "instructionBytes": 10,
+          "syscalls": 1,
+          "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+        },
+        "writableRoles": {
+          "1": [
+            "source",
+            "destination"
+          ],
+          "3": [
+            "mint",
+            "destination"
+          ],
+          "4": [
+            "source",
+            "mint"
+          ]
+        },
+        "byteFrame": {
+          "accounts": [
+            4,
+            12
+          ],
+          "mint": {
+            "size": 82,
+            "spans": [
+              [
+                36,
+                44
+              ]
+            ]
+          },
+          "token": {
+            "size": 165,
+            "spans": [
+              [
+                64,
+                108
+              ],
+              [
+                121,
+                129
+              ]
+            ]
+          },
+          "endExclusive": true
+        }
+      }
+    },
+    "adapterKeys": [
+      "adapterSha256",
+      "claims",
+      "dependencies",
+      "extraction",
+      "files",
+      "fixture",
+      "modelObligations",
+      "negativeModels",
+      "paths",
+      "rawPaths",
+      "seconds",
+      "witnesses"
+    ],
+    "adapterExact": {
+      "paths": 148,
+      "rawPaths": 741,
+      "modelObligations": 3911,
+      "claims": {
+        "ordered-return-contract": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "root-context-before-instruction": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "all-encodes-validation-execution-before-commit": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "no-adapter-writes-on-explicit-failure": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "exact-per-account-header-binding-payload-and-reply": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "encode-source-field-binding": {
+          "result": "unsat",
+          "counterexamples": 0
+        }
+      },
+      "witnesses": {},
+      "negativeModels": [],
+      "dependencies": [
+        "cpi_abi.h",
+        "solana_min.h",
+        "token-3.h",
+        "token-3.wire.h",
+        "token.h"
+      ]
+    },
+    "adapterExtraction": {
+      "passed": true,
+      "kind": "token-v1",
+      "extraction": "checked",
+      "scope": "Restricted-grammar path enumeration of the emitted bend_extract_effect/bend_extract_effects bodies against a schema-derived extraction specification, for the given adapter artifact only",
+      "extractionTokens": 938,
+      "effectType": "bend__2e__2e__2f_sdk_2f_effects_2e_Effect_t",
+      "effectsType": "bend__2e__2e__2f_sdk_2f_effects_2e_Effects_t",
+      "single": {
+        "paths": 10,
+        "successPaths": 4,
+        "variants": [
+          {
+            "tag": 0,
+            "name": "None",
+            "selectorCases": 1,
+            "mapping": {}
+          },
+          {
+            "tag": 1,
+            "name": "Transfer",
+            "selectorCases": 3,
+            "mapping": {
+              "active": "1",
+              "source": "value->as.c1.f0",
+              "destination": "value->as.c1.f1",
+              "mint": "value->as.c1.f2",
+              "authority": "value->as.c1.f6.tag",
+              "recipient": "value->as.c1.f4.tag",
+              "amount": "(u64)value->as.c1.f5.as.c0.f0 | (u64)value->as.c1.f5.as.c0.f1 << 32",
+              "mint_key": {
+                "littleEndianLimbs": [
+                  "value->as.c1.f3.as.c0.f0",
+                  "value->as.c1.f3.as.c0.f1",
+                  "value->as.c1.f3.as.c0.f2",
+                  "value->as.c1.f3.as.c0.f3",
+                  "value->as.c1.f3.as.c0.f4",
+                  "value->as.c1.f3.as.c0.f5",
+                  "value->as.c1.f3.as.c0.f6",
+                  "value->as.c1.f3.as.c0.f7"
+                ]
+              },
+              "recipient_key": {
+                "littleEndianLimbs": [
+                  "value->as.c1.f4.as.c2.f0.as.c0.f0",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f1",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f2",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f3",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f4",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f5",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f6",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f7"
+                ]
+              }
+            }
+          },
+          {
+            "tag": 2,
+            "name": "CheckMint",
+            "selectorCases": 1,
+            "mapping": {
+              "active": "2",
+              "mint": "value->as.c2.f0",
+              "mint_key": {
+                "littleEndianLimbs": [
+                  "value->as.c2.f1.as.c0.f0",
+                  "value->as.c2.f1.as.c0.f1",
+                  "value->as.c2.f1.as.c0.f2",
+                  "value->as.c2.f1.as.c0.f3",
+                  "value->as.c2.f1.as.c0.f4",
+                  "value->as.c2.f1.as.c0.f5",
+                  "value->as.c2.f1.as.c0.f6",
+                  "value->as.c2.f1.as.c0.f7"
+                ]
+              }
+            }
+          }
+        ],
+        "guardedTerms": [
+          "value->as.c1.f4.tag",
+          "value->as.c1.f5.tag",
+          "value->as.c1.f6.tag",
+          "value->tag"
+        ],
+        "uncheckedTerms": [
+          "value->as.c1.f3.tag",
+          "value->as.c1.f4.as.c2.f0.tag",
+          "value->as.c2.f1.tag"
+        ]
+      },
+      "plural": {
+        "paths": 4,
+        "slots": 2,
+        "layout": "fixed",
+        "slotSources": [
+          "value->as.c0.f0",
+          "value->as.c0.f1"
+        ],
+        "guardedTerms": [
+          "value->tag"
+        ],
+        "activeLengths": [
+          2
+        ]
+      },
+      "established": [
+        "Both bodies consist only of the accepted statement forms; every token is accounted for.",
+        "Single function: the whole slot is zeroed before any other statement, so every slot member is initialized on every return (success or failure); every later write is an assignment to a named scalar member or a four-byte write_le inside a named byte array of the same slot object.",
+        "Single function: for every well-formed input the function returns 1 and the slot equals the schema-derived mapping of the input variant (opcode, scalars, key limbs, 64-bit amount, zero elsewhere); every return of 0 is explained by a tag or Bool outside its declared domain.",
+        "Single function: a union member of a multi-variant value is read only after its tag was compared equal.",
+        "Plural function: on return 1 every declared slot is either extracted from its schema-derived source by a successful bend_extract_effect call or, for a vector, zeroed when its index is not below the length; slot indices are constants below the slot count; record tags and the length bound are guarded."
+      ],
+      "runtimeConventions": "active: 0 none, 1 transfer (plain or bound), 2 check-mint, 3 mint, 4 burn; recipient: 0 actor, 1 custody, 2 explicit key; authority: 0 actor, 1 custody (mint is pinned to custody, burn to actor); source_bound/destination_bound: 0 any, 1 exact key; keys are eight little-endian 32-bit limbs a..h; amount = lo | hi << 32.",
+      "dependencies": {
+        "includeClosure": [
+          "cpi_abi.h",
+          "solana_min.h",
+          "token-3.h",
+          "token-3.wire.h",
+          "token.h"
+        ],
+        "nativeHeader": "token-3.h",
+        "nativeTypedefsAudited": 6,
+        "slotStruct": "BendTransfer",
+        "slotBytes": 176,
+        "slotPaddingBytes": 0,
+        "layoutBasis": "Derived from reviewed declarations under natural alignment of 8/32/64-bit unsigned types",
+        "sha256": {
+          "cpi_abi.h": "9b12c41fcbd451072ad74fc3335e3b40e9a7daa77c6347bffefc77601155325a",
+          "solana_min.h": "103aa5bd910cf4f0b29dbe8d1b956a6bb7d6cb90e79f156a17857a05b18b8b06",
+          "token-3.h": "95b74e3cb96b5cadb3c7c2b3236f0a36badb9e4ead9a9ee9a72da49ec5462f29",
+          "token-3.wire.h": "72262a1adee34dbf09bb7dd0e9f8922a77ee79b604169cdfafdf313df61884f6",
+          "token.h": "104fa93b072218a955eca1c00c1f1a3aad1c8b46172972cfea7981ef990275c0"
+        },
+        "slotMembers": {
+          "active": {
+            "type": "u32",
+            "offset": 0
+          },
+          "source": {
+            "type": "u32",
+            "offset": 4
+          },
+          "destination": {
+            "type": "u32",
+            "offset": 8
+          },
+          "mint": {
+            "type": "u32",
+            "offset": 12
+          },
+          "authority": {
+            "type": "u32",
+            "offset": 16
+          },
+          "recipient": {
+            "type": "u32",
+            "offset": 20
+          },
+          "mint_key": {
+            "type": "u8[32]",
+            "offset": 24
+          },
+          "recipient_key": {
+            "type": "u8[32]",
+            "offset": 56
+          },
+          "amount": {
+            "type": "u64",
+            "offset": 88
+          },
+          "initialize": {
+            "type": "u32",
+            "offset": 96
+          },
+          "source_bound": {
+            "type": "u32",
+            "offset": 100
+          },
+          "destination_bound": {
+            "type": "u32",
+            "offset": 104
+          },
+          "fresh_destination": {
+            "type": "u32",
+            "offset": 108
+          },
+          "source_key": {
+            "type": "u8[32]",
+            "offset": 112
+          },
+          "destination_key": {
+            "type": "u8[32]",
+            "offset": 144
+          }
+        },
+        "writeLe": "exact body audited; summarized as p[i] = (u8)(v >> 8*i) for i < n"
+      },
+      "preconditions": [
+        "The input is a well-formed checked native value of the schema type: every ADT tag is a declared variant tag, every Bool is 0 or 1, and the union member of the tagged variant holds initialized fields. Behavior on a malformed tag or Bool is reported only where the emitted code was found to reject it (guardedTerms); the terms listed under uncheckedTerms are read without validation and rely on this precondition.",
+        "`value` points to a valid readable object of the recorded native type and `out` to a valid writable slot object (plural function: an array of at least `slots` slot objects). Input and output objects are disjoint.",
+        "unsigned char/unsigned int/unsigned long long are 8/32/64 bits (asserted by the audited headers)."
+      ],
+      "limitations": [
+        "Not a C semantics: the grammar, the abstract interpreter, the integer-conversion rules it admits and the schema-to-typedef bridge are trusted, reviewed code. The checker itself is not verified.",
+        "Clang/LLD/SBF preservation, stack use and compute budget are out of scope.",
+        "Only extraction is covered. Custody setup, effect validation/execution, syscalls, CPI and the adapter entrypoint (including how it calls extraction and whether it reads slots after a failed extraction) are not.",
+        "On a FAILED extraction only the single function guarantees an initialized slot; the plural function may leave later slots unwritten. Callers must not read slots after failure.",
+        "Whether the opcode/field conventions match what token.h/bend_cpi.h validation and execution expect is pinned here by review of those headers (RUNTIME_CONVENTIONS), not proved.",
+        "Macro interference is excluded only for macros defined in the recorded include closure; command-line definitions are assumed absent."
+      ],
+      "trustedBridge": "Exact reviewed text (conformance): slot struct typedefs in token.h/bend_cpi.h, write_le and the integer typedefs in solana_min.h, bend_u32, and one schema-generated typedef per native type reachable from the effects type. write_le(p, v, n) is summarized from its audited body as p[i] = byte i of v for i < n. Parsed and interpreted: every token of both extraction bodies."
+    }
+  },
+  "token-4": {
+    "fixtureKeys": [
+      "activeTransferWitnesses",
+      "actualEffectObligations",
+      "adapter",
+      "binding",
+      "bindingControls",
+      "codecEvidence",
+      "executorEvidence",
+      "extractionEvidence",
+      "fixture",
+      "properties",
+      "rootCallCount",
+      "rootSafety",
+      "sequenceFrame"
+    ],
+    "exact": {
+      "binding": {
+        "outputs": 55,
+        "rows": 128,
+        "claims": [
+          {
+            "name": "assignments-to-shared-outputs-have-disjoint-guards",
+            "result": "unsat"
+          },
+          {
+            "name": "every-base-input-extends-to-output-and-encoding-bindings",
+            "result": "unsat"
+          }
+        ]
+      },
+      "rootSafety": {
+        "name": "actual-root-C-safety",
+        "result": "unsat",
+        "witness": null
+      },
+      "properties": [
+        {
+          "name": "per-field-increment",
+          "result": "unsat",
+          "witness": null
+        },
+        {
+          "name": "unsigned-cannot-succeed",
+          "result": "unsat",
+          "witness": null
+        },
+        {
+          "name": "custody-success-contract",
+          "result": "unsat",
+          "witness": null
+        }
+      ],
+      "bindingControls": [
+        {
+          "name": "missing-output",
+          "reason": "output inventory"
+        },
+        {
+          "name": "missing-equation",
+          "reason": "equation inventory"
+        },
+        {
+          "name": "circular-value",
+          "reason": "circular value"
+        }
+      ],
+      "rootCallCount": 16,
+      "codecEvidence": {
+        "types": 16,
+        "adtTypes": 14,
+        "constructors": 20,
+        "z3Obligations": 112,
+        "claims": [
+          {
+            "name": "../sdk/context.Key constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 4 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 4 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 5 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 5 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 6 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 6 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 7 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 field 7 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Key constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/math.U64 constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/context.Context constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FirstCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "SecondCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "ThirdCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FourthCounter constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FourthCounter constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FourthCounter constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "FourthCounter constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "State constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Instruction constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Recipient constructor 2 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Authority constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 2 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 2 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 3 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 3 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 4 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 4 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 5 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 5 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 6 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 field 6 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effect constructor 2 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "../sdk/effects.Effects constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 1 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 field 1 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 0 all-zero canonical value",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 field 0 address relation",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 field 0 bounds",
+            "result": "unsat",
+            "premise": "sat"
+          },
+          {
+            "name": "Outcome constructor 1 canonical byte assembly",
+            "result": "unsat",
+            "premise": "sat"
+          }
+        ],
+        "maxWireBytes": 203
+      },
+      "extractionEvidence": {
+        "claims": [
+          {
+            "name": "typed-effect-path-coverage",
+            "result": "unsat"
+          },
+          {
+            "name": "typed-effect-never-rejected",
+            "result": "unsat"
+          },
+          {
+            "name": "typed-effect-path-disjointness",
+            "result": "unsat"
+          },
+          {
+            "name": "None-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-1",
+            "result": "unsat"
+          },
+          {
+            "name": "Transfer-mapping-2",
+            "result": "unsat"
+          },
+          {
+            "name": "CheckMint-mapping-0",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-typed-path-coverage",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-typed-path-disjointness",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-fixed-record-never-rejected",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-slot-0-all-fields",
+            "result": "unsat"
+          },
+          {
+            "name": "plural-slot-1-all-fields",
+            "result": "unsat"
+          }
+        ],
+        "singlePaths": 10,
+        "pluralPaths": 4,
+        "slots": 2,
+        "fieldsPerSlot": 139
+      },
+      "executorEvidence": {
+        "conformance": "complete reviewed token body",
+        "infosCapacity": 12,
+        "metasCapacity": 4,
+        "instructionBytes": 10,
+        "syscalls": 1,
+        "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+      },
+      "actualEffectObligations": {
+        "actual-effects: caller-count": 512,
+        "actual-effects: account and data read bounds": 512,
+        "actual-effects: exact error/success contract": 512,
+        "actual-effects: complete return coverage": 512,
+        "actual-effects: executor-mint-index": 512,
+        "actual-effects: executor-decimals-read": 512,
+        "actual-effects: executor-transfer-indices": 512,
+        "actual-effects: executor-transfer-authority": 512,
+        "actual-effects: managed writable-index exclusion": 2048,
+        "actual-effects: sequential durable validation": 512,
+        "actual-effects: sequential decimals preserved": 512,
+        "actual-effects: managed writable-key exclusion": 2048,
+        "actual-effects: sequential managed bytes preserved": 2048
+      },
+      "sequenceFrame": {
+        "executor": {
+          "conformance": "complete reviewed token body",
+          "infosCapacity": 12,
+          "metasCapacity": 4,
+          "instructionBytes": 10,
+          "syscalls": 1,
+          "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+        },
+        "writableRoles": {
+          "1": [
+            "source",
+            "destination"
+          ],
+          "3": [
+            "mint",
+            "destination"
+          ],
+          "4": [
+            "source",
+            "mint"
+          ]
+        },
+        "byteFrame": {
+          "accounts": [
+            4,
+            12
+          ],
+          "mint": {
+            "size": 82,
+            "spans": [
+              [
+                36,
+                44
+              ]
+            ]
+          },
+          "token": {
+            "size": 165,
+            "spans": [
+              [
+                64,
+                108
+              ],
+              [
+                121,
+                129
+              ]
+            ]
+          },
+          "endExclusive": true
+        }
+      }
+    },
+    "adapterKeys": [
+      "adapterSha256",
+      "claims",
+      "dependencies",
+      "extraction",
+      "files",
+      "fixture",
+      "modelObligations",
+      "negativeModels",
+      "paths",
+      "rawPaths",
+      "seconds",
+      "witnesses"
+    ],
+    "adapterExact": {
+      "paths": 312,
+      "rawPaths": 1533,
+      "modelObligations": 14287,
+      "claims": {
+        "ordered-return-contract": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "root-context-before-instruction": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "all-encodes-validation-execution-before-commit": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "no-adapter-writes-on-explicit-failure": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "exact-per-account-header-binding-payload-and-reply": {
+          "result": "unsat",
+          "counterexamples": 0
+        },
+        "encode-source-field-binding": {
+          "result": "unsat",
+          "counterexamples": 0
+        }
+      },
+      "witnesses": {},
+      "negativeModels": [],
+      "dependencies": [
+        "cpi_abi.h",
+        "solana_min.h",
+        "token-4.h",
+        "token-4.wire.h",
+        "token.h"
+      ]
+    },
+    "adapterExtraction": {
+      "passed": true,
+      "kind": "token-v1",
+      "extraction": "checked",
+      "scope": "Restricted-grammar path enumeration of the emitted bend_extract_effect/bend_extract_effects bodies against a schema-derived extraction specification, for the given adapter artifact only",
+      "extractionTokens": 938,
+      "effectType": "bend__2e__2e__2f_sdk_2f_effects_2e_Effect_t",
+      "effectsType": "bend__2e__2e__2f_sdk_2f_effects_2e_Effects_t",
+      "single": {
+        "paths": 10,
+        "successPaths": 4,
+        "variants": [
+          {
+            "tag": 0,
+            "name": "None",
+            "selectorCases": 1,
+            "mapping": {}
+          },
+          {
+            "tag": 1,
+            "name": "Transfer",
+            "selectorCases": 3,
+            "mapping": {
+              "active": "1",
+              "source": "value->as.c1.f0",
+              "destination": "value->as.c1.f1",
+              "mint": "value->as.c1.f2",
+              "authority": "value->as.c1.f6.tag",
+              "recipient": "value->as.c1.f4.tag",
+              "amount": "(u64)value->as.c1.f5.as.c0.f0 | (u64)value->as.c1.f5.as.c0.f1 << 32",
+              "mint_key": {
+                "littleEndianLimbs": [
+                  "value->as.c1.f3.as.c0.f0",
+                  "value->as.c1.f3.as.c0.f1",
+                  "value->as.c1.f3.as.c0.f2",
+                  "value->as.c1.f3.as.c0.f3",
+                  "value->as.c1.f3.as.c0.f4",
+                  "value->as.c1.f3.as.c0.f5",
+                  "value->as.c1.f3.as.c0.f6",
+                  "value->as.c1.f3.as.c0.f7"
+                ]
+              },
+              "recipient_key": {
+                "littleEndianLimbs": [
+                  "value->as.c1.f4.as.c2.f0.as.c0.f0",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f1",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f2",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f3",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f4",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f5",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f6",
+                  "value->as.c1.f4.as.c2.f0.as.c0.f7"
+                ]
+              }
+            }
+          },
+          {
+            "tag": 2,
+            "name": "CheckMint",
+            "selectorCases": 1,
+            "mapping": {
+              "active": "2",
+              "mint": "value->as.c2.f0",
+              "mint_key": {
+                "littleEndianLimbs": [
+                  "value->as.c2.f1.as.c0.f0",
+                  "value->as.c2.f1.as.c0.f1",
+                  "value->as.c2.f1.as.c0.f2",
+                  "value->as.c2.f1.as.c0.f3",
+                  "value->as.c2.f1.as.c0.f4",
+                  "value->as.c2.f1.as.c0.f5",
+                  "value->as.c2.f1.as.c0.f6",
+                  "value->as.c2.f1.as.c0.f7"
+                ]
+              }
+            }
+          }
+        ],
+        "guardedTerms": [
+          "value->as.c1.f4.tag",
+          "value->as.c1.f5.tag",
+          "value->as.c1.f6.tag",
+          "value->tag"
+        ],
+        "uncheckedTerms": [
+          "value->as.c1.f3.tag",
+          "value->as.c1.f4.as.c2.f0.tag",
+          "value->as.c2.f1.tag"
+        ]
+      },
+      "plural": {
+        "paths": 4,
+        "slots": 2,
+        "layout": "fixed",
+        "slotSources": [
+          "value->as.c0.f0",
+          "value->as.c0.f1"
+        ],
+        "guardedTerms": [
+          "value->tag"
+        ],
+        "activeLengths": [
+          2
+        ]
+      },
+      "established": [
+        "Both bodies consist only of the accepted statement forms; every token is accounted for.",
+        "Single function: the whole slot is zeroed before any other statement, so every slot member is initialized on every return (success or failure); every later write is an assignment to a named scalar member or a four-byte write_le inside a named byte array of the same slot object.",
+        "Single function: for every well-formed input the function returns 1 and the slot equals the schema-derived mapping of the input variant (opcode, scalars, key limbs, 64-bit amount, zero elsewhere); every return of 0 is explained by a tag or Bool outside its declared domain.",
+        "Single function: a union member of a multi-variant value is read only after its tag was compared equal.",
+        "Plural function: on return 1 every declared slot is either extracted from its schema-derived source by a successful bend_extract_effect call or, for a vector, zeroed when its index is not below the length; slot indices are constants below the slot count; record tags and the length bound are guarded."
+      ],
+      "runtimeConventions": "active: 0 none, 1 transfer (plain or bound), 2 check-mint, 3 mint, 4 burn; recipient: 0 actor, 1 custody, 2 explicit key; authority: 0 actor, 1 custody (mint is pinned to custody, burn to actor); source_bound/destination_bound: 0 any, 1 exact key; keys are eight little-endian 32-bit limbs a..h; amount = lo | hi << 32.",
+      "dependencies": {
+        "includeClosure": [
+          "cpi_abi.h",
+          "solana_min.h",
+          "token-4.h",
+          "token-4.wire.h",
+          "token.h"
+        ],
+        "nativeHeader": "token-4.h",
+        "nativeTypedefsAudited": 6,
+        "slotStruct": "BendTransfer",
+        "slotBytes": 176,
+        "slotPaddingBytes": 0,
+        "layoutBasis": "Derived from reviewed declarations under natural alignment of 8/32/64-bit unsigned types",
+        "sha256": {
+          "cpi_abi.h": "9b12c41fcbd451072ad74fc3335e3b40e9a7daa77c6347bffefc77601155325a",
+          "solana_min.h": "103aa5bd910cf4f0b29dbe8d1b956a6bb7d6cb90e79f156a17857a05b18b8b06",
+          "token-4.h": "aa43932026babbf975958522824554ad1c24dc850c81815b64421751e0f7ee50",
+          "token-4.wire.h": "93d32e26ad9828129c1ad5af1200c2e6bdd8d0acd46b204e80dd84654d9018e8",
+          "token.h": "104fa93b072218a955eca1c00c1f1a3aad1c8b46172972cfea7981ef990275c0"
+        },
+        "slotMembers": {
+          "active": {
+            "type": "u32",
+            "offset": 0
+          },
+          "source": {
+            "type": "u32",
+            "offset": 4
+          },
+          "destination": {
+            "type": "u32",
+            "offset": 8
+          },
+          "mint": {
+            "type": "u32",
+            "offset": 12
+          },
+          "authority": {
+            "type": "u32",
+            "offset": 16
+          },
+          "recipient": {
+            "type": "u32",
+            "offset": 20
+          },
+          "mint_key": {
+            "type": "u8[32]",
+            "offset": 24
+          },
+          "recipient_key": {
+            "type": "u8[32]",
+            "offset": 56
+          },
+          "amount": {
+            "type": "u64",
+            "offset": 88
+          },
+          "initialize": {
+            "type": "u32",
+            "offset": 96
+          },
+          "source_bound": {
+            "type": "u32",
+            "offset": 100
+          },
+          "destination_bound": {
+            "type": "u32",
+            "offset": 104
+          },
+          "fresh_destination": {
+            "type": "u32",
+            "offset": 108
+          },
+          "source_key": {
+            "type": "u8[32]",
+            "offset": 112
+          },
+          "destination_key": {
+            "type": "u8[32]",
+            "offset": 144
+          }
+        },
+        "writeLe": "exact body audited; summarized as p[i] = (u8)(v >> 8*i) for i < n"
+      },
+      "preconditions": [
+        "The input is a well-formed checked native value of the schema type: every ADT tag is a declared variant tag, every Bool is 0 or 1, and the union member of the tagged variant holds initialized fields. Behavior on a malformed tag or Bool is reported only where the emitted code was found to reject it (guardedTerms); the terms listed under uncheckedTerms are read without validation and rely on this precondition.",
+        "`value` points to a valid readable object of the recorded native type and `out` to a valid writable slot object (plural function: an array of at least `slots` slot objects). Input and output objects are disjoint.",
+        "unsigned char/unsigned int/unsigned long long are 8/32/64 bits (asserted by the audited headers)."
+      ],
+      "limitations": [
+        "Not a C semantics: the grammar, the abstract interpreter, the integer-conversion rules it admits and the schema-to-typedef bridge are trusted, reviewed code. The checker itself is not verified.",
+        "Clang/LLD/SBF preservation, stack use and compute budget are out of scope.",
+        "Only extraction is covered. Custody setup, effect validation/execution, syscalls, CPI and the adapter entrypoint (including how it calls extraction and whether it reads slots after a failed extraction) are not.",
+        "On a FAILED extraction only the single function guarantees an initialized slot; the plural function may leave later slots unwritten. Callers must not read slots after failure.",
+        "Whether the opcode/field conventions match what token.h/bend_cpi.h validation and execution expect is pinned here by review of those headers (RUNTIME_CONVENTIONS), not proved.",
+        "Macro interference is excluded only for macros defined in the recorded include closure; command-line definitions are assumed absent."
+      ],
+      "trustedBridge": "Exact reviewed text (conformance): slot struct typedefs in token.h/bend_cpi.h, write_le and the integer typedefs in solana_min.h, bend_u32, and one schema-generated typedef per native type reachable from the effects type. write_le(p, v, n) is summarized from its audited body as p[i] = byte i of v for i < n. Parsed and interpreted: every token of both extraction bodies."
+    }
+  }
+}

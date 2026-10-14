@@ -292,7 +292,7 @@ def prove(program_path,pricing_path,sqrt_path,math_path,wide_path,sqrt_math_path
     prices=pricing_proof(pricing_path,math_path,wide_path)
     assert len(prices['claims'])==11 and all(c['result']=='unsat' for c in prices['claims']), 'Pricing proof failed: '+str([(c['claim'],c['result'],c.get('reason')) for c in prices['claims'] if c['result']!='unsat'])
     roots=sqrt_proof(sqrt_path,sqrt_math_path,sqrt_wide_path)
-    assert len(roots['claims'])==69 and all(c['result']=='unsat' for c in roots['claims']), 'Square-root proof failed: '+str([(c['claim'],c['result'],c.get('reason')) for c in roots['claims'] if c['result']!='unsat'])
+    assert len(roots['claims'])==71 and all(c['result']=='unsat' for c in roots['claims']), 'Square-root proof failed: '+str([(c['claim'],c['result'],c.get('reason')) for c in roots['claims'] if c['result']!='unsat'])
     keys=key_equality(program)
     assert keys['result']=='unsat','Key equality proof failed'
     return {'schema':schema,'bindings':bindings,'pricing':prices,'sqrt':roots,'claims':[keys]+transitions(program)+accounting()}

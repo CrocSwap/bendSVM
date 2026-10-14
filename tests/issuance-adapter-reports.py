@@ -1,0 +1,53 @@
+"""Refuse incomplete, stale, or overclaimed issuance composition evidence."""
+import copy,hashlib,json,os,pathlib,sys,subprocess
+receipt=json.loads(pathlib.Path('build/issuance-adapter/fresh-receipt.json').read_text());report_path=pathlib.Path(receipt['reportArtifact']);raw=report_path.read_bytes()
+assert hashlib.sha256(raw).hexdigest()==receipt['reportSha256']
+os.environ['BRIDGE_DIR']=str(report_path.parent);sys.path.insert(0,'verification')
+from issuance_adapter_report import check
+value=json.loads(raw);check(value);controls=[]
+def reject(name,mutate):
+ changed=copy.deepcopy(value);mutate(changed)
+ try:check(changed)
+ except (AssertionError,KeyError,TypeError):controls.append(name)
+ else:raise AssertionError('report fault escaped '+name)
+reject('false-success',lambda x:x.update(passed=False))
+reject('overclaimed-sbf',lambda x:x.update(endToEndVerified=True))
+reject('stale-input',lambda x:x.update(inputSha256='0'*64))
+reject('stale-checker',lambda x:x.update(checkerSha256='0'*64))
+reject('wrong-z3',lambda x:x.update(z3='0'))
+reject('missing-source',lambda x:x['sourceHashes'].pop(next(iter(x['sourceHashes']))))
+reject('missing-equivalence',lambda x:x['rootEquivalence'].clear())
+for key in ['claims','stateClaims','effectClaims','validatorClaims','witnesses','bindingFaults']:
+ reject('missing-'+key,lambda x,key=key:x['positive'][key].pop())
+reject('missing-sequence',lambda x:x['positive'].pop('sequence'))
+reject('missing-sequence-lemma',lambda x:x['positive']['sequence']['lemmas'].pop())
+reject('unknown-sequence-lemma',lambda x:x['positive']['sequence']['lemmas'][0].update(result='unknown'))
+reject('missing-sequence-call',lambda x:x['positive']['sequence']['claims'].pop(0))
+reject('duplicate-sequence-call',lambda x:x['positive']['sequence']['claims'].__setitem__(1,x['positive']['sequence']['claims'][0]))
+reject('unknown-sequence-result',lambda x:x['positive']['sequence']['claims'][0].update(result='unknown'))
+reject('missing-sequence-reachability',lambda x:x['positive']['sequence']['claims'][3].update(result='unsat'))
+reject('narrow-sequence-frame',lambda x:x['positive']['sequence']['frameSpec']['token'].update(spans=[[64,72]]))
+reject('fewer-sequence-steps',lambda x:x['positive']['sequence'].update(steps=2))
+reject('sequence-fault-not-detected',lambda x:x['positive']['sequence']['claims'][-1].update(result='unsat'))
+reject('missing-mutant-sequence',lambda x:x['mutations'][0]['proof'].pop('sequence'))
+reject('unknown-query',lambda x:x['positive']['validatorClaims'][0].update(result='unknown'))
+reject('duplicate-query',lambda x:x['positive']['validatorClaims'].__setitem__(1,x['positive']['validatorClaims'][0]))
+reject('narrow-bindings',lambda x:x['positive']['bindingAudit'].update(outputs=17))
+reject('missing-root-call',lambda x:x['positive'].update(rootCalls=1))
+reject('missing-commit-claim',lambda x:x['positive']['adapter']['claims'].pop(0))
+reject('missing-fault',lambda x:x['mutations'].pop())
+reject('wrong-fault-artifact',lambda x:x['mutations'][0].update(cSha256='0'*64))
+reject('missing-fault-witness',lambda x:x['mutations'][0]['proof']['effectClaims'][0].pop('wireArgs'))
+reject('fault-did-not-fail',lambda x:x['mutations'][0]['proof']['effectClaims'][0].update(result='unsat'))
+reject('fault-not-on-successful-caller',lambda x:x['mutations'][0]['proof']['effectClaims'][0].pop('successfulCallerWitness'))
+reject('missing-reserved-independence',lambda x:x['positive'].pop('reservedIndependence'))
+reject('missing-extraction-claim',lambda x:x['positive']['extractionEvidence']['claims'].pop())
+reject('narrow-extraction-fields',lambda x:x['positive']['extractionEvidence'].update(fieldsPerSlot=138))
+reject('incomplete-executor-review',lambda x:x['positive']['executorBody'].update(conformance='partial'))
+reject('lost-adapter-path',lambda x:x['positive']['adapter'].update(paths=34))
+optimized=subprocess.run([sys.executable,'-O','-B','verification/issuance_adapter_report.py'],capture_output=True,text=True,timeout=10)
+assert optimized.returncode!=0 and 'requires Python assertions' in optimized.stderr
+controls.append('optimized-python-refused')
+assert report_path.read_bytes()==raw
+output=report_path.parent/'report-controls.json';output.write_text(json.dumps({'passed':True,'reportSha256':hashlib.sha256(raw).hexdigest(),'controls':controls},indent=2)+'\n')
+print('Issuance report refusals:',len(controls))

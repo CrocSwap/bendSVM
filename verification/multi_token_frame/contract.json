@@ -1,0 +1,138 @@
+{
+  "scope": {
+    "symbolic": "Six full-caller init/update SAT witnesses require both transfer slots active and all representation/identity premises. Parsed per-slot validation plus reviewed executor result semantics and actual audited writable metas establish managed-data byte preservation at every emitted executor call, for arbitrary before/replacement bytes under a writable-key CPI frame. Full256-bit keys share identity and byte values; distinct program identities, stable metadata and native objects/local buffers remain assumed. Arbitrary before-data supports repeated-step composition but this is not a complete dynamic CPI or native-memory theorem.",
+    "frame_control": "Negative control: an overbroad managed-account write frame must fail byte-preservation. Parsed per-slot validation plus reviewed executor result semantics and actual audited writable metas establish managed-data byte preservation at every emitted executor call, for arbitrary before/replacement bytes under a writable-key CPI frame. Full256-bit keys share identity and byte values; distinct program identities, stable metadata and native objects/local buffers remain assumed. Arbitrary before-data supports repeated-step composition but this is not a complete dynamic CPI or native-memory theorem.",
+    "native": "Native ASan/UBSan executions of instrumented emitted ABI2 adapters with actual token validator/executor, codecs and root. Syscalls are stubbed; arbitrary token balance/delegate writes and failures exercise pending buffer isolation and delayed managed-state commit. No SPL semantics, VM frame enforcement or transaction rollback claim."
+  },
+  "topKeys": {
+    "symbolic": [
+      "controls",
+      "endToEndVerified",
+      "fixtures",
+      "inputHashes",
+      "passed",
+      "scope"
+    ],
+    "frame_control": [
+      "controls",
+      "endToEndVerified",
+      "fixtures",
+      "inputHashes",
+      "passed",
+      "scope"
+    ],
+    "native": [
+      "cases",
+      "controls",
+      "inputHashes",
+      "passed",
+      "runs",
+      "scope"
+    ]
+  },
+  "fixtureKeys": [
+    "addedObligations",
+    "executorAudit",
+    "managedIndices",
+    "metaInventory",
+    "name",
+    "observedPhases",
+    "result"
+  ],
+  "executorAudit": {
+    "conformance": "complete reviewed token body",
+    "infosCapacity": 12,
+    "metasCapacity": 4,
+    "instructionBytes": 10,
+    "syscalls": 1,
+    "scope": "Exact full-body token conformance, not semantic preservation. Conditional index/read/loop facts are checked separately against the parsed validator."
+  },
+  "metaInventory": {
+    "1": [
+      {
+        "slot": 0,
+        "expression": "t->source",
+        "role": "source",
+        "writable": true,
+        "signer": false
+      },
+      {
+        "slot": 1,
+        "expression": "t->mint",
+        "role": null,
+        "writable": false,
+        "signer": false
+      },
+      {
+        "slot": 2,
+        "expression": "t->destination",
+        "role": "destination",
+        "writable": true,
+        "signer": false
+      },
+      {
+        "slot": 3,
+        "expression": "t->authority ? 3 : 1",
+        "role": null,
+        "writable": false,
+        "signer": true
+      }
+    ],
+    "3": [
+      {
+        "slot": 0,
+        "expression": "t->mint",
+        "role": "mint",
+        "writable": true,
+        "signer": false
+      },
+      {
+        "slot": 1,
+        "expression": "t->destination",
+        "role": "destination",
+        "writable": true,
+        "signer": false
+      },
+      {
+        "slot": 2,
+        "expression": "3",
+        "role": null,
+        "writable": false,
+        "signer": true
+      }
+    ],
+    "4": [
+      {
+        "slot": 0,
+        "expression": "t->source",
+        "role": "source",
+        "writable": true,
+        "signer": false
+      },
+      {
+        "slot": 1,
+        "expression": "t->mint",
+        "role": "mint",
+        "writable": true,
+        "signer": false
+      },
+      {
+        "slot": 2,
+        "expression": "1",
+        "role": null,
+        "writable": false,
+        "signer": true
+      }
+    ]
+  },
+  "verificationModules": [
+    "adapter_contract_c.py",
+    "adapter_contract_sym.py",
+    "effect_extraction.py",
+    "multi_adapter_contract.py",
+    "token_validate.py",
+    "cpi_validate.py",
+    "cpi_composition.py",
+    "token_executor.py"
+  ]
+}

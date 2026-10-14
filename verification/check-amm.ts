@@ -11,7 +11,7 @@ fs.mkdirSync('build', { recursive: true });
 const prerequisites = [
   ['pricing', 'examples/amm/pricing.bend', ['fee','swap','deposit','withdraw']],
   ['sqrt', 'sdk/sqrt.bend', ['floor','geometric_mean']],
-  ['math', 'sdk/math.bend', ['mul32_parts','mul32','mul_parts','mul']],
+  ['math', 'sdk/math.bend', ['mul32_parts','mul32','mul_parts','mul','div_step','div2','div4','div8','div16','div32','div64','divmod','div','mod']],
   ['wide', 'sdk/wide.bend', ['add','product_parts','product','divide','mul_div','floor','ceil']],
 ] as const;
 const paths: Record<string,string> = {};
@@ -37,7 +37,7 @@ async function check(source: string, stem: string, status: number) {
   assert.equal(report.schema.result,'checked');
   assert(report.bindings.every((b:any)=>b.result==='checked'));
   assert.equal(report.pricing.claims.length,11);
-  assert.equal(report.sqrt.claims.length,69);
+  assert.equal(report.sqrt.claims.length,71);
   assert.equal(report.sqrt.checkedHelpers.length,3);
   assert.equal(report.pricing.checkedArithmetic.length,2);
   assert([...report.sqrt.checkedHelpers,...report.pricing.checkedArithmetic].every((c:any)=>c.result==='unsat'));
@@ -112,7 +112,7 @@ fs.writeFileSync('build/amm-negative-schema.model.json',JSON.stringify(extended)
 const uncovered=invoke('build/amm-negative-schema.model.json');
 assert.notEqual(uncovered.status,0);assert.match(uncovered.stderr,/Protocol schema mismatch: Instruction/);
 const files=['examples/amm/amm.bend','examples/amm/pricing.bend','sdk/math.bend','sdk/wide.bend','sdk/sqrt.bend','sdk/context.bend','sdk/effects.bend','sdk/issuance.bend',
-  'compiler/backend.ts','compiler/primitives.ts','compiler/schema.ts','package.json','package-lock.json',
+  'compiler/backend.ts', 'compiler/tagged-sum-ir.ts','compiler/primitives.ts','compiler/schema.ts','package.json','package-lock.json',
   ...fs.readdirSync('verification').filter(f=>/\.(py|ts)$/.test(f)).map(f=>`verification/${f}`)];
 const hashes=Object.fromEntries(files.map(f=>[f,crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')]));
 fs.writeFileSync('build/amm-refinement.json',JSON.stringify({bendCommit:BEND_COMMIT,positive,mutations,importMismatchesRejected:true,uncoveredInstructionRejected:true,hashes},null,2)+'\n');

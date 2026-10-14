@@ -84,8 +84,7 @@ class Evaluator:
         if kind in ['U32','Nat']: return z.BitVecVal(t['value'],32)
         if kind=='Ctr':
             if t['k'] in ['Zero','Succ']:
-                condition=args[0]==0 if t['k']=='Zero' else args[0]!=0
-                fields=[] if t['k']=='Zero' else [args[0]-1]
+                raise ValueError('Noncanonical model Nat constructor; expected exported Nat literal')
             elif t['k'] in ['True','False']: return z.BoolVal(t['k']=='True')
             sort,i=self.constructors[t['k']]
             return sort.constructor(i)(*[self.expression(x,env,path) for x in t['x']])
