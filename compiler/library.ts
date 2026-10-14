@@ -429,7 +429,11 @@ export async function buildLibrary(source: string, root: string, stem: string, t
   fs.writeFileSync(cSource, `/* Generated from checked pure Bend terms; do not edit. */\n` +
     definitions + '\n' + codecs + call.source);
 
-  const sbfFlags = ['--target=sbf', `-mcpu=${profile.cpu}`, '-O2', '-fPIC', '-ffreestanding',
+  // Explicit targets strip the output directory from stack-usage reports, so a
+  // bundle's manifest does not depend on where the caller put it. The historical
+  // command keeps its recorded bytes.
+  const pathFlags = target === undefined ? [] : [`-ffile-prefix-map=${outputDir}${path.sep}=`];
+  const sbfFlags = [...pathFlags, '--target=sbf', `-mcpu=${profile.cpu}`, '-O2', '-fPIC', '-ffreestanding',
     '-fno-builtin', '-fno-stack-protector', '-std=c17', '-Wall', '-Wextra', '-Werror',
     '-Wno-unused-function',
     `-Wframe-larger-than=${FRAME_LIMIT}`, '-fstack-usage', '-ffunction-sections', '-fdata-sections',
@@ -454,7 +458,7 @@ export async function buildLibrary(source: string, root: string, stem: string, t
   }
   const sbfStack = stackReport(sbfObject.replace(/\.o$/, '.su'));
   const memoryStack = stackReport(memoryObject.replace(/\.o$/, '.su'));
-  const hostFlags = ['-std=c17', '-O2', '-fPIC', '-ffreestanding', '-fno-builtin',
+  const hostFlags = [...pathFlags, '-std=c17', '-O2', '-fPIC', '-ffreestanding', '-fno-builtin',
     '-Wall', '-Wextra', '-Werror', `-Wframe-larger-than=${FRAME_LIMIT}`, '-fstack-usage',
     '-Wno-unused-function',
     `-I${outputDir}`, '-Iruntime'];

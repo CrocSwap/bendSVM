@@ -44,23 +44,27 @@ npm --prefix <bendSVM> run -s build:library -- <PROOF.bend> <root> <stem> --targ
    - Both explicit targets (`fogo-v0` and `solana-v3`) use platform-tools v1.57.
      Point `SBF_V157_TOOLS` (or its alias `SBF_V3_TOOLS`) at the `llvm/bin`
      directory. The default is `~/.cache/solana/v1.57/platform-tools/llvm/bin`.
-   - Bend checks `clang` and `llvm-readelf` by content against the macOS arm64
-     v1.57 release (`compiler/target-profile.ts`). Your ld.lld pin already matches
-     ours. A GoSVM-pinned root works only if those binaries are the same release
-     files, which the content check verifies.
+   - Bend checks `clang` and `llvm-readelf` by content against the v1.57
+     release binaries for macOS arm64, Linux x86_64 and Linux aarch64
+     (`V157_HOSTS` in `compiler/target-profile.ts`, which also pins each release
+     archive's SHA-256). `npm run install:platform-tools -- --root <dir>` installs
+     a hash-checked copy. Your macOS ld.lld pin already matches ours. A
+     GoSVM-pinned root works only if those binaries are the same release files,
+     which the content check verifies.
    - `SBF_TOOLS` (v1.53) applies only to the historical command without
      `--target`.
-5. **Reproducibility: rebuilding into the same stem gives a byte-identical
-   manifest.** A solana-v3 build repeated into one path had an unchanged
-   `manifestSha256`. The objects (`library.sbf.o`, `library.memory.o`,
-   `library.host.o`), the C source and the ABI are byte-identical across
-   different output directories too. The manifest still differs between
-   directories, because the stack-usage reports (`*.su`) embed the absolute
-   source path and the manifest records their hashes. A cache key that fixes
-   the output path, such as your `<key>` directory, therefore yields a stable
-   pin. Bend can make `*.su` path-independent if you want manifests identical
-   across machines or directories. Ask through the user; that would change
-   manifest hashes once.
+5. **Reproducibility: the same source, root, target and toolchain give a
+   byte-identical bundle, wherever it is written.** Since the same day's
+   follow-up, explicit-target builds pass `-ffile-prefix-map` for the output
+   directory, so the stack-usage reports (`*.su`) no longer embed it. Two
+   solana-v3 builds (and two fogo-v0 builds) into different directories, one
+   with a space in its path, produced identical trees and `manifestSha256`.
+   Every object (`library.sbf.o`, `library.sbf.memory.o`, `library.host.o`), the
+   C source and the header are byte-identical to the published 2026-10-09
+   bundles. Only the `.su` contents and so the manifest hash differ from them, so
+   a rebuilt bundle needs one re-pin. Machine-independence across hosts is not
+   claimed; Linux uses different pinned binaries. The historical command without
+   `--target` is unchanged.
 
 Caveat: Bend reruns no qualification for consumer builds. A rebuilt bundle is
 evidence for its own recorded inputs and hashes. The published, qualified

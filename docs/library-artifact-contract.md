@@ -39,7 +39,12 @@ and `test:mixed-library` use it. Its manifest also says `targetProfile:
 "fogo-v0"`; consumers distinguish it by `toolchains.anzaClang.platformTools`.
 The earlier GoSVM pin `ec18012f…6bc6de` is such a v1.53 bundle.
 
-Explicit targets are pinned to platform-tools v1.57 on **macOS arm64 only**.
+Explicit targets are pinned to platform-tools v1.57 for macOS arm64, Linux x86_64 or Linux aarch64
+(`npm run install:platform-tools`). The macOS arm64 binaries are the ones GoSVM
+qualified; the Linux pins come from the same GitHub release.
+Explicit-target builds strip the output directory from stack-usage reports
+(`-ffile-prefix-map`), so a bundle and its manifest hash do not depend on where
+the caller writes it.
 `SBF_V157_TOOLS` (alias `SBF_V3_TOOLS`) overrides the default
 `~/.cache/solana/v1.57/platform-tools/llvm/bin`; the producer refuses other hosts, other version text and any `clang` or
 `llvm-readelf` whose content differs from the recorded SHA-256 pins in
