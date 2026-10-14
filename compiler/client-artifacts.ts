@@ -22,7 +22,7 @@ export type CallOptions={mode?:'initialize'|'transition';remaining?:AccountMeta[
 export type InstructionPlan={program:string;accounts:AccountMeta[];data:Uint8Array};
 export declare function programClient(schema:unknown,layout:ProgramLayout,program:string):{
 call(name:string,args:unknown,accounts:Record<string,string>,options?:CallOptions):InstructionPlan;
-state(data:Uint8Array,field?:string):unknown;
+state(data:Uint8Array,field?:string,primaryAddress?:string):unknown;
 collection(data:Uint8Array,stateAddress:string,start:number,count:number):{length:number;capacity:number;entries:unknown[]};
 allocationBytes(capacity?:number):Record<string,number>;
 };\n`);

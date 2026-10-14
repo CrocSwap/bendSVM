@@ -1,7 +1,14 @@
+import crypto from 'node:crypto';
 import { mangle } from './backend.ts';
 import { wireLayouts, type RuntimeSchema } from './schema.ts';
 import { emitEffects, effectKind, effectCount } from './effects.ts';
 import { storageHeader, type emitSingleStorage } from './storage.ts';
+
+function multiHeader(schema: RuntimeSchema, state: string, field: string, type: string, index: number) {
+  const parent = storageHeader(schema, state);
+  const digest = crypto.createHash('sha256').update(JSON.stringify({parent, field, type, index})).digest();
+  return [66, 68, 77, 50, ...digest.subarray(0, 16)]; // BDM2, scoped to this field position.
+}
 
 // The single-account descriptor validates the common context/result/effect ABI.
 export function emitMultiStorage(schema: RuntimeSchema, root: string, fields: string[], baseline: ReturnType<typeof emitSingleStorage>['interface']) {
@@ -23,7 +30,10 @@ export function emitMultiStorage(schema: RuntimeSchema, root: string, fields: st
   const effectSlots=effects?effectCount(schema,effects.type):0;
   const getRecord=(name:string)=>{const t=types.get(name)!;if(t.kind!=='adt')throw new Error('Invalid record');return t.variants[0];};
   const ctx=getRecord(fn.args[0]),key=getRecord(ctx.fields[0].type),slot=getRecord(ctx.fields[2].type);
-  const accounts=state.variants[0].fields.map((field,i)=>({field:field.name,type:field.type,index:i===0?0:i+(effects?3:1),header:storageHeader(schema,field.type),stateBytes:20+sizes.get(field.type)!}));
+  const accounts=state.variants[0].fields.map((field,i)=>({field:field.name,type:field.type,
+    index:i===0?0:i+(effects?3:1),bindingBytes:i===0?0:32,
+    header:multiHeader(schema,baseline.state,field.name,field.type,i),
+    stateBytes:20+(i===0?0:32)+sizes.get(field.type)!}));
   const minimum=accounts.length+(effects?3:1),maximum=effects?12:minimum;
   const n=sizes.get(baseline.state)!,ixn=sizes.get(baseline.instruction)!;
   const c=`/* Generated multi-account state adapter, ABI version 2. */
@@ -55,11 +65,12 @@ ${accounts.map((a,i)=>`  Account state${i}=accounts[${a.index}];
   if (ix[0]==0) {
     if (!state${i}.signer) return 7;
     for(unsigned j=0;j<${a.stateBytes};++j) if(state${i}.data[j]) return 4;
-    const u8 empty${i}[${a.stateBytes-20}]={0};
-    if(!${mangle(a.type)}_decode(empty${i},${a.stateBytes-20},&before${i})) return 4;
+    const u8 empty${i}[${a.stateBytes-20-a.bindingBytes}]={0};
+    if(!${mangle(a.type)}_decode(empty${i},${a.stateBytes-20-a.bindingBytes},&before${i})) return 4;
   } else {
     for(unsigned j=0;j<20;++j) if(state${i}.data[j]!=header${i}[j]) return 4;
-    if(!${mangle(a.type)}_decode(state${i}.data+20,${a.stateBytes-20},&before${i})) return 4;
+    ${i===0?'':`if(!equal_key(state${i}.data+20,state0.key)) return 4;`}
+    if(!${mangle(a.type)}_decode(state${i}.data+${20+a.bindingBytes},${a.stateBytes-20-a.bindingBytes},&before${i})) return 4;
   }`).join('\n')}
   ${types.get(baseline.instruction)!.cType} instruction;
   if(!${mangle(baseline.instruction)}_decode(ix+1,${ixn},&instruction)) return 2;
@@ -71,14 +82,15 @@ ${accounts.map((a,i)=>`  Account state${i}=accounts[${a.index}];
   if(outcome.tag!=${accepted.tag}) return 9;
   const ${state.cType} *after=&outcome.as.c${accepted.tag}.f0;
   u8 reply[${n}]; if(!${mangle(baseline.state)}_encode(reply,${n},after)) return 9;
-${accounts.map((a,i)=>`  u8 encoded${i}[${a.stateBytes-20}];
-  if(!${mangle(a.type)}_encode(encoded${i},${a.stateBytes-20},&after->as.c${state.variants[0].tag}.f${i})) return 9;`).join('\n')}
+${accounts.map((a,i)=>`  u8 encoded${i}[${a.stateBytes-20-a.bindingBytes}];
+  if(!${mangle(a.type)}_encode(encoded${i},${a.stateBytes-20-a.bindingBytes},&after->as.c${state.variants[0].tag}.f${i})) return 9;`).join('\n')}
   ${effects?`${cpi?'BendInvoke':'BendTransfer'} transfers[${effectSlots}];
   if(!bend_extract_effects(&outcome.as.c${accepted.tag}.f1,transfers)) return 9;
   for(unsigned i=0;i<${effectSlots};++i) { u64 error=${cpi?'bend_invoke_validate':'bend_transfer_validate'}(&transfers[i],accounts,(unsigned)count); if(error) return error; ${cpi?`if(transfers[i].active) for(unsigned j=0;j<transfers[i].count;++j) if(transfers[i].metas[j].writable && (${accounts.map(a=>`transfers[i].metas[j].index==${a.index}`).join(' || ')})) return 22;`:''} }
   for(unsigned i=0;i<${effectSlots};++i) if(${cpi?'bend_invoke_execute':'bend_transfer_execute'}(&transfers[i],accounts,(unsigned)count,bump)) return 18;`:''}
-${accounts.map((a,i)=>`  for(unsigned j=0;j<20;++j) state${i}.data[j]=header${i}[j];
-  for(unsigned j=0;j<${a.stateBytes-20};++j) state${i}.data[20+j]=encoded${i}[j];`).join('\n')}
+${accounts.map((a,i)=>`  __builtin_memcpy(state${i}.data,header${i},20);
+  ${i===0?'':`__builtin_memcpy(state${i}.data+20,state0.key,32);`}
+  __builtin_memcpy(state${i}.data+${20+a.bindingBytes},encoded${i},${a.stateBytes-20-a.bindingBytes});`).join('\n')}
   sol_set_return_data(reply,${n}); return 0;
 }
 `;

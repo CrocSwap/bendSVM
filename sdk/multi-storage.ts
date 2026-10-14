@@ -17,7 +17,9 @@ export function multiStorageCodec(schema:RuntimeSchema,layout:MultiStorageInterf
   slots.forEach((a,i)=>{
     const field=state.variants[0].fields[i];
     if(a.field!==field.name || a.type!==field.type || a.index!==(i===0?0:i+(effectful?3:1)) ||
-       a.header.length!==20 || a.header.some(b=>!Number.isInteger(b)||b<0||b>255) || a.stateBytes!==20+codec.sizes.get(a.type)!)
+       a.header.length!==20 || a.header.slice(0,4).join(',')!=='66,68,77,50' ||
+       a.header.some(b=>!Number.isInteger(b)||b<0||b>255) ||
+       a.bindingBytes!==(i===0?0:32) || a.stateBytes!==20+a.bindingBytes+codec.sizes.get(a.type)!)
       throw new Error('Invalid multi-storage account layout');
   });
   return {
@@ -25,10 +27,14 @@ export function multiStorageCodec(schema:RuntimeSchema,layout:MultiStorageInterf
       if(mode!=='initialize'&&mode!=='transition')throw new Error('Invalid storage mode');
       const out=new Uint8Array(layout.instructionBytes);out[0]=layout.modes[mode];out.set(codec.encode(layout.instruction,value),1);return out;
     },
-    account(field:string,data:Uint8Array) {
+    account(field:string,data:Uint8Array,primaryKey?:Uint8Array) {
       const a=slots.find(a=>a.field===field);
       if(!a || data.length!==a.stateBytes || a.header.some((b,i)=>data[i]!==b))throw new Error('Invalid storage account field/header/size');
-      return codec.decode(a.type,data.subarray(20));
+      if(a.bindingBytes) {
+        if(!primaryKey || primaryKey.length!==32 || data.subarray(20,52).some((b,i)=>b!==primaryKey[i]))
+          throw new Error('Invalid primary state binding');
+      }
+      return codec.decode(a.type,data.subarray(20+a.bindingBytes));
     },
     reply(data:Uint8Array) {return codec.decode(layout.state,data);},
   };

@@ -26,7 +26,8 @@ export function storageHeader(schema: RuntimeSchema, state: string) {
     if (reachable.has(name)) return;
     const t = types.get(name)!;
     reachable.set(name, t.kind === 'adt' ? { name, kind: t.kind,
-      variants: t.variants.map(v => ({ name: v.name, tag: v.tag, fields: v.fields })) } : { name, kind: t.kind });
+      variants: t.variants.map(v => ({ name: v.name, tag: v.tag, fields: v.fields })) }
+      : { name, kind: t.kind, ...(t.max === undefined ? {} : { max: t.max }) });
     if (t.kind === 'adt') t.variants.forEach(v => v.fields.forEach(f => visit(f.type)));
   };
   visit(state);
@@ -141,8 +142,9 @@ u64 entrypoint(const u8 *input) {
   for (unsigned i = 0; i < ${effectSlots}; ++i) {
     if (${cpi?'bend_invoke_execute':'bend_transfer_execute'}(&transfers[i],accounts,(unsigned)count,bump)) return 18;
   }` : ''}
-  for (unsigned i = 0; i < ${header.length}; ++i) state.data[i] = header[i];
-  for (unsigned i = 0; i < ${n}; ++i) state.data[${header.length} + i] = encoded[i];
+  /* Encoding succeeded and all effects completed; commit disjoint local bytes. */
+  __builtin_memcpy(state.data, header, ${header.length});
+  __builtin_memcpy(state.data + ${header.length}, encoded, ${n});
   sol_set_return_data(encoded, ${n});
   return 0;
 }

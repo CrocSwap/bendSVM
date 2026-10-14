@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Backend, checkedBook } from '../compiler/backend.ts';
 import { emitEffects } from '../compiler/effects.ts';
 import { buildProgram } from '../scripts/program.ts';
+import { assertReproducibleProgramBuilds, programBuildSnapshot } from './program-build-reproducibility.ts';
 
 export async function testTokenIssuance() {
   const schema = new Backend(await checkedBook('tests/token-issuance.bend')).emit(['process']).schema;
@@ -25,7 +26,8 @@ export async function testTokenIssuance() {
   assert.equal(layout.effectSlots, 3);
   const directory = fs.mkdtempSync('build/token-issuance-reproduce-');
   try {
-    assert.deepEqual(await buildProgram('tests/token-issuance.bend', 'process', `${directory}/token-issuance`), manifest);
+    const reproduced = await buildProgram('tests/token-issuance.bend', 'process', `${directory}/token-issuance`);
+    assertReproducibleProgramBuilds(programBuildSnapshot(manifest, 'build/token-issuance'), programBuildSnapshot(reproduced, `${directory}/token-issuance`));
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
   console.log('Issuance structure rejection and reproducible public build passed');
 }

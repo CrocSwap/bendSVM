@@ -84,3 +84,26 @@ executor probes, not custody applications. Builds reproduce through the public
 builder. Results are recorded in `build/cpi-pair-validation.json` and
 `build/cpi-multi{,-3,-4}-validation.json`. Native proof claims for the applications do not establish the
 behavior of arbitrary external programs or this runtime path.
+
+## ABI 1 state-frame regression
+
+The focused `test:cpi-frame` build and `cargo test --locked --test sbf cpi_frame`
+exercise read-only state forwarding, explicitly requested initialization
+signatures, runtime write protection and rollback, and adapter error 22.
+See [adapter assurance](adapter-assurance.md#compiled-cpi-state-frame-regression)
+for the measured scope. Read-only does not remove a signer capability when the
+caller provided the signature and the CPI meta requests it.
+
+## Helper assurance
+
+`npm run verify:cpi-validator` checks the runtime validator's actual C body
+against a separate bounded capability contract, including guarded reads and
+return coverage. It leaves application authorization and writable managed-state
+exclusion to the caller. See [the helper contract](adapter-assurance.md#arbitrary-cpi-helper-contract)
+for assumptions, execution obligations and the distinction from SBF evidence.
+
+`npm run test:cpi-helpers` separately exercises the actual custody, validation
+and execution helpers under native ASan/UBSan with mocked syscall boundaries.
+It checks exact forwarded arguments, full-width errors, and length refresh
+across calls against an independent oracle. This does not replace the compiled
+SBF/rollback tests described above.

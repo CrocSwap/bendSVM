@@ -113,8 +113,8 @@ __attribute__((noinline)) static u64 bend_collection_run(Account *accounts,unsig
   }
   for(unsigned i=0;i<${effectSlots};++i)if(${cpi?'bend_invoke_execute':'bend_transfer_execute'}(&transfers[i],accounts,count,bump))return 18;`:'(void)count;'}
   bend_collection_commit(&collection,&selected,written,next,encoded_records,collection_header,state->key);
-  for(unsigned i=0;i<20;++i)state->data[i]=state_header[i];
-  for(unsigned i=0;i<${n};++i)state->data[20+i]=encoded_state[i];
+  __builtin_memcpy(state->data,state_header,20);
+  __builtin_memcpy(state->data+20,encoded_state,${n});
   sol_set_return_data(encoded_state,${n});return 0;
 }
 __attribute__((visibility("default"))) u64 entrypoint(const u8 *input){

@@ -35,6 +35,19 @@ for(const stem of ['vault','multi-storage','multi-storage-3','multi-storage-4','
   const file=`build/${stem}.client-test.ts`;fs.writeFileSync(file,emitClient(s,l,file));
   assert.equal(typeof (await import('../'+file)).createClient(key(9)).instructions,'object');
 }
+const multi=programClient(read('multi-storage','schema'),read('multi-storage','interface'),key(9));
+const secondary=read('multi-storage','interface').stateAccounts[1];
+const secondaryBytes=new Uint8Array(secondary.stateBytes);
+secondaryBytes.set(secondary.header);
+secondaryBytes.set(addressBytes(key(1)),20);
+secondaryBytes[52]=0;
+new DataView(secondaryBytes.buffer).setUint32(53,42,true);
+assert.deepEqual(multi.state(secondaryBytes,'right',key(1)),{value:42});
+assert.throws(()=>multi.state(secondaryBytes,'right'),/primary state binding/);
+assert.throws(()=>multi.state(secondaryBytes,'right',key(2)),/primary state binding/);
+const generatedMulti=(await import('../build/multi-storage.client-test.ts')).createClient(key(9));
+assert.deepEqual(generatedMulti.state.right(secondaryBytes,key(1)),{value:42});
+assert.throws(()=>generatedMulti.state.right(secondaryBytes,key(2)),/primary state binding/);
 const file='build/collection-store.client-test.ts';fs.writeFileSync(file,emitClient(schema,layout,file));
 const generated=(await import('../'+file)).createClient(key(9));
 assert.deepEqual(generated.instructions.Append({value:17},accounts,{mode:'initialize'}),append);

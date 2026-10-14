@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 import { buildProgram } from '../scripts/program.ts';
+import { assertReproducibleProgramBuilds, programBuildSnapshot } from './program-build-reproducibility.ts';
 
 export async function testBuilds() {
   const dir=fs.mkdtempSync('build/reproduce-');
@@ -16,7 +17,8 @@ export async function testBuilds() {
       assert.ok(Object.keys(first.inputs).includes(`examples/${name}/LAWS.bend`));
       assert.ok(Object.keys(first.inputs).includes('sdk/effects.bend'));
       const second=await buildProgram(source,root,`${dir}/${name}`);
-      assert.deepEqual(second,first,'Fresh output directory must reproduce every artifact and manifest');
+      assertReproducibleProgramBuilds(programBuildSnapshot(first,stem),programBuildSnapshot(second,`${dir}/${name}`),
+        'Fresh output directory must reproduce every artifact and stable manifest identity');
       results.push({name,artifacts:first.artifacts,elfBytes:first.elfBytes});
     }
   } finally {fs.rmSync(dir,{recursive:true,force:true});}

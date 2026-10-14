@@ -1,5 +1,8 @@
 # Generated interfaces and initial storage SDK
 
+The [ABI 1 adapter assurance plan](adapter-assurance.md) states the account,
+effect-ordering and commit contract, its current evidence and proof boundary.
+
 The backend emits type metadata from checked Bend types. `compiler/codecs.ts`
 and `compiler/dispatch.ts` consume that metadata; they contain no application
 names or application business rules. `sdk/wire.ts` implements the client side
@@ -15,7 +18,7 @@ of the same format.
 - Nested values use the same rules. Native C alignment/padding is never stored.
 - Decoders reject incorrect lengths, invalid tags/booleans and nonzero padding.
 - Recursive types are unsupported; at most 256 constructors and 1,024 wire bytes
-  per value. The backend additionally limits native C values to 1,024 bytes,
+  per value. The backend additionally limits native C values to 1,536 bytes,
   with the SBF compiler enforcing the 4,096-byte frame limit. Large aggregate
   copies/initializers use the wrappers in `runtime/memory.c`. Builds reject
   unresolved imports outside the supported syscall allowlist.
@@ -72,7 +75,7 @@ Instruction data is a mode byte followed by the canonical instruction value:
 The 20-byte storage header is `BDS1` followed by the first 16 bytes of SHA-256
 over the generated reachable state schema. Type/constructor/field names, tags
 and field types are included. Changing function bodies alone does not change
-the header. Schema changes currently require an explicit migration design;
+the header. Reachable scalar bounds are part of this fingerprint. Schema changes currently require an explicit migration design;
 there is no automatic migration or account resizing.
 
 On acceptance, the adapter encodes the complete next state into a temporary
@@ -212,8 +215,17 @@ The layout is `{"stateAccounts":["left","right"]}`. The root still has
 `(context, state, instruction) -> outcome`; `state` must be a single-constructor
 record containing exactly the named fields, in declaration order. Two to four
 fields are supported. Each field's type is stored in its own program-owned
-account, with its own existing BDS1 schema header and canonical payload. Business
-rules remain in the checked root. The layout file is hashed in the build manifest.
+account. ABI 2 uses a field-position-specific `BDM2` header, distinct even for
+fields of the same type. The first account stores the header and canonical
+payload. Each secondary account stores the header, the first state account's
+32-byte address, then its canonical payload. This binds secondary accounts to
+one primary instance and prevents same-type field swaps. The layout change
+requires new allocations or an explicit migration for older ABI 2 state. There
+is no migration tool or in-place compatibility path. In particular, drain and
+close an existing token program's custody before upgrading a deployed ABI 2
+program; an upgrade that switches the account layout can strand old custody.
+Business rules remain in the checked root. The layout file is hashed in the
+build manifest.
 
 Without effects, accounts are `[firstState, actor, otherStates...]`, with exact
 count. With token effects they are `[firstState, actor, tokenProgram, custody,
@@ -223,8 +235,9 @@ continues to derive from the **first** state account. The interface JSON lists
 each field's account index, type, header and allocation size.
 
 Mode 0 initializes **all** state accounts together: every state address must sign
-and every allocation must contain only zeros. Mode 1 requires all headers and
-payloads to be valid. Mixed initialization/update is not supported. All state
+and every allocation must contain only zeros. Mode 1 requires all headers,
+primary-address bindings and payloads to be valid. Mixed initialization/update
+is not supported. All state
 accounts must be writable, distinct, non-executable and owned by the program.
 The root receives the assembled record. The adapter validates every account,
 computes the outcome, encodes every output, validates/executes any effects, then
@@ -232,7 +245,10 @@ writes all state accounts. The return data is the canonical **aggregate record**
 Transaction rollback still depends on Solana runtime semantics.
 
 `sdk/multi-storage.ts` provides `multiStorageCodec(schema, interface)` with
-`instruction(value, mode)`, `account(fieldName, bytes)` and `reply(bytes)`.
+`instruction(value, mode)`, `account(fieldName, bytes, primaryKey)` and
+`reply(bytes)`. Decoding a secondary account requires the 32-byte primary key
+and checks its stored binding. A generated client's `state(bytes, fieldName,
+primaryAddress)` likewise requires the primary address for a secondary field.
 Existing single-account builds remain ABI 1 with their existing client API.
 No layout file is required for those programs.
 
@@ -268,3 +284,29 @@ reports are in `build/multi-token-{2,3,4}-validation.json`. Fresh public builds
 reproduce all fixture artifacts. These are executor probes with caller-controlled
 amounts, not independently secure custody applications. Arbitrary-program CPI
 is still outside the SDK.
+## External fixed-layout readers (experimental)
+
+`compiler/external-layout.ts` generates checked C readers from explicit field
+offsets; `sdk/external-layout.ts` provides the corresponding TypeScript reader.
+Descriptors specify integer widths and endianness, byte fields, magic/version
+and reserved-zero checks, exact or bounded-prefix allocation, and bounded
+nonoverlapping windows whose offsets and lengths come from declared fields.
+Malformed descriptors, unknown properties and sparse arrays reject. Reads must
+fit the actual allocation; a prefix allocation does not imply that the complete
+logical record is present. This initial descriptor does not express dynamic
+size formulas or application-specific parent/address relationships.
+
+C readers return small `const` views into caller-owned bytes and leave their
+output unchanged on explicit failure. Callers must provide readable input,
+disjoint writable aligned output, and keep the borrowed bytes alive and
+unchanged while views are used. TypeScript copies only the bounded selected
+byte fields/windows. Neither reader establishes account authorization.
+
+This is a standalone reader/generator prerequisite, not a new Bend borrowed
+type or a replacement for canonical Bend wire codecs. The native-value, wire
+and stack bounds remain unchanged; no SHA-256 intrinsic or DCG handler is added.
+`npm run test:external-layout` exercises independent byte goldens, malformed
+descriptors/records, range checks and native ASan/UBSan execution, including a
+10 MiB input with a short borrowed window. Its hashed report is
+`build/external-layout-report.json`. This is host execution evidence, not a
+formal proof or SBF acceptance result.

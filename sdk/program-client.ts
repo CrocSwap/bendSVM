@@ -98,8 +98,8 @@ export function programClient(schema:RuntimeSchema,layout:ProgramLayout,program:
       const value={constructor:v.name,fields:Object.fromEntries(v.fields.map(f=>[f.name,encode(f.type,(args as any)[f.name])]))};
       return {program,accounts:metas,data:codec.instruction(value,mode)};
     },
-    state(data:Uint8Array,field?:string):unknown {
-      if(layout.version===2){const slot=layout.stateAccounts.find(a=>a.field===field);if(!slot)throw new Error('Specify the state account field');return decode(slot.type,multiStorageCodec(schema,layout).account(slot.field,data));}
+    state(data:Uint8Array,field?:string,primaryAddress?:string):unknown {
+      if(layout.version===2){const slot=layout.stateAccounts.find(a=>a.field===field);if(!slot)throw new Error('Specify the state account field');return decode(slot.type,multiStorageCodec(schema,layout).account(slot.field,data,primaryAddress?addressBytes(primaryAddress):undefined));}
       const result=layout.version===1?storageCodec(schema,layout).account(data):collectionStorageCodec(schema,layout).state(data);
       return decode(layout.state,result);
     },

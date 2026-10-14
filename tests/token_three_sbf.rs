@@ -107,6 +107,11 @@ fn three_token_effects_commit_and_roll_back_atomically() {
 #[test]
 fn three_token_effects_commit_multiple_states_atomically() {
     let mut f = TokenFixture::new("token-three-multi");
+    let layout: serde_json::Value = serde_json::from_slice(
+        &std::fs::read("build/token-three-multi.interface.json").unwrap(),
+    )
+    .unwrap();
+    let secondary_size = layout["stateAccounts"][1]["stateBytes"].as_u64().unwrap() as usize;
     let secondary = Keypair::new();
     let ix = |f: &TokenFixture, initialize, amounts, last_mint| {
         let mut ix = instruction(f, initialize, amounts, last_mint);
@@ -118,7 +123,7 @@ fn three_token_effects_commit_multiple_states_atomically() {
     f.send_extra(
         &[
             f.create(f.state.pubkey(), f.size, f.program),
-            f.create(secondary.pubkey(), f.size, f.program),
+            f.create(secondary.pubkey(), secondary_size, f.program),
             ix(&f, true, [10, 20, 31], 7),
         ],
         &[&secondary],
@@ -130,7 +135,7 @@ fn three_token_effects_commit_multiple_states_atomically() {
     f.send_extra(
         &[
             f.create(f.state.pubkey(), f.size, f.program),
-            f.create(secondary.pubkey(), f.size, f.program),
+            f.create(secondary.pubkey(), secondary_size, f.program),
             ix(&f, true, [10, 20, 5], 7),
         ],
         &[&secondary],
@@ -139,8 +144,9 @@ fn three_token_effects_commit_multiple_states_atomically() {
     assert_eq!(count(&f), 1);
     assert_eq!(f.balances(), (975, 25));
     let secondary_before = f.svm.get_account(&secondary.pubkey()).unwrap();
+    assert_eq!(&secondary_before.data[20..52], f.state.pubkey().as_ref());
     assert_eq!(
-        u32::from_le_bytes(secondary_before.data[21..25].try_into().unwrap()),
+        u32::from_le_bytes(secondary_before.data[53..57].try_into().unwrap()),
         2
     );
     f.reject(ix(&f, false, [1, 2, 29], 7), Some(1));
@@ -156,8 +162,9 @@ fn three_token_effects_commit_multiple_states_atomically() {
     f.send(&[ix(&f, false, [1, 2, 28], 7)]).unwrap();
     assert_eq!(count(&f), 2);
     let secondary_after = f.svm.get_account(&secondary.pubkey()).unwrap();
+    assert_eq!(&secondary_after.data[20..52], f.state.pubkey().as_ref());
     assert_eq!(
-        u32::from_le_bytes(secondary_after.data[21..25].try_into().unwrap()),
+        u32::from_le_bytes(secondary_after.data[53..57].try_into().unwrap()),
         4
     );
     assert_eq!(f.balances(), (1000, 0));

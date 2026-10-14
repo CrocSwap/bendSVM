@@ -6,7 +6,9 @@ import { emitCodecs } from './codecs.ts';
 import { emitDispatcher } from './dispatch.ts';
 import { emitStorage, type StorageOptions } from './storage.ts';
 
-export function writeArtifacts(stem: string, emitted: ReturnType<Backend['emit']>, storageRoot?: string, storageOptions?: StorageOptions) {
+export type ArtifactEmission = Pick<ReturnType<Backend['emit']>, 'c' | 'schema'>;
+
+export function writeArtifacts(stem: string, emitted: ArtifactEmission, storageRoot?: string, storageOptions?: StorageOptions) {
   // Generate everything before writing, so unsupported schemas don't leave
   // apparently complete artifacts. Public build commands must check exit status.
   const resources=resourceReport(emitted.schema);

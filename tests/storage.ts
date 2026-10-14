@@ -10,6 +10,12 @@ import { wireCodec } from '../sdk/wire.ts';
 export async function testStorage() {
   const emitted = new Backend(await checkedBook('tests/storage.bend')).emit(['process']);
   const storage = emitStorage(emitted.schema, 'process');
+  const bounded = structuredClone(emitted.schema);
+  const u32 = bounded.types.find(t => t.name === 'U32');
+  if (!u32 || u32.kind !== 'u32') throw new Error('Expected U32 schema');
+  u32.max = 64;
+  assert.notDeepEqual(emitStorage(bounded, 'process').interface.header, storage.interface.header,
+    'Changing a reachable scalar bound must change the state header');
   writeArtifacts('build/storage', emitted, 'process');
   const client = storageCodec(emitted.schema, storage.interface);
   assert.deepEqual([...client.instruction({ constructor: 'Initialize', fields: { value: 42 } }, 'initialize')], [0,0,42,0,0,0]);

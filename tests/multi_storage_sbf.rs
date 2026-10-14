@@ -6,7 +6,7 @@ fn multiple_state_accounts_commit_together_and_reject_invalid_inputs() {
         serde_json::from_slice(&std::fs::read("build/multi-storage.interface.json").unwrap())
             .unwrap();
     let program = Pubkey::new_unique();
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     svm.add_program_from_file(program, "build/multi-storage.so")
         .unwrap();
     let payer = Keypair::new();
@@ -79,10 +79,48 @@ fn multiple_state_accounts_commit_together_and_reject_invalid_inputs() {
         let header: Vec<u8> =
             serde_json::from_value(layout["stateAccounts"][i]["header"].clone()).unwrap();
         assert_eq!(&state.data[..20], header);
-        assert_eq!(state.data[20], 0);
-        assert_eq!(&state.data[21..25], expected.to_le_bytes());
+        let offset = if i == 0 { 20 } else { 52 };
+        if i > 0 { assert_eq!(&state.data[20..52], left.pubkey().as_ref()); }
+        assert_eq!(state.data[offset], 0);
+        assert_eq!(&state.data[offset + 1..offset + 5], expected.to_le_bytes());
     }
+    // A secondary state created for another primary may have the same type and
+    // header, but must not be accepted alongside this primary.
+    let other_left = Keypair::new();
+    let other_right = Keypair::new();
+    for (i, key) in [&other_left, &other_right].iter().enumerate() {
+        svm.set_account(key.pubkey(), Account {
+            lamports: 1_000_000,
+            data: vec![0; layout["stateAccounts"][i]["stateBytes"].as_u64().unwrap() as usize],
+            owner: program, executable: false, rent_epoch: 0,
+        }).unwrap();
+    }
+    let mut other_init = instruction(true, 31, 37);
+    other_init.accounts[0] = AccountMeta::new(other_left.pubkey(), true);
+    other_init.accounts[2] = AccountMeta::new(other_right.pubkey(), true);
+    svm.send_transaction(Transaction::new(
+        &[&payer, &actor, &other_left, &other_right],
+        Message::new(&[other_init], Some(&payer.pubkey())), svm.latest_blockhash(),
+    )).unwrap();
+    let before_mix = snapshot(&svm);
+    let other_before = svm.get_account(&other_right.pubkey());
+    let mut mixed = instruction(false, 99, 100);
+    mixed.accounts[2] = AccountMeta::new(other_right.pubkey(), false);
+    assert_eq!(send(&mut svm, mixed).unwrap_err().err,
+        TransactionError::InstructionError(0, InstructionError::Custom(4)));
+    assert_eq!(snapshot(&svm), before_mix);
+    assert_eq!(svm.get_account(&other_right.pubkey()), other_before);
     let initialized = snapshot(&svm);
+    for offset in 20..52 {
+        let mut corrupted = initialized[1].clone();
+        corrupted.data[offset] ^= 1;
+        svm.set_account(right.pubkey(), corrupted).unwrap();
+        let before = snapshot(&svm);
+        assert_eq!(send(&mut svm, instruction(false, 99, 100)).unwrap_err().err,
+            TransactionError::InstructionError(0, InstructionError::Custom(4)));
+        assert_eq!(snapshot(&svm), before, "binding byte {offset} escaped rollback");
+        svm.set_account(right.pubkey(), initialized[1].clone()).unwrap();
+    }
     assert!(send(&mut svm, instruction(true, 1, 2)).is_err());
     assert_eq!(snapshot(&svm), initialized);
     send(&mut svm, instruction(false, 13, 17)).unwrap();
@@ -124,7 +162,7 @@ fn multiple_state_accounts_commit_together_and_reject_invalid_inputs() {
     let meta = send(&mut svm, instruction(false, 19, 23)).unwrap();
     let states = snapshot(&svm);
     assert_eq!(&states[0].data[21..25], 19u32.to_le_bytes());
-    assert_eq!(&states[1].data[21..25], 23u32.to_le_bytes());
+    assert_eq!(&states[1].data[53..57], 23u32.to_le_bytes());
     assert_eq!(meta.return_data.data.len(), 11);
     println!(
         "Multi-storage two-account update: {} CU",
@@ -137,7 +175,7 @@ fn larger_multi_storage(count: usize) {
     let layout: serde_json::Value =
         serde_json::from_slice(&std::fs::read(format!("{stem}.interface.json")).unwrap()).unwrap();
     let program = Pubkey::new_unique();
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     svm.add_program_from_file(program, format!("{stem}.so"))
         .unwrap();
     let payer = Keypair::new();
@@ -223,7 +261,9 @@ fn larger_multi_storage(count: usize) {
         let header: Vec<u8> =
             serde_json::from_value(layout["stateAccounts"][i]["header"].clone()).unwrap();
         assert_eq!(&account.data[..20], header);
-        assert_eq!(&account.data[21..], ((i as u32 + 1) * 11).to_le_bytes());
+        let offset = if i == 0 { 20 } else { 52 };
+        if i > 0 { assert_eq!(&account.data[20..52], states[0].pubkey().as_ref()); }
+        assert_eq!(&account.data[offset + 1..], ((i as u32 + 1) * 11).to_le_bytes());
     }
     let meta = send(&mut svm, ix(false, 1)).unwrap();
     let rotated = snapshot(&svm);
@@ -232,7 +272,8 @@ fn larger_multi_storage(count: usize) {
     let mut reply = vec![0];
     for (i, account) in rotated[..count].iter().enumerate() {
         let expected = (((i + 1) % count) as u32 + 1) * 11;
-        assert_eq!(&account.data[21..], expected.to_le_bytes());
+        let offset = if i == 0 { 20 } else { 52 };
+        assert_eq!(&account.data[offset + 1..], expected.to_le_bytes());
         reply.push(0);
         reply.extend(expected.to_le_bytes());
     }
@@ -260,7 +301,7 @@ fn larger_multi_storage(count: usize) {
                     4
                 }
                 4 => {
-                    account.data[20] = 1;
+                    account.data[if i == 0 { 20 } else { 52 }] = 1;
                     4
                 }
                 5 => {
@@ -397,7 +438,9 @@ fn multi_state_token_effects_commit_and_roll_back_both_legs() {
                 let header: Vec<u8> =
                     serde_json::from_value(layout["stateAccounts"][i]["header"].clone()).unwrap();
                 assert_eq!(&account.data[..20], header);
-                assert_eq!(&account.data[21..25], expected.to_le_bytes());
+                let offset = if i == 0 { 20 } else { 52 };
+                if i > 0 { assert_eq!(&account.data[20..52], f.state.pubkey().as_ref()); }
+                assert_eq!(&account.data[offset + 1..offset + 5], expected.to_le_bytes());
             }
         };
         let mut initialize = vec![f.create(f.state.pubkey(), f.size, f.program)];

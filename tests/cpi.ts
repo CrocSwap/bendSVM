@@ -5,6 +5,7 @@ import {emitStorage} from '../compiler/storage.ts';
 import {storageCodec} from '../sdk/storage.ts';
 import {buildProgram} from '../scripts/program.ts';
 import {compileSbf} from '../scripts/build.ts';
+import { assertReproducibleProgramBuilds, programBuildSnapshot } from './program-build-reproducibility.ts';
 export async function testCpi() {
   const schema=new Backend(await checkedBook('tests/cpi.bend')).emit(['process']).schema;
   const layout=emitStorage(schema,'process').interface;
@@ -23,14 +24,20 @@ export async function testCpi() {
   assert.throws(()=>emitStorage(broken,'process'),/Invalid CPI scalar/);
   const first=await buildProgram('tests/cpi.bend','process','build/cpi');
   const dir=fs.mkdtempSync('build/cpi-reproduce-');
-  try {assert.deepEqual(await buildProgram('tests/cpi.bend','process',`${dir}/cpi`),first);}
+  try {
+    const reproduced=await buildProgram('tests/cpi.bend','process',`${dir}/cpi`);
+    assertReproducibleProgramBuilds(programBuildSnapshot(first,'build/cpi'),programBuildSnapshot(reproduced,`${dir}/cpi`));
+  }
   finally {fs.rmSync(dir,{recursive:true,force:true});}
   compileSbf('tests/cpi-callee.c','build/cpi-callee');
   for(const stem of ['cpi-pair','cpi-multi','cpi-multi-3','cpi-multi-4']) {
     const config=stem==='cpi-pair'?undefined:`tests/${stem}.layout.json`;
     const first=await buildProgram(`tests/${stem}.bend`,'process',`build/${stem}`,config);
     const dir=fs.mkdtempSync('build/cpi-reproduce-');
-    try {assert.deepEqual(await buildProgram(`tests/${stem}.bend`,'process',`${dir}/${stem}`,config),first);}
+    try {
+      const reproduced=await buildProgram(`tests/${stem}.bend`,'process',`${dir}/${stem}`,config);
+      assertReproducibleProgramBuilds(programBuildSnapshot(first,`build/${stem}`),programBuildSnapshot(reproduced,`${dir}/${stem}`));
+    }
     finally {fs.rmSync(dir,{recursive:true,force:true});}
   }
   console.log('CPI schema/client checks and reproducible caller/callee build passed');

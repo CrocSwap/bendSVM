@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { Backend, checkedBook } from '../compiler/backend.ts';
 import { emitEffects } from '../compiler/effects.ts';
 import { buildProgram } from '../scripts/program.ts';
+import { assertReproducibleProgramBuilds, programBuildSnapshot } from './program-build-reproducibility.ts';
 
 export async function testTokenThree() {
   const schema = new Backend(await checkedBook('tests/token-three.bend')).emit(['process']).schema;
@@ -24,12 +25,14 @@ export async function testTokenThree() {
   assert.equal(layout.effectSlots, 3);
   const directory = fs.mkdtempSync('build/token-three-reproduce-');
   try {
-    assert.deepEqual(await buildProgram('tests/token-three.bend', 'process', `${directory}/token-three`), manifest);
+    const reproduced = await buildProgram('tests/token-three.bend', 'process', `${directory}/token-three`);
+    assertReproducibleProgramBuilds(programBuildSnapshot(manifest, 'build/token-three'), programBuildSnapshot(reproduced, `${directory}/token-three`));
   } finally { fs.rmSync(directory, { recursive: true, force: true }); }
   const multi = await buildProgram('tests/token-three-multi.bend', 'process', 'build/token-three-multi', 'tests/token-three-multi.layout.json');
   const multiDirectory = fs.mkdtempSync('build/token-three-multi-reproduce-');
   try {
-    assert.deepEqual(await buildProgram('tests/token-three-multi.bend', 'process', `${multiDirectory}/token-three-multi`, 'tests/token-three-multi.layout.json'), multi);
+    const reproduced = await buildProgram('tests/token-three-multi.bend', 'process', `${multiDirectory}/token-three-multi`, 'tests/token-three-multi.layout.json');
+    assertReproducibleProgramBuilds(programBuildSnapshot(multi, 'build/token-three-multi'), programBuildSnapshot(reproduced, `${multiDirectory}/token-three-multi`));
   } finally { fs.rmSync(multiDirectory, { recursive: true, force: true }); }
   console.log('Three-effect structure rejection and reproducible public build passed');
 }

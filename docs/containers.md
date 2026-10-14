@@ -70,6 +70,51 @@ invariants. An application can retain detailed error codes by choosing an
 accumulator containing its own error/result type; the outer `Invalid` still
 represents a failed fold contract.
 
+## Pair-tree prefix fold
+
+`sdk/tree-fold.bend` provides `fold4(T, A, reduce, fuel, vector, initial)` and
+`fold32` for the corresponding homogeneous Pair-backed vectors. These are
+ordinary checked Bend definitions. They preserve the indexed fold's result
+contract: exact Nat fuel/length agreement, length within capacity, left-to-right
+reduction of the active prefix, and absorbing reducer failure. Zero-length
+vectors preserve the initial accumulator. The capacity bounds one vector; it
+does not impose a limit on an application's total elements.
+
+The traversal reduces full subtrees directly and skips empty subtrees, avoiding
+dynamic leaf selection and a vector carried through every iteration. Internal
+tree helpers assume a valid prefix; use `fold4` or `fold32` at boundaries. This
+API adds no compiler intrinsic or wire representation.
+
+`npm run test:tree-fold` checks 5,712 independent expected results through Bend,
+sanitizer-enabled native C and SBF. It exercises every admitted fuel value
+(0–64), every prefix length, malformed lengths including U32 maximum,
+noncommutative reductions, U32 and compound/U64 specializations, failure at every
+leaf, and inactive failure sentinels. Representative cases also run through the
+existing indexed fold. Twelve SBF inputs with excessive fuel reject. Three
+source controls detect reversed full-pair order, ignored fuel agreement and a
+reducer that suppresses failure. These are finite execution and source-mutation
+checks, not universal refinements of arbitrary reducers or types. The focused
+SBF fixtures use at most 7,298 CU; application costs require their own matched
+measurements.
+
+## Static Pair zip fold
+
+`sdk/zip-fold.bend` provides `fold2`, `fold4`, `fold8`, `fold16` and `fold32`
+for two homogeneous Pair trees. The element and accumulator types and the
+`A -> T -> T -> A` transition specialize at compile time. Each function visits
+corresponding leaves exactly once, left to right. It always visits the full
+fixed tree; a caller with an active prefix must keep its bound in the
+accumulator and make the transition ignore inactive leaves. This is a source
+traversal choice, with no new compiler intrinsic or wire layout.
+
+`npm run test:zip-fold` checks a noncommutative rolling calculation on ten
+32-leaf fixtures against independent expected values through Bend reference
+evaluation, sanitizer-enabled native C and SBF. The
+[linear-row benchmark](linear-benchmark.md) uses the same generic fold with
+a U32/checked-arithmetic accumulator and checks 21 independent-oracle SBF
+fixtures twice against Rust. These are execution checks of the exercised
+specializations, not a universal proof for arbitrary `T`, `A` or transitions.
+
 ## Runtime-length token effects
 
 `sdk/effect-buffer.bend` provides empty/push helpers for a four-slot effect vector.

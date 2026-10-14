@@ -1,9 +1,17 @@
 import { mangle } from './backend.ts';
 import { wireLayouts, type RuntimeSchema } from './schema.ts';
 
+// Large aggregate decoders can otherwise accumulate nested field locals and
+// constructor copies in a caller's frame. Keep ordinary codecs unchanged and
+// isolate only the larger ADTs.
+const OUT_OF_LINE_DECODE_WIRE_SIZE = 256;
+
 export function emitCodecs(schema: RuntimeSchema): string {
   const sizes = wireLayouts(schema);
   const types = new Map(schema.types.map(t => [t.name, t]));
+  const outOfLine = new Set(schema.types
+    .filter(t => t.kind === 'adt' && sizes.get(t.name)! >= OUT_OF_LINE_DECODE_WIRE_SIZE)
+    .map(t => t.name));
   const lines = ['/* Generated canonical wire codecs. Include the generated types first. */', '#pragma once'];
   // Dependency order is derived from the schema rather than array order.
   const done = new Set<string>();
@@ -14,7 +22,8 @@ export function emitCodecs(schema: RuntimeSchema): string {
     if (t.kind === 'adt') t.variants.forEach(v => v.fields.forEach(f => emit(f.type)));
     const id = mangle(name), n = sizes.get(name)!;
     lines.push(`#define ${id}_WIRE_SIZE ${n}u`);
-    lines.push(`static inline int ${id}_decode(const unsigned char *p, unsigned long long n, ${t.cType} *out) {`);
+    const decodeStorage = outOfLine.has(name) ? 'static __attribute__((noinline)) inline' : 'static inline';
+    lines.push(`${decodeStorage} int ${id}_decode(const unsigned char *p, unsigned long long n, ${t.cType} *out) {`);
     lines.push(`  if (n != ${n}u) return 0;`);
     if (t.kind === 'u32') {
       lines.push('  *out = (bend_u32)p[0] | ((bend_u32)p[1] << 8) | ((bend_u32)p[2] << 16) | ((bend_u32)p[3] << 24);', ...(t.max!==undefined?[`  if (*out > ${t.max}u) return 0;`]:[]), '  return 1;');
