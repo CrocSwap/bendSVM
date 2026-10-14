@@ -1,0 +1,34 @@
+[package]
+name = "bendsvm-modern-tests"
+version = "0.1.0"
+edition = "2021"
+license = "GPL-3.0-only"
+publish = false
+
+# Runs the shared tests/sbf.rs sources on LiteSVM 0.13.0 (loads SBPFv0 and SBPFv3)
+# with v3-era Solana crates. Relative paths ("build/...") resolve inside this
+# package directory, which the driver stages with the selected target's artifacts.
+[features]
+default = ["modern-litesvm"]
+modern-litesvm = []
+
+[dev-dependencies]
+litesvm = "=0.13.0"
+agave-feature-set = "=4.0.0"
+solana-account = "=3.4.0"
+solana-instruction = "=3.2.0"
+solana-keypair = "=3.1.2"
+solana-message = "=3.1.0"
+solana-pubkey = "=4.1.0"
+solana-signer = "=3.0.0"
+solana-transaction = { version = "=3.1.0", features = ["bincode"] }
+solana-transaction-error = "=3.1.0"
+solana-system-interface = { version = "=2.0.0", features = ["bincode"] }
+spl-token = { package = "spl-token-interface", version = "=2.0.0" }
+solana-program-pack = "=3.1.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[[test]]
+name = "sbf"
+path = "../tests/sbf.rs"

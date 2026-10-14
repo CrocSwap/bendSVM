@@ -21,7 +21,7 @@ type OfflineReport={
   sourceCopy:{stagedRepository:string;projectDirectory:string;copiedFiles:FileHash[]};
   tutorial:{changedProjectFiles:FileHash[]};
   gateInputs:Record<string,string>;
-  outputs:{elf:FileHash;manifest:FileHash;generatedClient:FileHash[];testReport:FileHash};
+  outputs:{target?:string;elf:FileHash;manifest:FileHash;generatedClient:FileHash[];testReport:FileHash};
 };
 
 try {
@@ -55,9 +55,13 @@ try {
   };
   verifyInputs();
   const config=JSON.parse(fs.readFileSync(path.join(project,'bend.json'),'utf8'));
-  const localReportPath=path.resolve(project,config.output)+'.local-test-report.json';
+  // A targeted project tests the offline-tested target only; its outputs live in <output-dir>/<target>/.
+  const target=config.targets?offline.outputs.target:undefined;
+  if(config.targets&&!target)throw new Error('Offline acceptance did not record which target it tested');
+  const stem=path.resolve(project,config.output);
+  const localReportPath=(target?path.join(path.dirname(stem),target,path.basename(stem)):stem)+'.local-test-report.json';
   fs.rmSync(localReportPath,{force:true});
-  const command=[path.join(stage,'scripts/bend.ts'),'test',project,'--local-rpc',endpoint];
+  const command=[path.join(stage,'scripts/bend.ts'),'test',project,...(target?['--target',target]:[]),'--local-rpc',endpoint];
   const result=spawnSync(process.execPath,command,{cwd:stage,encoding:'utf8',
     env:{...process.env,BEND_NO_TELEMETRY:'1'},maxBuffer:16*1024*1024});
   const log=path.join(evidence,'local-test.log');

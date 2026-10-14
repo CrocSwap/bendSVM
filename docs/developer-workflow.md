@@ -102,7 +102,7 @@ assertions compare all instruction accounts before and after, excluding the fee
 payer. Errors include transaction logs. Tests must invoke the loaded program and
 assert a result; an empty test cannot create a success report.
 
-Only success writes `dist/program.test-report.json`, including transaction logs,
+Only success writes the test report (`dist/<target>/program.test-report.json`), including transaction logs,
 compute measurements, assertions and hashes of the build manifest, test entrypoint,
 project configuration and runner inputs. A test attempt with a valid project
 configuration removes the prior success report before build setup. These are fixture measurements,
@@ -115,6 +115,35 @@ transition function), `layout` (storage JSON path, or `null` for the default sin
 state ABI), and `output` (artifact stem). Source/layout/output paths stay inside
 the project. Existing single-account, multi-account and collection programs use
 the same commands and generated client. Add a `test.ts` using their instructions.
+
+## Fogo and Solana targets
+
+`bend.json` can list several networks. `npm run bend -- new` writes both targets;
+`new <project> --target fogo` (or `solana`) writes just one:
+
+```json
+{ "version": 1, "source": "PROOF.bend", "root": "program.process",
+  "layout": "storage.json", "output": "dist/program", "targets": ["fogo", "solana"] }
+```
+
+| Target | Program format | Toolchain | Offline test runtime |
+| --- | --- | --- | --- |
+| `fogo` | SBPFv0 | Anza platform-tools v1.53 | LiteSVM 0.7.1 (`scripts/test-runner`) |
+| `solana` | SBPFv3 ([details](sbpf-v3-programs.md)) | platform-tools v1.57, macOS arm64 | LiteSVM 0.13.0, all features (`scripts/test-runner-modern`) |
+
+`build` and `test` then run for every listed target with no flags. Each target
+writes `dist/<target>/program.*` (ELF, manifest, interface, test report). The
+generated client is target-independent: it is checked byte-identical across
+targets and published once as `dist/program.client.*`, so `test.ts` keeps
+importing `./dist/program.client.ts`. `--target fogo|solana` builds or tests
+one listed target; `--local-rpc` requires it when several are listed. If the
+v1.57 toolchain is missing, `build` names the fix (install it, set
+`SBF_V157_TOOLS`, or build Fogo only). `npm run doctor` reports the v1.57 tools
+as optional checks. Without `"targets"` (projects created before targets existed, or
+edited by hand), a project builds the single SBPFv0 `output` exactly as before.
+Ubuntu CI and the acceptance gates have only v1.53, so they create the default
+starter and build and test it with `--target fogo`.
+`npm run test:project-targets` exercises these behaviours and refusals.
 
 The supported language and resource bounds still apply; see `subset.md` and
 `diagnostics.md`. This workflow adds packaging and testing, not unrestricted Bend

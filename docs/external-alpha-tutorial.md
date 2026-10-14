@@ -13,8 +13,11 @@ npm run bend -- new projects/My-Alpha
 ```
 
 The starter has a signed owner, a bounded collection of U32 values, and
-`Append` and `Replace` instructions. Its generated clients and SBF outputs go
-under the project `dist/` directory. The source imports the shared SDK from
+`Append` and `Replace` instructions. Its `bend.json` lists the `fogo` (SBPFv0)
+and `solana` (SBPFv3) targets: `build` and `test` run both, writing
+`dist/<target>/program.*` and one shared generated client under `dist/`. Without
+platform-tools v1.57 (macOS arm64 only), add `--target fogo` to each `build` and
+`test` command below. The source imports the shared SDK from
 this checkout.
 
 ## Change the application rule
@@ -177,7 +180,7 @@ rerun `acceptance:developer` first.
 For your own project, the reusable command is:
 
 ```sh
-npm run bend -- test projects/My-Alpha --local-rpc http://127.0.0.1:18899
+npm run bend -- test projects/My-Alpha --target fogo --local-rpc http://127.0.0.1:18899
 ```
 
 The offline command does not submit transactions. Local testing creates fresh

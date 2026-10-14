@@ -21,6 +21,10 @@ solana-program-pack = "2.2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+[features]
+# Enabled only by tests-modern/ (LiteSVM 0.13.0); never with this crate's LiteSVM 0.7.1.
+modern-litesvm = []
+
 [[test]]
 name = "sbf"
 path = "tests/sbf.rs"

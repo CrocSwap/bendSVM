@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn arbitrary_program_cpi_permissions_signers_and_rollback() {
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     let caller = Pubkey::new_unique();
     let callee = Pubkey::new_unique();
     svm.add_program_from_file(caller, "build/cpi.so").unwrap();
@@ -166,7 +166,7 @@ fn cpi_pair_lifecycle(count: usize) {
     let layout: serde_json::Value =
         serde_json::from_slice(&std::fs::read(format!("build/{stem}.interface.json")).unwrap())
             .unwrap();
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     let caller = Pubkey::new_unique();
     let callee = Pubkey::new_unique();
     svm.add_program_from_file(caller, format!("build/{stem}.so"))
@@ -363,8 +363,13 @@ fn cpi_pair_lifecycle(count: usize) {
     let meta = send(&mut svm, ix(false, 4, 0, false, false)).unwrap();
     assert_eq!(svm.get_account(&target).unwrap().data, 24u32.to_le_bytes());
     for (i, k) in state_keys.iter().enumerate() {
+        let account = svm.get_account(&k.pubkey()).unwrap();
+        let payload_offset = if multi && i > 0 { 53 } else { 21 };
+        if multi && i > 0 {
+            assert_eq!(&account.data[20..52], state.pubkey().as_ref());
+        }
         assert_eq!(
-            &svm.get_account(&k.pubkey()).unwrap().data[21..],
+            &account.data[payload_offset..],
             (3u32 * (i as u32 + 1)).to_le_bytes()
         );
     }

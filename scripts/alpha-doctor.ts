@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
+import crypto from 'node:crypto';
 import {BEND_COMMIT,sbfTools} from './build.ts';
 
 const repository=path.resolve(import.meta.dir,'..');
@@ -58,10 +59,28 @@ if(fs.existsSync(path.join(tools,'clang'))){
   add('sbf-clang-version',true,result.ok&&/20\.1\.7/.test(result.output)&&/anza-xyz/.test(result.output),result.output.split('\n')[0]??result.error??'not found',toolReuse);
 }
 
+// Solana (SBPFv3) target: platform-tools v1.57, content-pinned on macOS arm64.
+// Optional: projects that only target Fogo do not need it.
+{
+  const {libraryTarget,libraryTools,MODERN_TOOL_HASHES}=await import('../compiler/target-profile.ts');
+  const modern=libraryTools(libraryTarget('solana-v3'));
+  const modernReuse=process.env.SBF_V157_TOOLS||process.env.SBF_V3_TOOLS?`SBF_V157_TOOLS=${modern}`:`default cache ${modern}`;
+  const supportedHost=process.platform==='darwin'&&process.arch==='arm64';
+  for(const name of ['clang','ld.lld','llvm-readelf']){
+    const executable=path.join(modern,name);
+    if(!fs.existsSync(executable)){add(`solana-v1.57-${name}`,false,false,`missing ${executable} (needed only for the solana target)`,modernReuse);continue;}
+    const digest=crypto.createHash('sha256').update(fs.readFileSync(executable)).digest('hex');
+    const result=command(executable,['--version']);
+    const ok=supportedHost&&result.ok&&/22\.1\.2/.test(result.output)&&digest===MODERN_TOOL_HASHES[name];
+    add(`solana-v1.57-${name}`,false,ok,supportedHost
+      ?`${result.output.split('\n')[0]??''}; content ${digest===MODERN_TOOL_HASHES[name]?'matches':'differs from'} pin`
+      :`platform-tools v1.57 is pinned for macOS arm64 only (host ${process.platform}/${process.arch})`,modernReuse);
+  }
+}
 const bendHead=command('git',['-C','.deps/bend','rev-parse','HEAD']);
 const bendStatus=command('git',['-C','.deps/bend','status','--porcelain']);
 add('bend-checkout',true,bendHead.ok&&bendHead.output===BEND_COMMIT&&bendStatus.ok&&!bendStatus.output,`${bendHead.output||bendHead.error||'missing'}${bendStatus.output?' (dirty)':''}`,`.deps/bend at ${BEND_COMMIT}`);
-for(const manifest of ['scripts/test-runner/Cargo.toml','scripts/local-runner/Cargo.toml','scripts/live-queue/Cargo.toml']){
+for(const manifest of ['scripts/test-runner/Cargo.toml','scripts/test-runner-modern/Cargo.toml','scripts/local-runner/Cargo.toml','scripts/live-queue/Cargo.toml']){
   const result=command('cargo',['metadata','--locked','--offline','--no-deps','--manifest-path',manifest]);
   add(`cargo-${path.basename(path.dirname(manifest))}`,true,result.ok,result.ok?'locked offline metadata available':result.error??result.output);
 }

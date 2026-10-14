@@ -14,11 +14,12 @@ function manifest(stem:string) {
 }
 const e2e=read('build/workflow-e2e.json');assert(e2e.passed&&e2e.behaviorMutationRejected);assert.equal(e2e.reports.length,3);
 const versions=[];
-for(const {project,report} of e2e.reports){
-  assert.deepEqual(read(project+'/dist/program.test-report.json'),report);hashes(report.hashes);
+for(const {project,stem:recorded,report} of e2e.reports){
+  const stem=recorded??project+'/dist/program';
+  assert.deepEqual(read(stem+'.test-report.json'),report);hashes(report.hashes);
   assert(report.passed&&report.programCalls>0&&report.assertions>0&&report.successful>=2&&report.rejected>=1);
   assert.equal(report.transactions,report.receipts.length);assert(report.receipts.every((r:any)=>r.units>0&&r.logs.length>0));
-  manifest(project+'/dist/program');versions.push(read(project+'/dist/program.interface.json').version);
+  manifest(stem);versions.push(read(stem+'.interface.json').version);
 }
 assert.deepEqual(versions,[3,2,1]);
 const packaging=read('build/client-packaging-report.json');assert(packaging.passed);assert.match(packaging.typescript,/Version \d+\.\d+\.\d+/);hashes(packaging.hashes);

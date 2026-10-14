@@ -136,8 +136,10 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   const edit=runCommand('apply-tutorial',bun,[helper,projectDirectory],{cwd:stagedSource,env:stageEnv,expected:'pass'});
   recordCommand(logs,'apply-tutorial',edit);
 
+  // The starter lists fogo and solana; this gate (and Ubuntu CI) builds and tests fogo only.
+  const target=(name:string)=>name==='build'||name==='test'?['--target','fogo']:[];
   const projectCommand=(label:string,name:string)=>{
-    const result=runCommand(label,bun,[cli,name,projectDirectory],{cwd:stagedSource,env:stageEnv,expected:'pass'});
+    const result=runCommand(label,bun,[cli,name,projectDirectory,...target(name)],{cwd:stagedSource,env:stageEnv,expected:'pass'});
     recordCommand(logs,label,result);
     return result;
   };
@@ -162,7 +164,7 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
     verifyMutation=runCommand('zero-law-mutation-verify',bun,[cli,'verify',projectDirectory],
       {cwd:stagedSource,env:stageEnv,expected:'semantic-failure',semantic});
     recordCommand(logs,'zero-law-mutation-verify',verifyMutation);
-    buildMutation=runCommand('zero-law-mutation-build',bun,[cli,'build',projectDirectory],
+    buildMutation=runCommand('zero-law-mutation-build',bun,[cli,'build',projectDirectory,...target('build')],
       {cwd:stagedSource,env:stageEnv,expected:'semantic-failure',semantic});
     recordCommand(logs,'zero-law-mutation-build',buildMutation);
   }finally{
@@ -189,9 +191,10 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   const projectFiles=['program.bend','LAWS.bend','PROOF.bend','test.ts','storage.json','bend.json']
     .map(name=>path.join(projectDirectory,name));
   const clientStem=path.join(projectDirectory,'dist/program');
+  const fogoStem=path.join(projectDirectory,'dist/fogo/program');
   const outputFiles=[
-    clientStem+'.so',clientStem+'.manifest.json',clientStem+'.client.ts',clientStem+'.client.js',
-    clientStem+'.client-runtime.js',clientStem+'.client-runtime.d.ts',clientStem+'.test-report.json',
+    fogoStem+'.so',fogoStem+'.manifest.json',clientStem+'.client.ts',clientStem+'.client.js',
+    clientStem+'.client-runtime.js',clientStem+'.client-runtime.d.ts',fogoStem+'.test-report.json',
   ];
   for(const file of outputFiles)assertFile(file);
   const gateInputs=['scripts/fresh-developer-acceptance.ts','scripts/fresh-developer-tutorial.ts',
@@ -266,10 +269,11 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
       staleSuccessRemoved:!fs.existsSync(staleReport),
     },
     outputs:{
-      elf:{path:rel(clientStem+'.so'),sha256:hash(clientStem+'.so'),bytes:fs.statSync(clientStem+'.so').size},
-      manifest:{path:rel(clientStem+'.manifest.json'),sha256:hash(clientStem+'.manifest.json')},
+      target:'fogo',
+      elf:{path:rel(fogoStem+'.so'),sha256:hash(fogoStem+'.so'),bytes:fs.statSync(fogoStem+'.so').size},
+      manifest:{path:rel(fogoStem+'.manifest.json'),sha256:hash(fogoStem+'.manifest.json')},
       generatedClient:['.client.ts','.client.js','.client-runtime.js','.client-runtime.d.ts'].map(suffix=>({path:rel(clientStem+suffix),sha256:hash(clientStem+suffix)})),
-      testReport:{path:rel(clientStem+'.test-report.json'),sha256:hash(clientStem+'.test-report.json')},
+      testReport:{path:rel(fogoStem+'.test-report.json'),sha256:hash(fogoStem+'.test-report.json')},
       finishedProject:rel(projectDirectory),
       finishedStagedRepository:rel(stagedSource),
     },
@@ -281,7 +285,7 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   };
   fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+'\n');
   console.log(`Fresh-developer offline acceptance passed: ${reportPath}`);
-  return {reportPath,stagedRepository:stagedSource,projectDirectory,programPath,elfPath:clientStem+'.so',report};
+  return {reportPath,stagedRepository:stagedSource,projectDirectory,programPath,elfPath:fogoStem+'.so',report};
 }
 
 if(import.meta.main){

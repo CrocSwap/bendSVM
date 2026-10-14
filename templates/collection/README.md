@@ -14,9 +14,14 @@ npm run bend -- build @PROJECT@
 npm run bend -- test @PROJECT@
 ```
 
+`bend.json` lists two targets, `fogo` (SBPFv0) and `solana` (SBPFv3); `build` and
+`test` run both. Add `--target fogo` or `--target solana` to run one, for example on
+a host without the Solana toolchain (Anza platform-tools v1.57, macOS arm64).
+
 `check` checks the source, admitted language subset, account layout and client
 compatibility. `verify` checks declared source laws. `build` also checks the SBF
-toolchain's stack limits and writes `dist/program.so`, clients and resource reports.
+toolchain's stack limits and writes `dist/<target>/program.so` and resource reports
+for each target, plus one shared client.
 `test` rebuilds and executes `test.ts` against the compiled SBF in LiteSVM, without
 a network connection. It does not deploy through Solana RPC.
 
@@ -30,7 +35,7 @@ use bigint. You never supply constructor tags or wire padding.
 The test context supplies named test signers, creates accounts, submits generated
 instructions, reads account data and compares decoded results. `t.reject` checks
 the expected error and unchanged application accounts; transaction fees are excluded.
-Successful tests write `dist/program.test-report.json`. Starting a test with valid
+Successful tests write `dist/<target>/program.test-report.json`. Starting a test with valid
 project configuration removes the previous success report. Test keys are deterministic fixtures, never wallets
 for a live cluster.
 

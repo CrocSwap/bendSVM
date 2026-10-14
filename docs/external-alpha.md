@@ -82,6 +82,9 @@ npm run bend -- build projects/my-program
 npm run bend -- test projects/my-program
 ```
 
+The starter lists the `fogo` and `solana` targets; on a host without platform-tools
+v1.57 (including Ubuntu CI) add `--target fogo` to `build` and `test`, as the
+acceptance gates do. See [targets](developer-workflow.md#fogo-and-solana-targets).
 `test` executes the generated client against the actual SBF in LiteSVM. The
 repeatable acceptance gate starts a fresh starter in an isolated staging
 directory, writes all project artifacts there, explicitly rebuilds the pinned

@@ -333,7 +333,8 @@ fn exchange_rejects_account_substitution_and_rolls_back_second_leg_failure() {
             .meta
             .logs
             .iter()
-            .filter(|l| l.as_str() == "Program log: Instruction: TransferChecked")
+            // Both legs reach the token program (SPL Token and p-token log differently).
+            .filter(|l| **l == format!("Program {} invoke [2]", spl_token::id()))
             .count(),
         2
     );

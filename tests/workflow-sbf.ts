@@ -6,8 +6,11 @@ import {repository,createProject} from '../scripts/bend.ts';
 
 fs.rmSync('build/workflow-e2e.json',{force:true});
 const parent=fs.mkdtempSync(path.join(repository,'build/workflow-e2e-'));
+// The starter lists fogo and solana; build/test fogo only (CI has no v1.57 tools).
 const cli=(directory:string,command:string,success=true)=>{
-  const result=spawnSync(process.execPath,[path.join(repository,'scripts/bend.ts'),command,directory],{cwd:repository,encoding:'utf8'});
+  const targeted=fs.existsSync(path.join(directory,'bend.json'))&&JSON.parse(fs.readFileSync(path.join(directory,'bend.json'),'utf8')).targets;
+  const args=targeted&&(command==='build'||command==='test')?[command,directory,'--target','fogo']:[command,directory];
+  const result=spawnSync(process.execPath,[path.join(repository,'scripts/bend.ts'),...args],{cwd:repository,encoding:'utf8'});
   assert.equal(result.status===0,success,result.stdout+result.stderr);return result;
 };
 const starter=path.join(parent,'Fresh Project');createProject(starter);
@@ -17,7 +20,7 @@ const needle='window, value), U32.add(length, 1)';assert(source.includes(needle)
 fs.writeFileSync(sourceFile,source.replace(needle,'window, U32.add(value, 1)), U32.add(length, 1)'));
 cli(starter,'verify'); // The declared laws do not specify the appended payload.
 const wrong=cli(starter,'test',false);assert.match(wrong.stdout+wrong.stderr,/17|18/);
-assert(!fs.existsSync(path.join(starter,'dist/program.test-report.json')),'A failed run must invalidate its previous success report');
+assert(!fs.existsSync(path.join(starter,'dist/fogo/program.test-report.json')),'A failed run must invalidate its previous success report');
 fs.writeFileSync(sourceFile,source);cli(starter,'test');
 
 // Existing, unrelated two-state fixture exercises the same generic runner and
@@ -34,10 +37,10 @@ export default async function test(t) {
   const sizes=client.allocationBytes();
   await t.createAccounts([{address:accounts.left,bytes:sizes.left},{address:accounts.right,bytes:sizes.right}],client.instructions.Set({left:3,right:4},accounts,{mode:'initialize'}));
   t.equal(client.state.left(await t.data(accounts.left)),{value:3});
-  t.equal(client.state.right(await t.data(accounts.right)),{value:4});
+  t.equal(client.state.right(await t.data(accounts.right),accounts.left),{value:4});
   await t.send(client.instructions.Set({left:4294967295,right:17},accounts));
   t.equal(client.state.left(await t.data(accounts.left)),{value:4294967295});
-  t.equal(client.state.right(await t.data(accounts.right)),{value:17});
+  t.equal(client.state.right(await t.data(accounts.right),accounts.left),{value:17});
   await t.reject(client.instructions.AbortRequest({},accounts),298);
 }
 `);
@@ -59,7 +62,8 @@ export default async function test(t) {
 }
 `);
 cli(single,'verify');cli(single,'check');cli(single,'test');
-const reports=[starter,multi,single].map(project=>({project:path.relative(repository,project),report:JSON.parse(fs.readFileSync(path.join(project,'dist/program.test-report.json'),'utf8'))}));
+const reports=[[starter,'dist/fogo/program'],[multi,'dist/program'],[single,'dist/program']].map(([project,output])=>({project:path.relative(repository,project),
+  stem:path.relative(repository,path.join(project,output)),report:JSON.parse(fs.readFileSync(path.join(project,output+'.test-report.json'),'utf8'))}));
 assert.equal(reports[0].report.rejected,3);assert.equal(reports[1].report.rejected,1);
 fs.writeFileSync('build/workflow-e2e.json',JSON.stringify({passed:true,behaviorMutationRejected:true,reports},null,2)+'\n');
 console.log('Fresh collection and existing ABI 1/2 projects executed generated-client SBF transactions; behavior mutation failed, rollback and decoded state assertions passed');

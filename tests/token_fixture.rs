@@ -54,7 +54,7 @@ impl TokenFixture {
         } else {
             &interface
         };
-        let mut svm = LiteSVM::new().with_transaction_history(0);
+        let mut svm = crate::test_svm().with_transaction_history(0);
         let program = if deterministic {
             Pubkey::new_from_array([42; 32])
         } else {

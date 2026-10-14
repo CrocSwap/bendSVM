@@ -220,7 +220,8 @@ fn shared_two_leg_executor_rolls_back_first_transfer_when_second_cpi_fails() {
             .meta
             .logs
             .iter()
-            .filter(|line| line.as_str() == "Program log: Instruction: TransferChecked")
+            // Both legs reach the token program (SPL Token and p-token log differently).
+            .filter(|line| **line == format!("{token_prefix} invoke [2]"))
             .count(),
         2,
         "{:?}",

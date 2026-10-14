@@ -11,6 +11,26 @@ use solana_signer::Signer;
 use solana_transaction::Transaction;
 use solana_transaction_error::TransactionError;
 
+/// LiteSVM used by these tests. The `tests-modern` crate (LiteSVM 0.13.0) creates
+/// builtins after selecting all features so SBPFv3 programs load; the classic
+/// crate keeps LiteSVM 0.7.1's defaults.
+#[cfg(not(feature = "modern-litesvm"))]
+pub fn test_svm() -> LiteSVM {
+    LiteSVM::new()
+}
+#[cfg(feature = "modern-litesvm")]
+pub fn test_svm() -> LiteSVM {
+    LiteSVM::default()
+        .with_feature_set(agave_feature_set::FeatureSet::all_enabled())
+        .with_builtins()
+        .with_lamports(1_000_000_000_000_000)
+        .with_sysvars()
+        .with_feature_accounts()
+        .with_default_programs()
+        .with_sigverify(true)
+        .with_blockhash_check(true)
+}
+
 #[path = "amm_rust_math.rs"]
 mod amm_rust_math;
 #[path = "token_issuance_sbf.rs"]
@@ -20,6 +40,8 @@ mod token_three_sbf;
 
 #[path = "cpi_sbf.rs"]
 mod cpi_sbf;
+#[path = "cpi_frame_sbf.rs"]
+mod cpi_frame_sbf;
 #[path = "multi_storage_sbf.rs"]
 mod multi_storage_sbf;
 #[path = "storage_sbf.rs"]
@@ -40,7 +62,7 @@ fn generated_codec_dispatcher_runs_in_sbf() {
     )
     .unwrap();
     assert!(cases.len() > 200);
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     let program = Pubkey::new_unique();
     svm.add_program_from_file(program, "build/codecs.so")
         .unwrap();
@@ -101,7 +123,7 @@ fn arithmetic_reference_native_and_sbf_agree() {
     )
     .unwrap();
     assert!(cases.len() > 1000);
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     let program = Pubkey::new_unique();
     svm.add_program_from_file(program, "build/arithmetic.so")
         .unwrap();
@@ -152,7 +174,7 @@ struct Fixture {
 
 impl Fixture {
     fn new() -> Self {
-        let mut svm = LiteSVM::new().with_transaction_history(0);
+        let mut svm = crate::test_svm().with_transaction_history(0);
         let program = Pubkey::new_unique();
         svm.add_program_from_file(program, "build/escrow.so")
             .unwrap();
@@ -389,6 +411,9 @@ fn generic_specializations_execute_in_sbf() {
     run_oracles(&["generics"], 37);
 }
 
+#[path = "codec_structures_sbf.rs"]
+mod codec_structures_sbf;
+
 #[test]
 fn bounded_buffers_execute_in_sbf() {
     run_oracles(&["buffer"], 181);
@@ -401,7 +426,7 @@ fn bounded_iteration_executes_in_sbf() {
 
 #[test]
 fn bounded_iteration_rejects_excessive_fuel() {
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     let program = Pubkey::new_unique();
     svm.add_program_from_file(program, "build/iteration.so").unwrap();
     let payer = Keypair::new();
@@ -419,6 +444,43 @@ fn bounded_iteration_rejects_excessive_fuel() {
 #[test]
 fn bounded_folds_execute_in_sbf() {
     run_oracles(&["fold"], 1092);
+}
+
+#[test]
+fn zip_fold_order_executes_in_sbf() {
+    run_oracles(&["zip-fold"], 10);
+}
+
+#[test]
+fn tree_folds_execute_in_sbf() {
+    run_oracles(&["tree-fold"], 5712);
+}
+
+#[test]
+fn tree_folds_reject_excessive_fuel() {
+    #[derive(Deserialize)]
+    struct Case {
+        input: Vec<u8>,
+    }
+    let cases: Vec<Case> = serde_json::from_slice(
+        &std::fs::read("build/tree-fold-vectors.json").expect("run test:tree-fold first"),
+    )
+    .unwrap();
+    let mut svm = crate::test_svm().with_transaction_history(0);
+    let program = Pubkey::new_unique();
+    svm.add_program_from_file(program, "build/tree-fold.so").unwrap();
+    let payer = Keypair::new();
+    svm.airdrop(&payer.pubkey(), 1_000_000_000).unwrap();
+    for tag in 0..6u8 {
+        let case = cases.iter().find(|case| case.input[0] == tag).unwrap();
+        for fuel in [65u32, u32::MAX] {
+            let mut data = case.input.clone();
+            data[1..5].copy_from_slice(&fuel.to_le_bytes());
+            let ix = Instruction { program_id: program, accounts: vec![], data };
+            let tx = Transaction::new(&[&payer], Message::new(&[ix], Some(&payer.pubkey())), svm.latest_blockhash());
+            assert!(svm.send_transaction(tx).is_err(), "root {tag}, fuel {fuel} must reject");
+        }
+    }
 }
 
 #[test]
@@ -449,7 +511,7 @@ fn lowering_rejects_malformed_wire_in_sbf() {
     )
     .unwrap();
     assert_eq!(cases.len(), 8);
-    let mut svm = LiteSVM::new().with_transaction_history(0);
+    let mut svm = crate::test_svm().with_transaction_history(0);
     let program = Pubkey::new_unique();
     svm.add_program_from_file(program, "build/lowering.so").unwrap();
     let payer = Keypair::new();
@@ -488,7 +550,7 @@ fn run_oracles(stems: &[&str], minimum_cases: usize) {
             serde_json::from_slice(&std::fs::read(format!("build/{stem}-vectors.json")).unwrap())
                 .unwrap();
         assert!(cases.len() >= minimum_cases);
-        let mut svm = LiteSVM::new().with_transaction_history(0);
+        let mut svm = crate::test_svm().with_transaction_history(0);
         let program = Pubkey::new_unique();
         svm.add_program_from_file(program, format!("build/{stem}.so"))
             .unwrap();
@@ -534,3 +596,6 @@ mod queue_sbf;
 
 #[path = "collection_cpi_sbf.rs"]
 mod collection_cpi_sbf;
+
+#[path = "external-layout-sbf.rs"]
+mod external_layout_sbf;

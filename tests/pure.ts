@@ -2,7 +2,8 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import * as B from '../.deps/bend/bend2/bend.ts';
-import { Backend, checkedBook } from '../compiler/backend.ts';
+import { Backend, checkedProgram } from '../compiler/backend.ts';
+import { referenceCache } from './bend-reference-cache.ts';
 import { writeArtifacts } from '../compiler/artifacts.ts';
 import { wireCodec, type WireValue } from '../sdk/wire.ts';
 import { compileSbf, run } from '../scripts/build.ts';
@@ -10,7 +11,7 @@ import { compileSbf, run } from '../scripts/build.ts';
 export type PureCase = {name: string; args: WireValue[]; expected: WireValue};
 export async function testPure(file: string, roots: string[], stem: string,
     makeCases: (schema: ReturnType<Backend['emit']>['schema']) => PureCase[]) {
-  const book = await checkedBook(file), emitted = new Backend(book).emit(roots);
+  const checked = await checkedProgram(file), book = checked.book, emitted = new Backend(book).emit(roots);
   writeArtifacts(stem,emitted);
   const types = new Map(emitted.schema.types.map(t => [t.name,t]));
   const codec = wireCodec(emitted.schema);
@@ -41,13 +42,16 @@ export async function testPure(file: string, roots: string[], stem: string,
     return {constructor:variant.name,fields:Object.fromEntries(variant.fields.map((f,i) => [f.name,value(f.type,term.x[i])]))};
   }
   const cases = makeCases(emitted.schema), vectors = [];
+  const cache = referenceCache(checked.files, emitted.schema);
   for (const [index,c] of cases.entries()) {
     if (index % 32 === 0) console.log(`${stem}: Bend reference ${index+1}/${cases.length}`);
     const exp = emitted.schema.exports.find(e => e.name === c.name)!;
     let call: B.HTerm = B.Ref(c.name);
     c.args.forEach((a,i) => { call = B.App(call,term(exp.args[i],a)); });
     const expected = codec.encode(exp.result,c.expected);
-    assert.deepEqual(codec.encode(exp.result,value(exp.result,B.term_snf(book,call))),expected,`${c.name} case ${index}`);
+    const reference = cache.result({name:c.name,args:c.args},
+      () => Uint8Array.from(codec.encode(exp.result,value(exp.result,B.term_snf(book,call)))));
+    assert.deepEqual([...reference],[...expected],`${c.name} case ${index}`);
     vectors.push({name:`${c.name}-${index}`,input:[...codec.call(c.name,c.args)],expected:[...expected]});
   }
   const name = stem.split('/').at(-1)!;
@@ -74,5 +78,6 @@ int main(void) {
   fs.writeFileSync(stem+'-sbf.c',`#include "solana_min.h"\n#include "${name}.dispatch.h"\n#include "invoke.h"\n`);
   compileSbf(stem+'-sbf.c',stem);
   fs.writeFileSync(stem+'-vectors.json',JSON.stringify(vectors)+'\n');
-  console.log(`${vectors.length} ${name} oracle/Bend/native cases passed; SBF built`);
+  fs.writeFileSync(stem+'-reference-cache.json',JSON.stringify(cache.stats,null,2)+'\n');
+  console.log(`${vectors.length} ${name} oracle/Bend/native cases passed (Bend reference: ${cache.stats.evaluated} evaluated, ${cache.stats.hits} cached, mode ${cache.stats.mode}); SBF built`);
 }

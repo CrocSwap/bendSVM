@@ -16,7 +16,7 @@ impl Storage {
         let interface: serde_json::Value =
             serde_json::from_slice(&std::fs::read("build/storage.interface.json").unwrap())
                 .unwrap();
-        let mut svm = LiteSVM::new().with_transaction_history(0);
+        let mut svm = crate::test_svm().with_transaction_history(0);
         let program = Pubkey::new_unique();
         svm.add_program_from_file(program, "build/storage.so")
             .unwrap();

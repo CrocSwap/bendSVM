@@ -153,10 +153,16 @@ async function buildLocalRunner() {
   await cleanupGroup();
   if(result.failure||result.code!==0)throw new Error(`Cannot build local RPC test runner${timedOut?' (15 minute timeout)':''}. Install the locked Cargo dependencies first with cargo fetch --locked --manifest-path scripts/local-runner/Cargo.toml.\n${result.failure?.message??''}${error}${output}`);
 }
-export async function startTestProgram(elf:string) {
-  const build=spawnSync('cargo',['build','--locked','--offline','--manifest-path','scripts/test-runner/Cargo.toml','--target-dir','target'],{cwd:repository,encoding:'utf8'});
+/** LiteSVM 0.7.1 runs SBPFv0 only; the modern runner (LiteSVM 0.13.0) also loads SBPFv3. */
+export const TEST_RUNNERS={
+  classic:{manifest:'scripts/test-runner/Cargo.toml',targetDir:'target',executable:'target/debug/bend-test-runner'},
+  modern:{manifest:'scripts/test-runner-modern/Cargo.toml',targetDir:'target/test-runner-modern',executable:'target/test-runner-modern/debug/bend-test-runner-modern'},
+} as const;
+export async function startTestProgram(elf:string,runner:keyof typeof TEST_RUNNERS='classic') {
+  const selected=TEST_RUNNERS[runner];
+  const build=spawnSync('cargo',['build','--locked','--offline','--manifest-path',selected.manifest,'--target-dir',selected.targetDir],{cwd:repository,encoding:'utf8'});
   if(build.status!==0)throw new Error(`Cannot build offline SBF test runner. Install the pinned dependencies first.\n${build.error??''}${build.stderr}`);
-  const process=lineProcess(path.join(repository,'target/debug/bend-test-runner'),[],repository);
+  const process=lineProcess(path.join(repository,selected.executable),[],repository);
   try {
     const hello=await process.request({op:'hello'});
     let seed=0;

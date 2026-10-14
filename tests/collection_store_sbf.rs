@@ -13,7 +13,7 @@ impl CollectionFixture {
         Self::with_record(capacity,false)
     }
     fn with_record(capacity: usize, record: bool) -> Self {
-        let mut svm = LiteSVM::new().with_transaction_history(0);
+        let mut svm = crate::test_svm().with_transaction_history(0);
         let program = Pubkey::new_unique();
         svm.add_program_from_file(program, if record {"build/collection-record.so"} else {"build/collection-store.so"}).unwrap();
         let payer = Keypair::new();
