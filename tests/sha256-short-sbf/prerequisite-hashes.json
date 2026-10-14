@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Exact prerequisite snapshot copied from the main checkout before implementing the focused SBF execution test.",
+  "mainCheckoutHead": "3fdc9c0dfe6e38a6978bf478b468899365d1af92",
+  "mainCheckoutState": "The main checkout had uncommitted SHA short prerequisites; the listed files were hashed after copying into this isolated worktree.",
+  "bend": {
+    "commit": "7561656155a4285c1e4ccfcb3505ab59524de973",
+    "clean": true,
+    "bendTsSha256": "baf326d77e81c2ebe80c2bdd016c08732071a56ff951da0a67f68c26ac99e9d4",
+    "baseBendSha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+  },
+  "files": {
+    "compiler/backend.ts": "540f42daad66903d9e117747fec84d4d4651d9024a801a8a2a58e593658177e9",
+    "compiler/sha256-short.ts": "3582098a8abc07587b23907d4b2113dfaeefa367a14591feb32408735128f0e0",
+    "compiler/schema.ts": "c519ee4bfcfb4f62490bd36d6016f043ed390d7bbde92066845f24bcb04337b7",
+    "compiler/native-arithmetic.ts": "7ac1d5f9e1fe343fca3dcf10b9d0abd4bb2e69663724046fe20356f97594885f",
+    "compiler/tagged-sum-ir.ts": "2707f738e55361a17f54f1e9b4168124070879ccbeed503a15527a843f69ad41",
+    "compiler/diagnostics.ts": "f08c450ec3aaca8e1abae4890968d2dde800f2b80346171a5c55ba21eec3b1de",
+    "compiler/primitives.ts": "ac60d1451d45b758af1205af74df2ca8fcd5b0867a366bf9bad938ae9211a4ac",
+    "compiler/codecs.ts": "79b91040b1bfe53595fb93eb2de8334689420bf6ab7d3ca0269c003446063e78",
+    "compiler/dispatch.ts": "0c8843af75d615e1025848e0e36034fe891cb8f83ab69bd57454da3e1adf4dde",
+    "runtime/bend_sha256.h": "6a75b1c5f7aac1835f7fa57e495b6084760f9b05430516872dc2fa13ff6734a1",
+    "runtime/solana_min.h": "103aa5bd910cf4f0b29dbe8d1b956a6bb7d6cb90e79f156a17857a05b18b8b06",
+    "runtime/memory.c": "4df8dd715d94b0c74e90205d593756c5102a98f72555d9ab6bc02bc5ddb78f51",
+    "runtime/sbf.ld": "57681e310bb3bdfa1e40c82f5526bb854fcaf82f1a9c9d3ac54cebe795ea969c",
+    "sdk/sha256-reference.bend": "4eeaec621e7e855cd88abd1b224ee01279b2981c112701f4bfff0f6347d4e447",
+    "sdk/buffer.bend": "1577b02bde13257ad40ad3b1d1e4fda86c5023b613f5c5c4583c510bc17fb38f",
+    "sdk/iteration.bend": "49b224a99e83a6145d5e1ab2f1faf768c6f989f66e767c408ee75456f4b94386",
+    "sdk/wire.ts": "94055c8ab4436bbb2655438d2323dadf3173a00c405b37ea1e4816135b6503ea",
+    "tests/sha256-reference/PROOF.bend": "b60f076d936a0c95ce8c52f5e1f4154696838c56cca6ac80e79abee7d2dddeda",
+    "tests/sha256-reference/LAWS.bend": "af2e59ab7ebd61b746f8ff5f3a5a14f38fb81029b6d9363aed2814e860e797cd",
+    "tests/sha256-reference/vectors.json": "30703d46d212318da91b9eb9126b6d70e6b7cd7a629a32ba2ad2dbdb0cdff1b5",
+    "compiler/type-evaluation.ts": "6a7627505744bca4a1518fa4c846f2020fa02acadc23af3caa70549f7b96000c"
+  },
+  "readOnlySharedTools": {
+    "litesvmRunnerPath": "/Users/colkitt/sith/toys/crypto/bendSVM/scripts/test-runner/target/debug/bend-test-runner",
+    "litesvmRunnerSha256": "3cd6f111c4db06be2f129c8b4fd93543e38b6d5e59d855d6e501745be6bdfe7a",
+    "litesvmRunnerRerecorded": {
+      "date": "2026-10-09",
+      "previousSha256": "77df0dc19a4b496408bb185c3951b22e25efc90619a411ce6674a988c1298e83",
+      "reason": "Runner binary rebuilt 2026-10-06 19:06 from unchanged, committed scripts/test-runner sources (Cargo reports it up to date); hash re-recorded at the user's request."
+    }
+  },
+  "integrationCandidate": {
+    "scope": "Private combined check only; type isolation candidate reviewed separately, SHA observation correction review pending",
+    "backendBefore": "e46d20223a78b74aec2f7d891060afa7c631a704879e18e21a28beb53e5d2edc",
+    "backendAfter": "b194612ad36d8d79a76d328284ec832acdc5a9c5ad1e2c708b6eb4c7f09f6724",
+    "typeIsolationEvidence": "build/overnight/application-identity-repin-evidence.json",
+    "expectedChange": "Only Backend isolated type evaluation import and three calls; ordinary C baselines preserved in seven applications"
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Reviewed source qualification pins for explicit SHA-only SBF emission.",
+  "checkedRuntime": {
+    "root": "$module:sha256-reference.hash_short",
+    "sha256": "8645b9ed82f7d511d033e30422b6bff87de5a364764b9bc241ca88aef9d6860e",
+    "definitions": 160
+  },
+  "requiredModules": [
+    {
+      "label": "sha256-reference",
+      "sha256": "4eeaec621e7e855cd88abd1b224ee01279b2981c112701f4bfff0f6347d4e447"
+    },
+    {
+      "label": "buffer",
+      "sha256": "1577b02bde13257ad40ad3b1d1e4fda86c5023b613f5c5c4583c510bc17fb38f"
+    },
+    {
+      "label": "iteration",
+      "sha256": "49b224a99e83a6145d5e1ab2f1faf768c6f989f66e767c408ee75456f4b94386"
+    }
+  ],
+  "toolchain": {
+    "bun": "1.4.2",
+    "bunPlatform": "darwin",
+    "bunArch": "arm64",
+    "bunExecutable": "node_modules/bun/bin/bun.exe",
+    "bunExecutableSha256": "35d20dd0263e5c950194434b925454fdfa9ba6e4467da960410fa05b08a7a5b5",
+    "bendCommit": "7561656155a4285c1e4ccfcb3505ab59524de973",
+    "bendTsSha256": "baf326d77e81c2ebe80c2bdd016c08732071a56ff951da0a67f68c26ac99e9d4",
+    "baseBendSha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+  },
+  "selfNormalizedSha256": "6cc083b0474cd53d6fb7f4caaf8dcfe789e28a4fdb1ceee6ec773980ac65a6aa",
+  "supportFiles": {
+    "compiler/backend.ts": "540f42daad66903d9e117747fec84d4d4651d9024a801a8a2a58e593658177e9",
+    "compiler/checked-module-names.ts": "25003ac72895b7970e3175448af8db5c4afef788c732b37e915ee80fb08a0429",
+    "compiler/checked-runtime-identity.ts": "6c7e88e9386a3880fca910ca392e636eb564ab52601e22659ad25e693addee66",
+    "compiler/checked-source-paths.ts": "8d262d087f4a7922dd1c9ea7802584926d63170c60f5d77db61bc4c66c7cb0a2",
+    "compiler/identity-terms.ts": "207d8fd014d1c01a93b67f4091e5d35373c9f06481db4b929b0743c46cd825a4",
+    "compiler/type-evaluation.ts": "6a7627505744bca4a1518fa4c846f2020fa02acadc23af3caa70549f7b96000c",
+    "compiler/sha256-short.ts": "3582098a8abc07587b23907d4b2113dfaeefa367a14591feb32408735128f0e0",
+    "compiler/schema.ts": "c519ee4bfcfb4f62490bd36d6016f043ed390d7bbde92066845f24bcb04337b7",
+    "compiler/native-arithmetic.ts": "7ac1d5f9e1fe343fca3dcf10b9d0abd4bb2e69663724046fe20356f97594885f",
+    "compiler/tagged-sum-ir.ts": "2707f738e55361a17f54f1e9b4168124070879ccbeed503a15527a843f69ad41",
+    "compiler/diagnostics.ts": "f08c450ec3aaca8e1abae4890968d2dde800f2b80346171a5c55ba21eec3b1de",
+    "compiler/primitives.ts": "ac60d1451d45b758af1205af74df2ca8fcd5b0867a366bf9bad938ae9211a4ac",
+    "runtime/bend_sha256.h": "6a75b1c5f7aac1835f7fa57e495b6084760f9b05430516872dc2fa13ff6734a1",
+    "runtime/solana_min.h": "103aa5bd910cf4f0b29dbe8d1b956a6bb7d6cb90e79f156a17857a05b18b8b06",
+    "runtime/entrypoint.c": "bfc2e0e13733cb612f39e8f93f3985815677a42f1d36fc26b01e22605b3632cc",
+    "runtime/memory.c": "4df8dd715d94b0c74e90205d593756c5102a98f72555d9ab6bc02bc5ddb78f51",
+    "runtime/sbf.ld": "57681e310bb3bdfa1e40c82f5526bb854fcaf82f1a9c9d3ac54cebe795ea969c"
+  },
+  "ordinaryShaFixtureEmissionSha256": "1acd74f2acdad942a9ac44178454718b2e3751a362f997dd14cb05396fa447b2"
+}

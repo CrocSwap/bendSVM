@@ -1,0 +1,37 @@
+[
+  {
+    "name": "empty",
+    "hex": "",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "name": "abc",
+    "hex": "616263",
+    "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+  },
+  {
+    "name": "padding-55",
+    "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30313233343536",
+    "sha256": "463eb28e72f82e0a96c0a4cc53690c571281131f672aa229e0d45ae59b598b59"
+  },
+  {
+    "name": "random-short-1",
+    "hex": "c7",
+    "sha256": "3340883aad3038dd993b3c94d2d32c3b20e07859969aca411f7f93ab8847c746"
+  },
+  {
+    "name": "random-short-17",
+    "hex": "a5af99b9d9b222188fd841983c6751eedc",
+    "sha256": "d2b8784b7cfac71bcba66a5a6964bf6c283c75bb2338d87e7a98c20416bf788f"
+  },
+  {
+    "name": "random-short-31",
+    "hex": "f46404eab1f0e476050a467cad4cce2f0fedf449f870a1a611fff5aae679b8",
+    "sha256": "d2259debccd871a94576e7030ec8de9404c0a9410187df8c1beb406a08e6f3e2"
+  },
+  {
+    "name": "random-short-54",
+    "hex": "0c23e059ca9feff9b31e1e6f6b78c65340e68b7ccd42128c96a7eedaefec5bb6f6bdf7c6b6c6d17b9db02715dc7248fce4549039bf13",
+    "sha256": "5468e62d01fb8dace8baf03010c9de87812782784a3e16debc80d9b0ca0bc152"
+  }
+]

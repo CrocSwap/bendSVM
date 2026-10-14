@@ -1,0 +1,17 @@
+[
+  {"name":"empty","parts":[],"expected":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+  {"name":"empty-slice","parts":[{"kind":"hex","hex":""}],"expected":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+  {"name":"abc","parts":[{"kind":"hex","hex":"616263"}],"expected":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"},
+  {"name":"abc-multipart","parts":[{"kind":"hex","hex":"61"},{"kind":"hex","hex":"6263"}],"expected":"ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"},
+  {"name":"padding-55","parts":[{"kind":"repeat","byte":97,"length":55}],"expected":"9f4390f8d30c2dd92ec9f095b65e2b9ae9b0a925a5258e241c9f1e910f734318"},
+  {"name":"padding-56","parts":[{"kind":"repeat","byte":97,"length":56}],"expected":"b35439a4ac6f0948b6d6f9e3c6af0f5f590ce20f1bde7090ef7970686ec6738a"},
+  {"name":"padding-63","parts":[{"kind":"repeat","byte":97,"length":63}],"expected":"7d3e74a05d7db15bce4ad9ec0658ea98e3f06eeecf16b4c6fff2da457ddc2f34"},
+  {"name":"padding-64","parts":[{"kind":"repeat","byte":97,"length":64}],"expected":"ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb"},
+  {"name":"padding-65","parts":[{"kind":"repeat","byte":97,"length":65}],"expected":"635361c48bb9eab14198e76ea8ab7f1a41685d6ad62aa9146d301d4f17eb0ae0"},
+  {"name":"padding-127","parts":[{"kind":"repeat","byte":97,"length":127}],"expected":"c57e9278af78fa3cab38667bef4ce29d783787a2f731d4e12200270f0c32320a"},
+  {"name":"padding-128","parts":[{"kind":"repeat","byte":97,"length":128}],"expected":"6836cf13bac400e9105071cd6af47084dfacad4e5e302c94bfed24e013afb73e"},
+  {"name":"padding-129","parts":[{"kind":"repeat","byte":97,"length":129}],"expected":"c12cb024a2e5551cca0e08fce8f1c5e314555cc3fef6329ee994a3db752166ae"},
+  {"name":"sixteen-slices","parts":[{"kind":"hex","hex":"00"},{"kind":"hex","hex":"01"},{"kind":"hex","hex":"02"},{"kind":"hex","hex":"03"},{"kind":"hex","hex":"04"},{"kind":"hex","hex":"05"},{"kind":"hex","hex":"06"},{"kind":"hex","hex":"07"},{"kind":"hex","hex":"08"},{"kind":"hex","hex":"09"},{"kind":"hex","hex":"0a"},{"kind":"hex","hex":"0b"},{"kind":"hex","hex":"0c"},{"kind":"hex","hex":"0d"},{"kind":"hex","hex":"0e"},{"kind":"hex","hex":"0f"}],"expected":"be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991"},
+  {"name":"maxbytes-ramp","parts":[{"kind":"ramp","length":1024}],"expected":"785b0751fc2c53dc14a4ce3d800e69ef9ce1009eb327ccf458afe09c242c26c9"},
+  {"name":"maxbytes-sixteen-parts","parts":[{"kind":"repeat","byte":0,"length":64},{"kind":"repeat","byte":1,"length":64},{"kind":"repeat","byte":2,"length":64},{"kind":"repeat","byte":3,"length":64},{"kind":"repeat","byte":4,"length":64},{"kind":"repeat","byte":5,"length":64},{"kind":"repeat","byte":6,"length":64},{"kind":"repeat","byte":7,"length":64},{"kind":"repeat","byte":8,"length":64},{"kind":"repeat","byte":9,"length":64},{"kind":"repeat","byte":10,"length":64},{"kind":"repeat","byte":11,"length":64},{"kind":"repeat","byte":12,"length":64},{"kind":"repeat","byte":13,"length":64},{"kind":"repeat","byte":14,"length":64},{"kind":"repeat","byte":15,"length":64}],"expected":"06fad092802f0efe28a4f297402ca100aff7984c6091bdb60f7497cfffa7e465"}
+]
