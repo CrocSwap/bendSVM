@@ -107,6 +107,9 @@ u64 entrypoint(const u8 *input) {
   const amounts = [0n, 1n, 2n, (1n << 32n) - 1n, 1n << 32n, (1n << 32n) + 1n,
     (1n << 63n) - 1n, 1n << 63n, max - 1n, max];
   const pairs = amounts.flatMap(a => amounts.map(b => [a, b]));
+  // Both sides of the 32-step guard when the divisor fits in one limb.
+  pairs.push([(7n << 32n) + 123n, 8n], [(8n << 32n) + 123n, 8n],
+    [(65534n << 32n) + 123n, 65535n], [(65535n << 32n) + 123n, 65535n]);
   for (let i = 0; i < 32; i++) pairs.push([(BigInt(random()) << 32n) | BigInt(random()),
     (BigInt(random()) << 32n) | BigInt(random())]);
   const limbs = (n: bigint) => [Number(n & 0xffffffffn), Number(n >> 32n)];

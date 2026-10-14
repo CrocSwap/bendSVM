@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { checkedBook } from '../compiler/backend.ts';
 import { buildProgram } from '../scripts/program.ts';
 import { ammClient, type AmmAccounts } from '../examples/amm/client.ts';
+import { assertReproducibleProgramBuilds, programBuildSnapshot } from './program-build-reproducibility.ts';
 
 export async function testAmm() {
   const source = fs.readFileSync('examples/amm/amm.bend', 'utf8');
@@ -21,7 +22,10 @@ export async function testAmm() {
   }
   const manifest = await buildProgram('examples/amm/PROOF.bend', 'amm.process', 'build/amm');
   const directory = fs.mkdtempSync('build/amm-reproduce-');
-  try { assert.deepEqual(await buildProgram('examples/amm/PROOF.bend', 'amm.process', `${directory}/amm`), manifest); }
+  try {
+    const reproduced = await buildProgram('examples/amm/PROOF.bend', 'amm.process', `${directory}/amm`);
+    assertReproducibleProgramBuilds(programBuildSnapshot(manifest, 'build/amm'), programBuildSnapshot(reproduced, `${directory}/amm`));
+  }
   finally { fs.rmSync(directory, { recursive: true, force: true }); }
   const schema = JSON.parse(fs.readFileSync('build/amm.schema.json', 'utf8'));
   const layout = JSON.parse(fs.readFileSync('build/amm.interface.json', 'utf8'));

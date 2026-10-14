@@ -162,14 +162,21 @@ def div_high_route(high_is_zero: Bool, +a: U64, b: U64) -> DivResult:
     case False{}:
       div_high(a, b)
 
-def div_one_route(is_one: Bool, a: U64, +b: U64) -> DivResult:
+# A high dividend limb below the full divisor can seed the remainder directly.
+# The skipped upper 32 quotient bits must all be zero.
+def div32_allowed(a: U64, b: U64) -> Bool:
+  match a b:
+    case U64{al, ah} U64{bl, bh}:
+      Bool.or(Bool.not(U32.is_zero(bh)), U32.is_lt(ah, bl))
+
+def div_one_route(is_one: Bool, +a: U64, +b: U64) -> DivResult:
   match is_one:
     case True{}:
       DivOk{Division{a, zero()}}
     case False{}:
       match b:
         case U64{lo, hi}:
-          div_high_route(U32.is_zero(hi), a, b)
+          div_high_route(Bool.not(div32_allowed(a, b)), a, b)
 
 def div_less_route(is_less: Bool, a: U64, +b: U64) -> DivResult:
   match is_less:

@@ -1,0 +1,8 @@
+{
+  "compiler/backend.ts": "e71f0fb80c0fc634776edcd0ec0f8bdf1e399858ae64e4cc8489fabff82b86c4",
+  "compiler/backend-before-isolation.ts": "3d79805cee8b4d135b1c129486514e65483e8bc74e1f66558db174ec259999db",
+  "compiler/type-evaluation.ts": "6ebddf9a1d981e0881bcd7f8b20af18fc92ba8cd77ac6207df89f4e5afc09906",
+  "tests/type-evaluation.ts": "e5a89becbeef7ca62845fcc24fb2c019ff501ec039f4da8a4c5b22ca87c1f9bb",
+  "tests/type-evaluation-applications.ts": "b714a2f44cc0235bfdf938bc79538414da9d7dacdb69dc23a3acd4d00d6d9c9d",
+  "docs/type-evaluation.md": "72924e89f28538bbbd34f20038bad0ec3b28cf44d44e229e049fee2dacfbb338"
+}

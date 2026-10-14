@@ -142,13 +142,16 @@ const rows = bendRows.map((bend, index) => {
 });
 
 const inputs = [rustSource, 'scripts/benchmark-arithmetic-probe.ts', 'tests/arithmetic_probe_benchmark.rs',
-  'tests/arithmetic.bend', 'sdk/math.bend', 'sdk/PROOF.bend', 'compiler/backend.ts',
+  'tests/arithmetic.bend', 'sdk/math.bend', 'sdk/PROOF.bend', 'compiler/backend.ts', 'compiler/tagged-sum-ir.ts',
+  'compiler/native-arithmetic.ts',
   'compiler/primitives.ts', 'runtime/solana_min.h', 'runtime/memory.c', 'runtime/sbf.ld',
   'Cargo.toml', 'Cargo.lock'];
 const hashes = Object.fromEntries(inputs.map(file => [file, hash(file)]));
 const bendBuild = { clangVersion: bendFirst.version, target: 'SBF v0 / generic', cpu: 'generic',
   optimization: '-O2', emittedFunctions: emitted.functions, elfBytes: fs.statSync(`${buildDir}/arithmetic-probe-bend.so`).size,
   elfSha256: bendElfHash, sourceSha256: hash('tests/arithmetic.bend'), compilerSourceSha256: hash('compiler/backend.ts'),
+  compilerModuleSha256: Object.fromEntries(fs.readdirSync('compiler').filter(f => f.endsWith('.ts'))
+    .map(f => [`compiler/${f}`, hash(`compiler/${f}`)])),
   reproducible: true };
 const rustBuild = { rustVersion, flags: rustFlags, target: 'SBF v0 / generic',
   elfBytes: fs.statSync(rustElf).size, elfSha256: rustElfHash, sourceSha256: hash(rustSource), reproducible: true };

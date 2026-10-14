@@ -1,0 +1,419 @@
+{
+  "provenance": {
+    "scope": "pre-correction reviewed candidate, matched accepted previous emission by stage tests",
+    "tools": {
+      "bun": "1.4.2",
+      "typescript": "5.2.2",
+      "bendCommit": "7561656155a4285c1e4ccfcb3505ab59524de973",
+      "baselineCommit": "adc791815ea8bffd79dad431838deb313964d2d6"
+    },
+    "sourceRoot": "main/build/overnight/type-isolation-stage (frozen private snapshot)",
+    "identityRepin": {
+      "scope": "Declaration depth-pair identity correction; original source, C and full emission baselines preserved.",
+      "identityModuleSha256": "6c7e88e9386a3880fca910ca392e636eb564ab52601e22659ad25e693addee66",
+      "identityTermsSha256": "207d8fd014d1c01a93b67f4091e5d35373c9f06481db4b929b0743c46cd825a4",
+      "review": "identity_declaration_correction_review L1/L2 accepted, followed by explicit scalar validation; graph normalization separately reviewed"
+    },
+    "renderingEvidence": {
+      "scope": "Host-only function ownership addition. Historical emission and prior renderer evidence verified by removing only added metadata; C/source/identity pins retained. Independent review pending.",
+      "backendSha256": "540f42daad66903d9e117747fec84d4d4651d9024a801a8a2a58e593658177e9"
+    }
+  },
+  "programs": [
+    {
+      "app": "sha256-reference",
+      "source": "tests/sha256-reference/PROOF.bend",
+      "roots": [
+        "../../sdk/sha256-reference.hash_short"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "sdk/buffer.bend",
+          "sha256": "1577b02bde13257ad40ad3b1d1e4fda86c5023b613f5c5c4583c510bc17fb38f"
+        },
+        {
+          "path": "sdk/iteration.bend",
+          "sha256": "49b224a99e83a6145d5e1ab2f1faf768c6f989f66e767c408ee75456f4b94386"
+        },
+        {
+          "path": "sdk/sha256-reference.bend",
+          "sha256": "4eeaec621e7e855cd88abd1b224ee01279b2981c112701f4bfff0f6347d4e447"
+        },
+        {
+          "path": "tests/sha256-reference/LAWS.bend",
+          "sha256": "af2e59ab7ebd61b746f8ff5f3a5a14f38fb81029b6d9363aed2814e860e797cd"
+        },
+        {
+          "path": "tests/sha256-reference/PROOF.bend",
+          "sha256": "b60f076d936a0c95ce8c52f5e1f4154696838c56cca6ac80e79abee7d2dddeda"
+        }
+      ],
+      "identitySha256": "6273672527b553bcc9d9534c6a56184d3004634719d89f9a7ce89e0563caa0e5",
+      "cSha256": "f9dc987a20e2743ff8379117e6a29dd6e5efe3930425b9661a15a268f33689bc",
+      "emissionSha256": "39adf1e6653c66e385d6c49505afb0fef894d6016d6fbccc2c311c8269a857be",
+      "renderingEmissionSha256": "bab9cf44f708967dda3db3f928c8f5971d2d8b207316e4982f7ab70e5ea7d3a0"
+    },
+    {
+      "app": "vault",
+      "source": "examples/vault/PROOF.bend",
+      "roots": [
+        "vault.process"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "examples/vault/LAWS.bend",
+          "sha256": "e1b9462a2ace4c94b157e2ce7c6a54f90bd0376e2f12bd6d87b1168197b59418"
+        },
+        {
+          "path": "examples/vault/PROOF.bend",
+          "sha256": "4ce25c00d00a144f51176119b9745469bc2541bd565e887ae2b0de56b32c568d"
+        },
+        {
+          "path": "examples/vault/vault.bend",
+          "sha256": "fb355702bab5f58967c002f66e2298623835bf77752af2dd5edefb1f4cf99d5d"
+        },
+        {
+          "path": "sdk/context.bend",
+          "sha256": "dbd525c7c61abd4c775e486d1a573836f14971b79cb52d9e78bf52a022194584"
+        },
+        {
+          "path": "sdk/effects.bend",
+          "sha256": "db1013d88edfdc6a34fb00496a2c7089ea05c642c4505096d0f503181c5f794e"
+        },
+        {
+          "path": "sdk/LAWS.bend",
+          "sha256": "5cada1d45f756eaad848db2b174a8353838898199d05905097e4cdff7967d613"
+        },
+        {
+          "path": "sdk/math.bend",
+          "sha256": "f320550854f1fe114f6061483bb730650d53c0aa6eb26934e7ba72eeb14b1f68"
+        },
+        {
+          "path": "sdk/PROOF.bend",
+          "sha256": "5f5c89c2568f1cae02bda07574f9ceff5abc0755fc6d26b5404af24fc3720ee3"
+        }
+      ],
+      "identitySha256": "64da472f47ccb2d4df4f7873c9f76589397a1efddf5430523e11fa5f65156928",
+      "cSha256": "b589c09de9249862d00ffcb4d1ac33d05da508722d671e854e2309a99fe55968",
+      "emissionSha256": "92ba153cc3364bedc15a39644b4c974920118e30a160f2066f72e95047a68a69",
+      "renderingEmissionSha256": "b9e8c116c436a2ae8ec9e634a9f93026b19a7d82dc481a3fc241e50ec6d601be"
+    },
+    {
+      "app": "vesting",
+      "source": "examples/vesting/PROOF.bend",
+      "roots": [
+        "vesting.process"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "examples/vesting/LAWS.bend",
+          "sha256": "c8214dace109dd109a2ecb18b08710e6a4a70f046ad72c8ae0efef733226c74b"
+        },
+        {
+          "path": "examples/vesting/PROOF.bend",
+          "sha256": "6ac0872ced80c36243a4c0810019ca7dcdcbfdd504c1bd513a0ee83e6ce84f4b"
+        },
+        {
+          "path": "examples/vesting/vesting.bend",
+          "sha256": "54f7ae57cbb923de5c5250335208331deb99cc51bfeab8d0c81ec110808f3d8d"
+        },
+        {
+          "path": "sdk/context.bend",
+          "sha256": "dbd525c7c61abd4c775e486d1a573836f14971b79cb52d9e78bf52a022194584"
+        },
+        {
+          "path": "sdk/effects.bend",
+          "sha256": "db1013d88edfdc6a34fb00496a2c7089ea05c642c4505096d0f503181c5f794e"
+        },
+        {
+          "path": "sdk/LAWS.bend",
+          "sha256": "5cada1d45f756eaad848db2b174a8353838898199d05905097e4cdff7967d613"
+        },
+        {
+          "path": "sdk/math.bend",
+          "sha256": "f320550854f1fe114f6061483bb730650d53c0aa6eb26934e7ba72eeb14b1f68"
+        },
+        {
+          "path": "sdk/PROOF.bend",
+          "sha256": "5f5c89c2568f1cae02bda07574f9ceff5abc0755fc6d26b5404af24fc3720ee3"
+        },
+        {
+          "path": "sdk/wide.bend",
+          "sha256": "24525a305385d8ee2a5f5db10d0ecb7ff4cd64ac7d650d6b258e38fe3d2f9c01"
+        }
+      ],
+      "identitySha256": "0eb12c3377d8d7938b3fca906574a40a9c874d40ff5c446589cbfe8fa044d6e2",
+      "cSha256": "e41b22a47a18b750e96b86ac4e30a3b0d39e60c6d7b8e037f7d924dba31a129c",
+      "emissionSha256": "0dae752ba72f2e500e29e4e06db9d217b160f7aaf72c2e295f7d7277c4a8aed8",
+      "renderingEmissionSha256": "462328151452b65d065f882350328b31c790954ff51170212f02edba56bd617d"
+    },
+    {
+      "app": "exchange",
+      "source": "examples/exchange/PROOF.bend",
+      "roots": [
+        "exchange.process"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "examples/exchange/exchange.bend",
+          "sha256": "b62a7c46e560c1f6d2343b810cf74b8b2a21fc4e303606c0e5ecb12d210bc39e"
+        },
+        {
+          "path": "examples/exchange/LAWS.bend",
+          "sha256": "2d1c5131f79754fbb25d11a59105390d87b45e1732df863a8ab643262536e43c"
+        },
+        {
+          "path": "examples/exchange/PROOF.bend",
+          "sha256": "fff29d70e5d199fabaf8e26fe871425a79d3808b44f845e7fbfdb2bf6f4c1295"
+        },
+        {
+          "path": "sdk/context.bend",
+          "sha256": "dbd525c7c61abd4c775e486d1a573836f14971b79cb52d9e78bf52a022194584"
+        },
+        {
+          "path": "sdk/effects.bend",
+          "sha256": "db1013d88edfdc6a34fb00496a2c7089ea05c642c4505096d0f503181c5f794e"
+        },
+        {
+          "path": "sdk/LAWS.bend",
+          "sha256": "5cada1d45f756eaad848db2b174a8353838898199d05905097e4cdff7967d613"
+        },
+        {
+          "path": "sdk/math.bend",
+          "sha256": "f320550854f1fe114f6061483bb730650d53c0aa6eb26934e7ba72eeb14b1f68"
+        },
+        {
+          "path": "sdk/PROOF.bend",
+          "sha256": "5f5c89c2568f1cae02bda07574f9ceff5abc0755fc6d26b5404af24fc3720ee3"
+        },
+        {
+          "path": "sdk/wide.bend",
+          "sha256": "24525a305385d8ee2a5f5db10d0ecb7ff4cd64ac7d650d6b258e38fe3d2f9c01"
+        }
+      ],
+      "identitySha256": "6bc1d4efcbbd2d07cf819c4bae785a0a9b0cc9923db606eae6d1ea88137fb2b4",
+      "cSha256": "5e333c990db2309fb755f554e65951d505eb1305d9bf249861eed250543608a5",
+      "emissionSha256": "5c7dc4a85510cf09daf76120ebdd9b9bf242cdbce8532cb5770000a824dd1110",
+      "renderingEmissionSha256": "30061c94d70a450ab667209b97f9b2368370f0dc99669ff7c048871e9c8930f4"
+    },
+    {
+      "app": "amm",
+      "source": "examples/amm/PROOF.bend",
+      "roots": [
+        "amm.process"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "examples/amm/amm.bend",
+          "sha256": "c3c55f3cd7f2d8aaa87228c80df9cc73a37069a6a308310d83a029c3798b8082"
+        },
+        {
+          "path": "examples/amm/LAWS.bend",
+          "sha256": "90e2e89078959eeb802fed2d35690fc40bb75727aa9317a854775f8fa9786988"
+        },
+        {
+          "path": "examples/amm/pricing.bend",
+          "sha256": "f7c8653ccdcd26355a8cf4261cbbaa14a0bf5f57f75de0b3ccfbf5d8551dfc6f"
+        },
+        {
+          "path": "examples/amm/PROOF.bend",
+          "sha256": "4a54bb7090602fed5d0f0bc32d34cee52d331620859144d82d638128c9b7a7fd"
+        },
+        {
+          "path": "sdk/context.bend",
+          "sha256": "dbd525c7c61abd4c775e486d1a573836f14971b79cb52d9e78bf52a022194584"
+        },
+        {
+          "path": "sdk/effects.bend",
+          "sha256": "db1013d88edfdc6a34fb00496a2c7089ea05c642c4505096d0f503181c5f794e"
+        },
+        {
+          "path": "sdk/issuance.bend",
+          "sha256": "958a47f42b0f54a42d0cee194c5e9f978eb8a0a784d2aa36cfb7f0b9cf148de6"
+        },
+        {
+          "path": "sdk/LAWS.bend",
+          "sha256": "5cada1d45f756eaad848db2b174a8353838898199d05905097e4cdff7967d613"
+        },
+        {
+          "path": "sdk/math.bend",
+          "sha256": "f320550854f1fe114f6061483bb730650d53c0aa6eb26934e7ba72eeb14b1f68"
+        },
+        {
+          "path": "sdk/PROOF.bend",
+          "sha256": "5f5c89c2568f1cae02bda07574f9ceff5abc0755fc6d26b5404af24fc3720ee3"
+        },
+        {
+          "path": "sdk/sqrt.bend",
+          "sha256": "1a543e8bf791cd54080d137d66ff7001607c143aae2a800d983b306dfe442237"
+        },
+        {
+          "path": "sdk/wide.bend",
+          "sha256": "24525a305385d8ee2a5f5db10d0ecb7ff4cd64ac7d650d6b258e38fe3d2f9c01"
+        }
+      ],
+      "identitySha256": "131efb0eb8e04b64bcac4535514e729fca65fb373b4e605912feed197e195e64",
+      "cSha256": "bfb894f20c22c4f83dce4861a3fff132a9d897ff83b9f6b10105a772b58e6b6f",
+      "emissionSha256": "2c76fdf1f09234ae402b7b8ecc9dae4a3a171156f2aca90b637fb14254f66864",
+      "renderingEmissionSha256": "8c319100ed9cc36c65168274d7dec1a408662b1fdd0947101caaf2d936f14fc5"
+    },
+    {
+      "app": "batch",
+      "source": "examples/batch/PROOF.bend",
+      "roots": [
+        "batch.process"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "examples/batch/batch.bend",
+          "sha256": "8e45542f46a6100452a69cc1be9eb5626c0b37ce5886afe72c06561a2a8431d7"
+        },
+        {
+          "path": "examples/batch/LAWS.bend",
+          "sha256": "8227c6f61f578eeac503c3467a915df3866f7db45cd2dacbb5b4655eb138849f"
+        },
+        {
+          "path": "examples/batch/PROOF.bend",
+          "sha256": "4740b9b9645d40451d0b589fe5af2bdb716c4323745ff8ed22686e8928319056"
+        },
+        {
+          "path": "sdk/buffer.bend",
+          "sha256": "1577b02bde13257ad40ad3b1d1e4fda86c5023b613f5c5c4583c510bc17fb38f"
+        },
+        {
+          "path": "sdk/context.bend",
+          "sha256": "dbd525c7c61abd4c775e486d1a573836f14971b79cb52d9e78bf52a022194584"
+        },
+        {
+          "path": "sdk/effect-buffer.bend",
+          "sha256": "9c5cbb5ab9e6f2e42490e4e51e28c34e12506a50ac8b3ee0cb26e4bb5dbed8cc"
+        },
+        {
+          "path": "sdk/effects.bend",
+          "sha256": "db1013d88edfdc6a34fb00496a2c7089ea05c642c4505096d0f503181c5f794e"
+        },
+        {
+          "path": "sdk/fold.bend",
+          "sha256": "ef813cb05ce0e29127a0833f98da7a3798a0e56bc03d3cb272ff7d26cf36a3f0"
+        },
+        {
+          "path": "sdk/issuance.bend",
+          "sha256": "958a47f42b0f54a42d0cee194c5e9f978eb8a0a784d2aa36cfb7f0b9cf148de6"
+        },
+        {
+          "path": "sdk/iteration.bend",
+          "sha256": "49b224a99e83a6145d5e1ab2f1faf768c6f989f66e767c408ee75456f4b94386"
+        },
+        {
+          "path": "sdk/LAWS.bend",
+          "sha256": "5cada1d45f756eaad848db2b174a8353838898199d05905097e4cdff7967d613"
+        },
+        {
+          "path": "sdk/math.bend",
+          "sha256": "f320550854f1fe114f6061483bb730650d53c0aa6eb26934e7ba72eeb14b1f68"
+        },
+        {
+          "path": "sdk/PROOF.bend",
+          "sha256": "5f5c89c2568f1cae02bda07574f9ceff5abc0755fc6d26b5404af24fc3720ee3"
+        }
+      ],
+      "identitySha256": "0df83947b11e70df6ff98f7942a1d586d3bbca68472e821d43ddc7afe767b978",
+      "cSha256": "b95948a85dba7ea33f39030c8ee09a1d41b38ffc7452673e5d9c4824cd56520f",
+      "emissionSha256": "b2db2014cc70e1a2dae38fcbc6439d9314948fcd559c02d50334401cbd8d4345",
+      "renderingEmissionSha256": "a283c85f5a40ad6948acf8601ef583b11152d5d211a89d9b58e88ddd26813273"
+    },
+    {
+      "app": "queue",
+      "source": "examples/queue/PROOF.bend",
+      "roots": [
+        "queue.process"
+      ],
+      "inputFiles": [
+        {
+          "path": "@bend/bend2/base.bend",
+          "sha256": "b8c2734d45ec6b4ce70fee70ff06ef35e08fce885af8852d8eb77dbff020e946"
+        },
+        {
+          "path": "examples/queue/LAWS.bend",
+          "sha256": "3e8c52694b96a2b280695298edd5fd8499a6010de055bb35dd8159a38eede0a5"
+        },
+        {
+          "path": "examples/queue/PROOF.bend",
+          "sha256": "b1567ba13189c9de3f87ca55b0a5cf99895c5f9c39ddbd0ab7c29ccc2e4e4965"
+        },
+        {
+          "path": "examples/queue/queue.bend",
+          "sha256": "fc52152c6896a24900cb2a6b66c6dc034815d6f9781117979b460684eaf1c308"
+        },
+        {
+          "path": "sdk/buffer.bend",
+          "sha256": "1577b02bde13257ad40ad3b1d1e4fda86c5023b613f5c5c4583c510bc17fb38f"
+        },
+        {
+          "path": "sdk/collection.bend",
+          "sha256": "827201b97dbd645620b6f87e11baeeb781a63536b648346e8cd2885c2aa1035a"
+        },
+        {
+          "path": "sdk/context.bend",
+          "sha256": "dbd525c7c61abd4c775e486d1a573836f14971b79cb52d9e78bf52a022194584"
+        },
+        {
+          "path": "sdk/effects.bend",
+          "sha256": "db1013d88edfdc6a34fb00496a2c7089ea05c642c4505096d0f503181c5f794e"
+        },
+        {
+          "path": "sdk/fold.bend",
+          "sha256": "ef813cb05ce0e29127a0833f98da7a3798a0e56bc03d3cb272ff7d26cf36a3f0"
+        },
+        {
+          "path": "sdk/issuance.bend",
+          "sha256": "958a47f42b0f54a42d0cee194c5e9f978eb8a0a784d2aa36cfb7f0b9cf148de6"
+        },
+        {
+          "path": "sdk/iteration.bend",
+          "sha256": "49b224a99e83a6145d5e1ab2f1faf768c6f989f66e767c408ee75456f4b94386"
+        },
+        {
+          "path": "sdk/LAWS.bend",
+          "sha256": "5cada1d45f756eaad848db2b174a8353838898199d05905097e4cdff7967d613"
+        },
+        {
+          "path": "sdk/math.bend",
+          "sha256": "f320550854f1fe114f6061483bb730650d53c0aa6eb26934e7ba72eeb14b1f68"
+        },
+        {
+          "path": "sdk/PROOF.bend",
+          "sha256": "5f5c89c2568f1cae02bda07574f9ceff5abc0755fc6d26b5404af24fc3720ee3"
+        }
+      ],
+      "identitySha256": "383b460128939e231309ae3e6e13604d053f338d5d75dfa74a9fd06d9f733d93",
+      "cSha256": "93de3e731ef22889afe3ce79ff913773a9a0b2d299d7b08d6ce7398525818a26",
+      "emissionSha256": "62c9918d0f528a1a27d3d0ed4ab7619179be0733242b590f2d5d42b48a995bbd",
+      "renderingEmissionSha256": "d4ff7bafd74c3ab5f1f21bbb6489aee7d4b388cd8497d7ac580127be54297e96"
+    }
+  ]
+}

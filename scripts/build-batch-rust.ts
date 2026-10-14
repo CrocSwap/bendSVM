@@ -4,6 +4,17 @@ import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 import { run, sbfTools } from './build.ts';
 
+// This independent codec targets the published batch interface. Refuse a stale
+// baseline before compilation instead of measuring a different state protocol.
+const batchInterface = JSON.parse(fs.readFileSync('build/batch.interface.json', 'utf8'));
+const wireSource = fs.readFileSync('benchmarks/batch-rust/wire.rs', 'utf8');
+const wireHeader = wireSource.match(/pub const HEADER: \[u8; 20\] = \[([\d,\s]+)\];/);
+assert(wireHeader, 'Rust batch header declaration is missing');
+assert.deepEqual(wireHeader[1].split(',').map(s => s.trim()).filter(Boolean).map(Number),
+  batchInterface.header, 'Rust batch state header differs from the published interface');
+assert.equal(batchInterface.stateBytes, 314, 'Rust batch state layout needs review');
+assert.equal(batchInterface.instructionBytes, 252, 'Rust batch instruction layout needs review');
+
 const tools = sbfTools();
 const rustc = path.resolve(tools, '../../rust/bin/rustc');
 const version = run(rustc, ['--version', '--verbose'], true);
@@ -32,6 +43,7 @@ for (const line of symbols.split('\n').filter(line => /\bUND\b/.test(line))) {
 }
 const files = ['main.rs', 'transition.rs', 'wire.rs'].map(name => `benchmarks/batch-rust/${name}`);
 files.push('scripts/build-batch-rust.ts', 'Cargo.lock');
+files.push('build/batch.interface.json');
 fs.writeFileSync('build/batch-rust.manifest.json', JSON.stringify({
   version, flags, target: 'SBF v0 / generic', elf, elfBytes: fs.statSync(elf).size,
   elfSha256: first, reproducible: true,

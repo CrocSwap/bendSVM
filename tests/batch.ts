@@ -6,11 +6,15 @@ import { testPure, type PureCase } from './pure.ts';
 import { effectLayout } from '../compiler/effects.ts';
 import { model } from '../verification/model.ts';
 import type { WireValue } from '../sdk/wire.ts';
+import { assertReproducibleProgramBuilds, programBuildSnapshot } from './program-build-reproducibility.ts';
 
 export async function testBatch() {
   const manifest=await buildProgram('examples/batch/PROOF.bend','batch.process','build/batch');
   const directory=fs.mkdtempSync('build/batch-reproduce-');
-  try {assert.deepEqual(await buildProgram('examples/batch/PROOF.bend','batch.process',`${directory}/batch`),manifest);}
+  try {
+    const reproduced=await buildProgram('examples/batch/PROOF.bend','batch.process',`${directory}/batch`);
+    assertReproducibleProgramBuilds(programBuildSnapshot(manifest,'build/batch'),programBuildSnapshot(reproduced,`${directory}/batch`));
+  }
   finally {fs.rmSync(directory,{recursive:true,force:true});}
   const source=fs.readFileSync('examples/batch/batch.bend','utf8');
   for(const [before,after] of [

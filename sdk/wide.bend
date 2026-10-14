@@ -19,26 +19,54 @@ def product(a: Math.U64, b: Math.U64) -> U128:
     case Math.U64{+al, +ah} Math.U64{+bl, +bh}:
       product_parts(Math.mul32(al, bl), Math.mul32(al, bh), Math.mul32(ah, bl), Math.mul32(ah, bh))
 
-# high >= divisor iff the quotient does not fit in 64 bits. When high is zero,
-# the first 32 restoring steps can be skipped if low's high limb is below the
-# divisor. The other fitting cases start with high as the initial remainder.
-def divide_route(short: Bool, low: Math.U64, high: Math.U64, divisor: Math.U64) -> Math.DivResult:
-  match short:
+def divide_small_last(second: Math.DivResult, qh: U32) -> Math.DivResult:
+  match second:
+    case Math.DivErr{code}:
+      Math.DivErr{code}
+    case Math.DivOk{Math.Division{Math.U64{ql, _}, remainder}}:
+      Math.DivOk{Math.Division{Math.U64{ql, qh}, remainder}}
+
+# General 128/32 division. Caller establishes 0 < divisor and high < divisor.
+def divide_small_finish(first: Math.DivResult, low: U32, divisor: Math.U64) -> Math.DivResult:
+  match first:
+    case Math.DivErr{code}:
+      Math.DivErr{code}
+    case Math.DivOk{Math.Division{Math.U64{qh, _}, Math.U64{rh, _}}}:
+      divide_small_last(Math.divmod(Math.U64{low, rh}, divisor), qh)
+
+def divide_small(low: Math.U64, high: Math.U64, divisor: Math.U64) -> Math.DivResult:
+  match low high divisor:
+    case Math.U64{ll, lh} Math.U64{hl, _} Math.U64{+dl, _}:
+      divide_small_finish(Math.divmod(Math.U64{lh, hl}, Math.U64{dl, 0}), ll, Math.U64{dl, 0})
+
+def divide_wide_route(small: Bool, low: Math.U64, high: Math.U64, divisor: Math.U64) -> Math.DivResult:
+  match small:
     case True{}:
-      match low:
-        case Math.U64{lo, hi}:
-          Math.div_finish(Math.div32(Math.DivState{Math.U64{0, lo}, Math.U64{hi, 0}, divisor}))
+      divide_small(low, high, divisor)
     case False{}:
       Math.div_finish(Math.div64(Math.DivState{low, high, divisor}))
 
-def divide_one(is_one: Bool, low: Math.U64, +high: Math.U64, +divisor: Math.U64) -> Math.DivResult:
+def divide_wide(low: Math.U64, high: Math.U64, divisor: Math.U64) -> Math.DivResult:
+  match divisor:
+    case Math.U64{dl, +dh}:
+      divide_wide_route(U32.is_zero(dh), low, high, Math.U64{dl, dh})
+
+# high >= divisor iff the quotient does not fit in 64 bits. A zero high
+# limb admits ordinary checked u64 division; a nonzero high limb uses the
+# two-limb path for 32-bit divisors and the full loop for larger divisors.
+def divide_route(narrow: Bool, low: Math.U64, high: Math.U64, divisor: Math.U64) -> Math.DivResult:
+  match narrow:
+    case True{}:
+      Math.divmod(low, divisor)
+    case False{}:
+      divide_wide(low, high, divisor)
+
+def divide_one(is_one: Bool, low: Math.U64, +high: Math.U64, divisor: Math.U64) -> Math.DivResult:
   match is_one:
     case True{}:
       Math.DivOk{Math.Division{low, Math.zero()}}
     case False{}:
-      match low divisor:
-        case Math.U64{llo, +lhi} Math.U64{dlo, +dhi}:
-          divide_route(Bool.and(Math.equal(high, Math.zero()), Bool.or(U32.is_zero(lhi), Bool.not(U32.is_zero(dhi)))), Math.U64{llo, lhi}, high, Math.U64{dlo, dhi})
+      divide_route(Math.equal(high, Math.zero()), low, high, divisor)
 
 def divide_fits(fits: Bool, low: Math.U64, high: Math.U64, +divisor: Math.U64) -> Math.DivResult:
   match fits:

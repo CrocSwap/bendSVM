@@ -80,8 +80,8 @@ async function main() {
     '  sol_log_compute_units_(); /* effects_extracted */\n  for (unsigned i = 0; i < 3; ++i) {\n    u64 error = bend_transfer_validate');
   source = substitute(source, '  for (unsigned i = 0; i < 3; ++i) {\n    if (bend_transfer_execute',
     '  sol_log_compute_units_(); /* validated */\n  for (unsigned i = 0; i < 3; ++i) {\n    if (bend_transfer_execute');
-  source = substitute(source, '  for (unsigned i = 0; i < 20; ++i) state.data[i] = header[i];',
-    '  sol_log_compute_units_(); /* token_executed */\n  for (unsigned i = 0; i < 20; ++i) state.data[i] = header[i];');
+  source = substitute(source, '  __builtin_memcpy(state.data, header, 20);',
+    '  sol_log_compute_units_(); /* token_executed */\n  __builtin_memcpy(state.data, header, 20);');
   source = substitute(source, '  sol_set_return_data(encoded, 196);',
     '  sol_log_compute_units_(); /* state_written */\n  sol_set_return_data(encoded, 196);');
   fs.writeFileSync(`${bend}.c`, source);

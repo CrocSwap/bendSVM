@@ -4,7 +4,7 @@ pub const INSTRUCTION_BYTES: usize = 252;
 pub const PAYLOAD_BYTES: usize = 294;
 pub const STATE_BYTES: usize = 314;
 pub const HEADER: [u8; 20] = [
-    66, 68, 83, 49, 56, 225, 63, 114, 179, 251, 54, 224, 77, 135, 157, 22, 113, 78, 21, 107,
+    66, 68, 83, 49, 61, 40, 230, 94, 191, 136, 107, 169, 217, 182, 51, 93, 227, 47, 69, 244,
 ];
 struct Reader<'a> {
     bytes: &'a [u8],

@@ -2,7 +2,8 @@ import ./math.bend as Math
 import ./wide.bend as Wide
 
 # Unsigned integer square root of a full 128-bit value. Trial bits run from
-# bit 63 to bit 0, with no recursion or heap. A candidate is retained exactly
+# bit 63, 31, or 15 down to zero for 128-, 64-, or 32-bit inputs.
+# Both paths use bounded composition with no recursion or heap. A candidate is retained exactly
 # when its full-width square does not exceed the target.
 type Search is Data:
   Search{target: Wide.U128, root: Math.U64, bit: Math.U64}
@@ -55,8 +56,29 @@ def finish(state: Search) -> Math.U64:
     case Search{target, root, bit}:
       root
 
+def floor_low_width(narrow: Bool, value: Wide.U128) -> Math.U64:
+  match narrow:
+    case True{}:
+      finish(step16(Search{value, Math.zero(), Math.U64{32768, 0}}))
+    case False{}:
+      finish(step32(Search{value, Math.zero(), Math.U64{2147483648, 0}}))
+
+def floor_low(value: Wide.U128) -> Math.U64:
+  match value:
+    case Wide.U128{Math.U64{lo, +hi}, upper}:
+      floor_low_width(U32.is_eq(hi, 0), Wide.U128{Math.U64{lo, hi}, upper})
+
+def floor_width(small: Bool, value: Wide.U128) -> Math.U64:
+  match small:
+    case False{}:
+      finish(step64(Search{value, Math.zero(), Math.U64{0, 2147483648}}))
+    case True{}:
+      floor_low(value)
+
 def floor(value: Wide.U128) -> Math.U64:
-  finish(step64(Search{value, Math.zero(), Math.U64{0, 2147483648}}))
+  match value:
+    case Wide.U128{lo, +hi}:
+      floor_width(Math.equal(hi, Math.zero()), Wide.U128{lo, hi})
 
 def geometric_mean(a: Math.U64, b: Math.U64) -> Math.U64:
   floor(Wide.product(a, b))

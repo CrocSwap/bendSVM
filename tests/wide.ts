@@ -17,6 +17,11 @@ export async function testWide() {
     triples.push([3n,2n,2n],[(1n<<32n),2n,1n<<32n],
       [1n<<32n,2n,2n],[1n<<32n,1n<<32n,1n<<32n],
       [1n,max,1n],[1n<<32n,1n<<32n,0n]);
+    // Nonzero-high products around the 32-bit divisor route boundary.
+    for (const d of [2n,3n,10n,100n,10000n,(1n<<31n)-1n,
+      (1n<<32n)-2n,(1n<<32n)-1n,1n<<32n,(1n<<32n)+1n]) {
+      triples.push([max,d,d],[max,d-1n,d],[max,d+1n,d]);
+    }
     let seed=0x9175bac;
     const word=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return BigInt(seed>>>0);};
     const random=()=> (word()<<32n)|word();

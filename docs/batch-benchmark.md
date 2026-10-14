@@ -14,16 +14,30 @@ LiteSVM version with the original SPL Token Program.
 
 | Operation | Bend CU | Rust CU | Bend / Rust |
 | --- | ---: | ---: | ---: |
-| Fund 1 obligation | 36,998 | 14,555 | 2.54× |
-| Fund 4 obligations | 37,229 | 14,603 | 2.55× |
-| Settle 1 obligation | 30,791 | 14,915 | 2.06× |
-| Settle 2 obligations | 45,469 | 22,587 | 2.01× |
-| Settle 3 obligations | 60,567 | 30,262 | 2.00× |
-| Settle 4 obligations | 76,089 | 37,942 | 2.01× |
-| Reject unauthorized settlement | 21,980 | 6,992 | 3.14× |
-| Roll back at frozen fourth destination | 71,603 | 36,085 | 1.98× |
+| Fund 1 obligation | 18,770 | 14,555 | 1.29× |
+| Fund 4 obligations | 19,001 | 14,603 | 1.30× |
+| Settle 1 obligation | 16,767 | 14,916 | 1.12× |
+| Settle 2 obligations | 25,620 | 22,588 | 1.13× |
+| Settle 3 obligations | 34,566 | 30,263 | 1.14× |
+| Settle 4 obligations | 43,609 | 37,943 | 1.15× |
+| Reject unauthorized settlement | 6,289 | 6,993 | 0.90× |
+| Roll back at frozen fourth destination | 41,753 | 36,086 | 1.16× |
 
-ELF sizes are 30,128 bytes for Bend and 30,520 bytes for Rust. Additional measured
+These results were refreshed on 2026-10-03 using the public benchmark command.
+Both implementations passed all seven shared conformance tests; all 18 matched
+cases reproduced identical CU readings. The Rust codec's stale state-header
+constant was updated to the published interface, and its build now refuses a
+header or size mismatch before compiling. Its transition and codec algorithms
+were unchanged. The source/artifact and outcome audit is
+`build/batch-refresh-20261003/audit.json`; preceding artifacts and the initial
+header-mismatch failure are retained in that directory.
+
+The earlier documented Bend costs were 36,998 CU for funding one obligation
+and 76,089 CU for settling four. Current costs are 49.3% and 42.7% lower,
+respectively. This refresh measures accumulated compiler/SDK improvements;
+it does not attribute those savings to an individual optimization.
+
+ELF sizes are 28,296 bytes for Bend and 30,536 bytes for Rust. Additional measured
 cases cover replay at each length, empty input, mismatched fuel, overflow and
 insufficient funding. Complete numbers and fixture hashes are in
 `build/batch-benchmark.json`; raw fixture/account records are retained beside it.

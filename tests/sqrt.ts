@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { testPure, type PureCase } from './pure.ts';
 
 // Newton's method in unbounded host integers is deliberately different from
-// the 64 trial-bit steps in the Bend implementation.
+// the bounded trial-bit steps in the Bend implementation.
 function sqrt(n: bigint): bigint {
   if (n < 2n) return n;
   let x = n, next = (x + 1n) / 2n;
@@ -23,7 +23,8 @@ export async function testSqrt() {
     const u128 = (n: bigint) => ({ constructor: wide.variants[0].name,
       fields: { low: u64(n & max), high: u64(n >> 64n) } });
     const values = new Set<bigint>([0n, 1n, 2n, (1n << 128n) - 1n]);
-    for (const root of [2n, 3n, 1000n, 1001n, (1n << 32n) - 1n,
+    for (const root of [2n, 3n, 1000n, 1001n, (1n << 16n) - 1n,
+      1n << 16n, (1n << 32n) - 1n,
       1n << 32n, (1n << 63n) - 1n, 1n << 63n, max]) {
       for (const delta of [-1n, 0n, 1n]) values.add(root * root + delta);
     }
