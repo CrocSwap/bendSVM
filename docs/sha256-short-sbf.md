@@ -19,7 +19,7 @@ bun tests/sha256-short-sbf.ts
 Set `SBF_TOOLS` if platform-tools are outside the default cache path. Set
 `SHA256_SHORT_SBF_RUNNER` if the read-only runner is outside this checkout. The
 runner must hash to the pinned SHA-256
-`3cd6f111c4db06be2f129c8b4fd93543e38b6d5e59d855d6e501745be6bdfe7a`
+`ed30e400bcd46a0cf5da08a64f9810eb6b6ba932257154ff4ce98a4c724ce1bc`
 (re-recorded 2026-10-09 after a rebuild from unchanged runner sources; previously
 `77df0dc19a4b496408bb185c3951b22e25efc90619a411ce6674a988c1298e83`); the
 environment variable changes only its path, never that requirement. The gate

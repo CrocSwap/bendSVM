@@ -34,11 +34,13 @@
   },
   "readOnlySharedTools": {
     "litesvmRunnerPath": "/Users/colkitt/sith/toys/crypto/bendSVM/scripts/test-runner/target/debug/bend-test-runner",
-    "litesvmRunnerSha256": "3cd6f111c4db06be2f129c8b4fd93543e38b6d5e59d855d6e501745be6bdfe7a",
+    "litesvmRunnerSha256": "ed30e400bcd46a0cf5da08a64f9810eb6b6ba932257154ff4ce98a4c724ce1bc",
     "litesvmRunnerRerecorded": {
-      "date": "2026-10-09",
-      "previousSha256": "77df0dc19a4b496408bb185c3951b22e25efc90619a411ce6674a988c1298e83",
-      "reason": "Runner binary rebuilt 2026-10-06 19:06 from unchanged, committed scripts/test-runner sources (Cargo reports it up to date); hash re-recorded at the user's request."
+      "date": "2026-10-14",
+      "previousSha256": "3cd6f111c4db06be2f129c8b4fd93543e38b6d5e59d855d6e501745be6bdfe7a",
+      "reason": "Runner binary rebuilt 2026-10-14 with Rust 1.92.0 (now pinned by rust-toolchain.toml) from unchanged, committed scripts/test-runner sources; hash re-recorded at the user's request.",
+      "earlier": {"date": "2026-10-09", "previousSha256": "77df0dc19a4b496408bb185c3951b22e25efc90619a411ce6674a988c1298e83",
+        "reason": "Runner binary rebuilt 2026-10-06 19:06 from unchanged, committed scripts/test-runner sources; hash re-recorded at the user's request."}
     }
   },
   "integrationCandidate": {

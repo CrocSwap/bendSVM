@@ -1,0 +1,5 @@
+# Rust version documented and used in CI. rustup selects it for every Cargo
+# command under this checkout, so host defaults (for example a newer stable)
+# do not change runner binaries or fail npm run doctor.
+[toolchain]
+channel = "1.92.0"

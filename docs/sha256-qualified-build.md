@@ -69,7 +69,7 @@ manifest in this run's identified archive. A separate proof-gate failure also
 checks run-bound archive hashes. The runner must already exist
 at `scripts/test-runner/target/debug/bend-test-runner` (or be selected with
 `SHA256_SHORT_SBF_RUNNER`) and match SHA-256
-`3cd6f111c4db06be2f129c8b4fd93543e38b6d5e59d855d6e501745be6bdfe7a`
+`ed30e400bcd46a0cf5da08a64f9810eb6b6ba932257154ff4ce98a4c724ce1bc`
 (re-recorded 2026-10-09 after a rebuild from unchanged runner sources; previously
 `77df0dc19a4b496408bb185c3951b22e25efc90619a411ce6674a988c1298e83`); the gate
 does not build Cargo or change shared dependencies.

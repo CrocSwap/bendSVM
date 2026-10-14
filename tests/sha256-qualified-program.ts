@@ -21,7 +21,7 @@ const qualifiedStem = path.join(work,'qualified');
 const referenceStem = path.join(work,'ordinary-reference');
 const runnerPath = path.resolve(process.env.SHA256_SHORT_SBF_RUNNER ??
   'scripts/test-runner/target/debug/bend-test-runner');
-const runnerSha256 = '3cd6f111c4db06be2f129c8b4fd93543e38b6d5e59d855d6e501745be6bdfe7a';
+const runnerSha256 = 'ed30e400bcd46a0cf5da08a64f9810eb6b6ba932257154ff4ce98a4c724ce1bc';
 
 function hash(file:string):string {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
