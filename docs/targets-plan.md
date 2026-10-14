@@ -41,8 +41,9 @@ refuses v3; it must not be used as evidence of network state.
    v3 decoder/CFG (static syscalls, internal calls, v3 instruction classes)
    with its own refusal controls; never relabel the v0 gate.
 3. **Project targets.** *Implemented 2026-10-09 (see developer-workflow.md). Since
-   2026-10-14 `bend new` writes both targets (user decision, option b); CI and the
-   acceptance gates build and test the starter with `--target fogo`.* `bend.json` gains `"targets": ["fogo", "solana"]`
+   2026-10-14 `bend new` writes both targets (user decision, option b), v1.57 is
+   pinned for macOS arm64 and Linux x86_64/aarch64 with `npm run install:platform-tools`,
+   and CI and the acceptance gates build and test both targets with no flags.* `bend.json` gains `"targets": ["fogo", "solana"]`
    (default both). `bend build` writes `dist/fogo/program.so` and
    `dist/solana/program.so` with per-target manifests; `bend test` runs each on
    the right runner; `doctor`/`bootstrap` install/check the needed tools.
@@ -61,8 +62,8 @@ refuses v3; it must not be used as evidence of network state.
   the unchanged v1.53 v0 profile; B) project targets/runners; C) move fogo to
   v1.57 and re-baseline v0 evidence. Qualified SHA paths stay v1.53 until re-qualified.
 - Local Solana tests use all-enabled features for now; a pinned live-cluster list later.
-- 2026-10-14: `bend new` defaults to `"targets": ["fogo", "solana"]`; Ubuntu CI and
-  acceptance (v1.53 only) pass `--target fogo`.
+- 2026-10-14: `bend new` defaults to `"targets": ["fogo", "solana"]`. With the Linux
+  v1.57 pins and installer, CI and acceptance build and test both targets.
 
 ## Options that were presented
 

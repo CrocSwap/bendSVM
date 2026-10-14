@@ -52,8 +52,9 @@ async function buildTarget(project:ReturnType<typeof loadProject>,target:Project
   }catch(e){
     const message=e instanceof Error?e.message:String(e);
     if(target==='solana'&&/platform-tools|pinned for macOS|content pin|ENOENT|Cannot locate|spawn/.test(message))
-      throw new Error(`Target solana needs Anza platform-tools v1.57 on macOS arm64 (default ~/.cache/solana/v1.57/platform-tools; override with SBF_V157_TOOLS). `+
-        `Install it, or build only Fogo with --target fogo or "targets": ["fogo"] in bend.json.\n${message}`);
+      throw new Error(`Target solana needs Anza platform-tools v1.57 (macOS arm64, Linux x86_64 or Linux aarch64). `+
+        `Install it with: npm run install:platform-tools (default ~/.cache/solana/v1.57/platform-tools; override with SBF_V157_TOOLS), `+
+        `or build only Fogo with --target fogo or "targets": ["fogo"] in bend.json.\n${message}`);
     throw e;
   }
 }

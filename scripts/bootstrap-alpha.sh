@@ -2,8 +2,9 @@
 set -euo pipefail
 
 # Safe bootstrap for the experimental alpha. It only creates/updates the
-# explicitly scoped .deps/bend checkout and Cargo/npm caches; it does not touch
-# the user's wallet, Solana CLI config, or any source/build directory.
+# explicitly scoped .deps/bend checkout, Cargo/npm caches and the hash-checked
+# ~/.cache/solana/v1.57 platform-tools; it does not touch the user's wallet,
+# Solana CLI config, or any source/build directory.
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 cd "$ROOT"
 export BEND_NO_TELEMETRY=1
@@ -32,7 +33,16 @@ fi
 
 cargo fetch --locked --manifest-path Cargo.toml
 cargo fetch --locked --manifest-path scripts/test-runner/Cargo.toml
+cargo fetch --locked --manifest-path scripts/test-runner-modern/Cargo.toml
+cargo fetch --locked --manifest-path tests-modern/Cargo.toml
+cargo fetch --locked --manifest-path scripts/modern-library-runner/Cargo.toml
 cargo fetch --locked --manifest-path scripts/local-runner/Cargo.toml
 cargo fetch --locked --manifest-path scripts/live-queue/Cargo.toml
+# Solana (SBPFv3) toolchain: hash-checked install into ~/.cache/solana/v1.57
+# (or verify an existing one). BEND_SKIP_PLATFORM_TOOLS=1 skips it for
+# Fogo-only use; SBF_V157_TOOLS points at a toolchain installed elsewhere.
+if [ "${BEND_SKIP_PLATFORM_TOOLS:-}" != 1 ] && [ -z "${SBF_V157_TOOLS:-}" ]; then
+  npm run -s install:platform-tools
+fi
 npm run doctor -- --write build/alpha-doctor.json
 echo 'External-alpha bootstrap complete. Review the doctor output before building.'

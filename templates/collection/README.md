@@ -15,8 +15,8 @@ npm run bend -- test @PROJECT@
 ```
 
 `bend.json` lists two targets, `fogo` (SBPFv0) and `solana` (SBPFv3); `build` and
-`test` run both. Add `--target fogo` or `--target solana` to run one, for example on
-a host without the Solana toolchain (Anza platform-tools v1.57, macOS arm64).
+`test` run both. Add `--target fogo` or `--target solana` to run one. The Solana
+toolchain (Anza platform-tools v1.57) installs with `npm run install:platform-tools`.
 
 `check` checks the source, admitted language subset, account layout and client
 compatibility. `verify` checks declared source laws. `build` also checks the SBF

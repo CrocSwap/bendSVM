@@ -6,11 +6,8 @@ import {repository,createProject} from '../scripts/bend.ts';
 
 fs.rmSync('build/workflow-e2e.json',{force:true});
 const parent=fs.mkdtempSync(path.join(repository,'build/workflow-e2e-'));
-// The starter lists fogo and solana; build/test fogo only (CI has no v1.57 tools).
 const cli=(directory:string,command:string,success=true)=>{
-  const targeted=fs.existsSync(path.join(directory,'bend.json'))&&JSON.parse(fs.readFileSync(path.join(directory,'bend.json'),'utf8')).targets;
-  const args=targeted&&(command==='build'||command==='test')?[command,directory,'--target','fogo']:[command,directory];
-  const result=spawnSync(process.execPath,[path.join(repository,'scripts/bend.ts'),...args],{cwd:repository,encoding:'utf8'});
+  const result=spawnSync(process.execPath,[path.join(repository,'scripts/bend.ts'),command,directory],{cwd:repository,encoding:'utf8'});
   assert.equal(result.status===0,success,result.stdout+result.stderr);return result;
 };
 const starter=path.join(parent,'Fresh Project');createProject(starter);
@@ -20,7 +17,7 @@ const needle='window, value), U32.add(length, 1)';assert(source.includes(needle)
 fs.writeFileSync(sourceFile,source.replace(needle,'window, U32.add(value, 1)), U32.add(length, 1)'));
 cli(starter,'verify'); // The declared laws do not specify the appended payload.
 const wrong=cli(starter,'test',false);assert.match(wrong.stdout+wrong.stderr,/17|18/);
-assert(!fs.existsSync(path.join(starter,'dist/fogo/program.test-report.json')),'A failed run must invalidate its previous success report');
+assert(['fogo','solana'].every(target=>!fs.existsSync(path.join(starter,`dist/${target}/program.test-report.json`))),'A failed run must invalidate its previous success report');
 fs.writeFileSync(sourceFile,source);cli(starter,'test');
 
 // Existing, unrelated two-state fixture exercises the same generic runner and

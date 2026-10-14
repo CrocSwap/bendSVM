@@ -112,8 +112,8 @@ or build a library with
 The [library fixture contract](tests/mixed-library/fixture.md) documents the
 versioned ABI, pointer preconditions, error codes, link/load checks and receipt
 scope. This is a generic library boundary; it does not implement a DCG handler.
-Libraries take `--target fogo-v0|solana-v3` (both platform-tools v1.57, macOS
-arm64 only; `--json` reports the manifest) and pass `npm run test:target-profiles`
+Libraries take `--target fogo-v0|solana-v3` (both platform-tools v1.57, installed by
+`npm run install:platform-tools`; `--json` reports the manifest) and pass `npm run test:target-profiles`
 for Rust consumers; the historical command without `--target` stays v0 on v1.53. See the
 [library artifact contract](docs/library-artifact-contract.md). Full programs and
 the project CLI remain SBPFv0.

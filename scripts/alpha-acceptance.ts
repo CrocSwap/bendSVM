@@ -56,9 +56,9 @@ cargo('test-runner-build',['build','--locked','--manifest-path','scripts/test-ru
 run('new',['scripts/bend.ts','new',project],{exit:0});
 run('check',['scripts/bend.ts','check',project],{exit:0});
 run('verify',['scripts/bend.ts','verify',project],{exit:0});
-// The starter lists fogo and solana; this gate (and Ubuntu CI) builds fogo only.
-run('build',['scripts/bend.ts','build',project,'--target','fogo'],{exit:0});
-run('test',['scripts/bend.ts','test',project,'--target','fogo'],{exit:0});
+// The starter lists fogo and solana; build and test run both with no flags.
+run('build',['scripts/bend.ts','build',project],{exit:0});
+run('test',['scripts/bend.ts','test',project],{exit:0});
 
 // A declared law is part of the checked source contract. Deliberately violate
 // one in a fresh staged project and require verification/build to reject it.
@@ -78,12 +78,12 @@ let lawFailure:{status:number|null;output:string};
 let buildFailure:{status:number|null;output:string};
 try{
   lawFailure=run('law-failure-verify',['scripts/bend.ts','verify',project],{exit:'nonzero',semantic:semanticLawRejection});
-  buildFailure=run('law-failure-build',['scripts/bend.ts','build',project,'--target','fogo'],{exit:'nonzero',semantic:semanticLawRejection});
+  buildFailure=run('law-failure-build',['scripts/bend.ts','build',project],{exit:'nonzero',semantic:semanticLawRejection});
 }finally{fs.writeFileSync(program,original);}
 // A build removes the previous ELF and manifest before it starts, so the failed
 // law build leaves none. Rebuild and retest the restored source for the evidence.
-run('build-restored',['scripts/bend.ts','build',project,'--target','fogo'],{exit:0});
-run('test-restored',['scripts/bend.ts','test',project,'--target','fogo'],{exit:0});
+run('build-restored',['scripts/bend.ts','build',project],{exit:0});
+run('test-restored',['scripts/bend.ts','test',project],{exit:0});
 const hash=(file:string)=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const evidenceFiles=[
   path.join(project,'bend.json'),
@@ -95,6 +95,9 @@ const evidenceFiles=[
   path.join(project,'dist/fogo/program.manifest.json'),
   path.join(project,'dist/program.client.js'),
   path.join(project,'dist/fogo/program.test-report.json'),
+  path.join(project,'dist/solana/program.so'),
+  path.join(project,'dist/solana/program.manifest.json'),
+  path.join(project,'dist/solana/program.test-report.json'),
   path.join(repository,'scripts/bend.ts'),
   path.join(repository,'scripts/alpha-acceptance.ts'),
   path.join(repository,'package-lock.json'),

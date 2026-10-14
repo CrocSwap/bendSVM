@@ -16,8 +16,9 @@ and select the build and test runner per target
 ## Build profile
 
 `scripts/build-v3.ts` uses platform-tools v1.57 (Clang/LLD 22.1.2), pinned by
-content on macOS arm64 (`compiler/target-profile.ts`: `clang`, `ld.lld`,
-`llvm-readelf`; `SBF_V157_TOOLS` overrides the location).
+content per host (`compiler/target-profile.ts` `V157_HOSTS`: `clang`, `ld.lld`,
+`llvm-readelf` for macOS arm64, Linux x86_64 or Linux aarch64). `npm run install:platform-tools` installs
+it after checking the archive and binary hashes; `SBF_V157_TOOLS` overrides the location.
 
 - Compile with `-mcpu=v3`. The program, `runtime/memory.c` and
   `runtime/sbpfv3_syscalls.c` are separate objects.
@@ -98,6 +99,7 @@ needs a deterministic per-operation benchmark on one runtime.
 
 - Local LiteSVM only; no devnet/mainnet deployment yet. The all-enabled
   feature set is a local choice, not observed cluster state.
-- macOS arm64 only (v1.57 content pins).
+- Recorded execution results are from macOS arm64. Linux pins match the release
+  archives; CI (Ubuntu x86_64) runs these checks there.
 - The qualified SHA program path and `build:library` without `--target` remain
   SBPFv0/v1.53.

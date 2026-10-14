@@ -6,7 +6,7 @@ on:
 
 jobs:
   supported-alpha:
-    name: Ubuntu 22.04 / Node 22 / Rust 1.92 / Anza v1.53
+    name: Ubuntu 22.04 / Node 22 / Rust 1.92 / Anza v1.53 + v1.57
     runs-on: ubuntu-22.04
     timeout-minutes: 90
     steps:
@@ -34,6 +34,13 @@ jobs:
           test -x "$TOOLS_ROOT/llvm/bin/ld.lld"
           test -x "$TOOLS_ROOT/llvm/bin/llvm-readelf"
           echo "SBF_TOOLS=$TOOLS_ROOT/llvm/bin" >> "$GITHUB_ENV"
+      - name: Install pinned Anza platform-tools v1.57 (Solana SBPFv3 target)
+        env:
+          TOOLS_ROOT: ${{ runner.temp }}/platform-tools-v1.57
+        run: |
+          npm ci
+          npm run install:platform-tools -- --root "$TOOLS_ROOT"
+          echo "SBF_V157_TOOLS=$TOOLS_ROOT/llvm/bin" >> "$GITHUB_ENV"
       - name: Provision locked dependencies
         run: npm run bootstrap:alpha
       - name: Run prerequisite diagnostics
@@ -51,6 +58,12 @@ jobs:
         run: npm test
       - name: Run mixed Rust and Bend acceptance with call-depth refusal control
         run: npm run test:mixed-library
+      - name: Run Fogo and Solana target checks (library profiles, SBPFv3 programs, project targets)
+        run: |
+          npm exec -- bun tests/install-platform-tools.ts
+          npm run test:target-profiles
+          npm run test:sbpf-v3
+          npm run test:project-targets
       - name: Run generated-client and packaging checks after fixture generation
         run: |
           npm exec -- bun tests/program-client.ts

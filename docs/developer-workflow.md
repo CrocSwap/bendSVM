@@ -129,7 +129,7 @@ the same commands and generated client. Add a `test.ts` using their instructions
 | Target | Program format | Toolchain | Offline test runtime |
 | --- | --- | --- | --- |
 | `fogo` | SBPFv0 | Anza platform-tools v1.53 | LiteSVM 0.7.1 (`scripts/test-runner`) |
-| `solana` | SBPFv3 ([details](sbpf-v3-programs.md)) | platform-tools v1.57, macOS arm64 | LiteSVM 0.13.0, all features (`scripts/test-runner-modern`) |
+| `solana` | SBPFv3 ([details](sbpf-v3-programs.md)) | platform-tools v1.57 (`npm run install:platform-tools`) | LiteSVM 0.13.0, all features (`scripts/test-runner-modern`) |
 
 `build` and `test` then run for every listed target with no flags. Each target
 writes `dist/<target>/program.*` (ELF, manifest, interface, test report). The
@@ -137,12 +137,14 @@ generated client is target-independent: it is checked byte-identical across
 targets and published once as `dist/program.client.*`, so `test.ts` keeps
 importing `./dist/program.client.ts`. `--target fogo|solana` builds or tests
 one listed target; `--local-rpc` requires it when several are listed. If the
-v1.57 toolchain is missing, `build` names the fix (install it, set
-`SBF_V157_TOOLS`, or build Fogo only). `npm run doctor` reports the v1.57 tools
-as optional checks. Without `"targets"` (projects created before targets existed, or
+v1.57 toolchain is missing, `build` names the fix (`npm run install:platform-tools`,
+set `SBF_V157_TOOLS`, or build Fogo only). `npm run bootstrap:alpha` installs it.
+`install:platform-tools` checks the release archive and its `clang`, `ld.lld` and
+`llvm-readelf` against SHA-256 pins for macOS arm64, Linux x86_64 or Linux aarch64, and never overwrites a
+mismatched installation. `npm run doctor` reports the v1.57 tools as optional checks. Without `"targets"` (projects created before targets existed, or
 edited by hand), a project builds the single SBPFv0 `output` exactly as before.
-Ubuntu CI and the acceptance gates have only v1.53, so they create the default
-starter and build and test it with `--target fogo`.
+CI (Ubuntu x86_64) and the acceptance gates install v1.57 and build and test the
+default starter for both targets with no flags.
 `npm run test:project-targets` exercises these behaviours and refusals.
 
 The supported language and resource bounds still apply; see `subset.md` and

@@ -21,25 +21,68 @@ export function legacyLibraryTarget(): LibraryTargetProfile {
   return { name: 'fogo-v0', platformTools: 'v1.53', llvm: '20.1.7', cpu: 'generic', sbpfVersion: 0, machine: 263 };
 }
 
-// macOS arm64 v1.57 candidate shared with GoSVM's recorded qualification.
-// Other host packages require separate pins and execution qualification.
-export const MODERN_TOOL_HASHES: Record<string, string> = {
-  clang: '67ebfa7313086cf01ddb42d6cdf3b4bba741dc2341a1e70796d018fe7b9ee697',
-  'llvm-readelf': 'b0e56e720c675f76804612a944154ff99bbf72f6ecbcb876ef53cee68eff5698',
-  'ld.lld': '91db7cf05b55facfdb7178eb24d6e5eba1da369672f2b52ab1657165a6441630',
-};
+/**
+ * Anza platform-tools v1.57 release archives and the binaries Bend runs, pinned
+ * by SHA-256 per host. The macOS arm64 binaries are the ones GoSVM qualified;
+ * all three archives were downloaded from the v1.57 GitHub release on 2026-10-14.
+ */
+export const V157_HOSTS = {
+  'darwin-arm64': {
+    archive: 'platform-tools-osx-aarch64.tar.bz2',
+    archiveSha256: '48c32c2ec3ac3729b5caf1fdd6c4145496125edf043b2662b0586bfbc932b34a',
+    tools: {
+      clang: '67ebfa7313086cf01ddb42d6cdf3b4bba741dc2341a1e70796d018fe7b9ee697',
+      'llvm-readelf': 'b0e56e720c675f76804612a944154ff99bbf72f6ecbcb876ef53cee68eff5698',
+      'ld.lld': '91db7cf05b55facfdb7178eb24d6e5eba1da369672f2b52ab1657165a6441630',
+    },
+  },
+  'linux-x64': {
+    archive: 'platform-tools-linux-x86_64.tar.bz2',
+    archiveSha256: 'b0f7af104adf726fff2a6a09ea2eb2f2d2965c92295f4d7388c08d140e0c2b00',
+    tools: {
+      clang: '6672ea42140527104c230c995992edf7147308a370ae3e52163821896d9b8c1a',
+      'llvm-readelf': '008aa4b309a200d4a7e679b95ce78974a82f8a36b29943d01ee0e80a0019ef6a',
+      'ld.lld': 'e54c88f3021702b13527e4b255e0e299420ebe11d17ece99a338a5d789ef18ed',
+    },
+  },
+  'linux-arm64': {
+    archive: 'platform-tools-linux-aarch64.tar.bz2',
+    archiveSha256: 'f2f31c9325cb2d00244df23b4a1a0904e51819cec49d39235a3ed3ee2320375d',
+    tools: {
+      clang: 'eba6e975225cfd44291bdcace57f1e9a6e3c4942be98475468a74f5b4789ac78',
+      'llvm-readelf': '53b7f91b3fc623f1e6c6382ad42f25b07e24948f472d32645e99c41ba0df2c9e',
+      'ld.lld': 'bc01c50986b5c38501df0fc1d57d7f702850c05e01ec4dd39376998bd3a5cdfb',
+    },
+  },
+} as const;
+export type V157Host = keyof typeof V157_HOSTS;
+export const V157_RELEASE_URL = 'https://github.com/anza-xyz/platform-tools/releases/download/v1.57';
+export const V157_DEFAULT_ROOT = path.join(os.homedir(), '.cache/solana/v1.57/platform-tools');
+
+/** The pinned v1.57 host entry for this machine, or undefined when no pin exists. */
+export function v157Host(platform: string = process.platform, arch: string = process.arch): V157Host | undefined {
+  const key = `${platform}-${arch}`;
+  return Object.hasOwn(V157_HOSTS, key) ? key as V157Host : undefined;
+}
+export const SUPPORTED_V157_HOSTS = 'macOS arm64, Linux x86_64 and Linux aarch64';
+
+/** v1.57 tool pins for this host ({} on an unsupported host). */
+export const MODERN_TOOL_HASHES: Record<string, string> = (() => {
+  const host = v157Host();
+  return host ? { ...V157_HOSTS[host].tools } : {};
+})();
 
 /** SBF_TOOLS selects v1.53; SBF_V157_TOOLS (alias SBF_V3_TOOLS) selects v1.57. */
 export function libraryTools(profile: LibraryTargetProfile): string {
   return profile.platformTools === 'v1.53' ? sbfTools() :
     process.env.SBF_V157_TOOLS ?? process.env.SBF_V3_TOOLS ??
-      path.join(os.homedir(), '.cache/solana/v1.57/platform-tools/llvm/bin');
+      path.join(V157_DEFAULT_ROOT, 'llvm/bin');
 }
 
 export function checkLibraryTools(profile: LibraryTargetProfile, directory: string,
     names: string[] = ['clang', 'llvm-readelf']): void {
-  if (profile.platformTools === 'v1.57' && (process.platform !== 'darwin' || process.arch !== 'arm64')) {
-    throw new Error(`${profile.name} library tools (platform-tools v1.57) are currently pinned for macOS arm64 only`);
+  if (profile.platformTools === 'v1.57' && !v157Host()) {
+    throw new Error(`${profile.name} library tools (platform-tools v1.57) are pinned for ${SUPPORTED_V157_HOSTS}; host is ${process.platform}/${process.arch}`);
   }
   for (const name of names) {
     const executable = path.join(directory, name);

@@ -136,10 +136,8 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   const edit=runCommand('apply-tutorial',bun,[helper,projectDirectory],{cwd:stagedSource,env:stageEnv,expected:'pass'});
   recordCommand(logs,'apply-tutorial',edit);
 
-  // The starter lists fogo and solana; this gate (and Ubuntu CI) builds and tests fogo only.
-  const target=(name:string)=>name==='build'||name==='test'?['--target','fogo']:[];
   const projectCommand=(label:string,name:string)=>{
-    const result=runCommand(label,bun,[cli,name,projectDirectory,...target(name)],{cwd:stagedSource,env:stageEnv,expected:'pass'});
+    const result=runCommand(label,bun,[cli,name,projectDirectory],{cwd:stagedSource,env:stageEnv,expected:'pass'});
     recordCommand(logs,label,result);
     return result;
   };
@@ -164,7 +162,7 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
     verifyMutation=runCommand('zero-law-mutation-verify',bun,[cli,'verify',projectDirectory],
       {cwd:stagedSource,env:stageEnv,expected:'semantic-failure',semantic});
     recordCommand(logs,'zero-law-mutation-verify',verifyMutation);
-    buildMutation=runCommand('zero-law-mutation-build',bun,[cli,'build',projectDirectory,...target('build')],
+    buildMutation=runCommand('zero-law-mutation-build',bun,[cli,'build',projectDirectory],
       {cwd:stagedSource,env:stageEnv,expected:'semantic-failure',semantic});
     recordCommand(logs,'zero-law-mutation-build',buildMutation);
   }finally{
@@ -192,7 +190,8 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
     .map(name=>path.join(projectDirectory,name));
   const clientStem=path.join(projectDirectory,'dist/program');
   const fogoStem=path.join(projectDirectory,'dist/fogo/program');
-  const outputFiles=[
+  const solanaStem=path.join(projectDirectory,'dist/solana/program');
+  const outputFiles=[solanaStem+'.so',solanaStem+'.manifest.json',solanaStem+'.test-report.json',
     fogoStem+'.so',fogoStem+'.manifest.json',clientStem+'.client.ts',clientStem+'.client.js',
     clientStem+'.client-runtime.js',clientStem+'.client-runtime.d.ts',fogoStem+'.test-report.json',
   ];
@@ -274,6 +273,11 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
       manifest:{path:rel(fogoStem+'.manifest.json'),sha256:hash(fogoStem+'.manifest.json')},
       generatedClient:['.client.ts','.client.js','.client-runtime.js','.client-runtime.d.ts'].map(suffix=>({path:rel(clientStem+suffix),sha256:hash(clientStem+suffix)})),
       testReport:{path:rel(fogoStem+'.test-report.json'),sha256:hash(fogoStem+'.test-report.json')},
+      solana:{
+        elf:{path:rel(solanaStem+'.so'),sha256:hash(solanaStem+'.so'),bytes:fs.statSync(solanaStem+'.so').size},
+        manifest:{path:rel(solanaStem+'.manifest.json'),sha256:hash(solanaStem+'.manifest.json')},
+        testReport:{path:rel(solanaStem+'.test-report.json'),sha256:hash(solanaStem+'.test-report.json')},
+      },
       finishedProject:rel(projectDirectory),
       finishedStagedRepository:rel(stagedSource),
     },

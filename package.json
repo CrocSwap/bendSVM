@@ -7,6 +7,7 @@
     "bend": "bun scripts/bend.ts",
     "doctor": "bun scripts/alpha-doctor.ts",
     "bootstrap:alpha": "bash scripts/bootstrap-alpha.sh",
+    "install:platform-tools": "bun scripts/install-platform-tools.ts",
     "acceptance:alpha": "bun scripts/alpha-acceptance.ts",
     "acceptance:developer": "bun scripts/fresh-developer-acceptance.ts",
     "acceptance:developer:local": "bun scripts/fresh-developer-local.ts",
