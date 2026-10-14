@@ -1,8 +1,11 @@
+import {isolatedTypeWhnf} from './type-evaluation.ts';
 import * as B from '../.deps/bend/bend2/bend.ts';
 import path from 'node:path';
 import fs from 'node:fs';
 import { TargetDiagnostic, targetError } from './diagnostics.ts';
 import { primitives } from './primitives.ts';
+import { nativeArithmeticBody } from './native-arithmetic.ts';
+import {lowerConstruct, lowerCase, renderConstruct, renderCase, type SumFamily, type SumEvidence, type SumRendering} from './tagged-sum-ir.ts';
 import type { RuntimeSchema } from './schema.ts';
 
 export const mangle = (name: string) => 'bend_' + name.replace(/[^a-zA-Z0-9]/g,
@@ -14,20 +17,39 @@ type Loop = { name: string; fuel: number; used: boolean };
 type Field = { name: string; type: string };
 type Variant = { name: string; tag: number; fields: Field[]; type: string; sourceName?: string };
 type Signature = { args: string[]; result: string };
+export type EmittedFunction = {name: string; cName: string; args: string[]; result: string; definition: string};
 
 export async function checkedBook(file: string): Promise<B.Book> {
   return (await checkedProgram(file)).book;
 }
 
-export async function checkedProgram(file: string): Promise<{ book: B.Book; files: string[] }> {
+export type CheckedModule = { file: string; namespace: string; declarations: string[] };
+export type CheckedProgram = { book: B.Book; files: string[]; modules: CheckedModule[] };
+
+export async function checkedProgram(file: string): Promise<CheckedProgram> {
   const files: string[] = [];
-  try { return {book: await loadCheckedBook(file, files), files}; }
+  const modules: CheckedModule[] = [];
+  try { return {book: await loadCheckedBook(file, files, modules), files, modules}; }
   catch (e) { throw new Error(describeError(e)); }
 }
 
-async function loadCheckedBook(file: string, files: string[]): Promise<B.Book> {
+async function loadCheckedBook(file: string, files: string[], modules: CheckedModule[]): Promise<B.Book> {
   const book = B.book_nil();
-  const seen = new Map<string, string | null>();
+  const declaredByFile = new Map<string, string[]>();
+  let recordedDeclarations = 0;
+  // Pinned book_load finishes each module by setting its non-null namespace,
+  // immediately after parse_book appends that module's declarations to order.
+  // Imported modules finish first, so record each append exactly once. A law
+  // declared and later proved in another file retains both origin events.
+  const seen = new class extends Map<string, string | null> {
+    override set(loadedFile: string, namespace: string | null): this {
+      if (namespace !== null) {
+        declaredByFile.set(loadedFile, book.order.slice(recordedDeclarations));
+        recordedDeclarations = book.order.length;
+      }
+      return super.set(loadedFile, namespace);
+    }
+  }();
   await B.book_load(book, path.resolve(file), '', seen);
   const laws = path.join(path.dirname(path.resolve(file)), 'LAWS.bend');
   if (path.basename(file) === 'PROOF.bend' && fs.existsSync(laws) && !seen.has(fs.realpathSync(laws))) {
@@ -59,7 +81,14 @@ async function loadCheckedBook(file: string, files: string[]): Promise<B.Book> {
     if (t.$ === 'ADT') t.c.forEach(c => scan(B.term_lower(c.T)));
   };
   for (const [name, t] of Object.entries(book.tlds)) if (!t.b) visit(name);
-  files.push(...seen.keys());
+  // Preserve the exact loader mapping after all proof checks have succeeded.
+  // Realpaths identify loaded files; namespaces identify their checked names.
+  // This is not a receipt for the exact source bytes read by the loader.
+  for (const [loadedFile, namespace] of seen) {
+    if (namespace === null) throw new Error('Incomplete checked module load');
+    files.push(loadedFile);
+    modules.push({file: loadedFile, namespace, declarations: declaredByFile.get(loadedFile) ?? []});
+  }
   return book;
 }
 
@@ -72,11 +101,22 @@ export class Backend {
   private signatures = new Map<string, Signature>();
   private functionBusy = new Set<string>();
   private definitions: string[] = [];
+  private functionRecords: EmittedFunction[] = [];
+  /** Inspection only: records do not authorize changing generated code. */
+  emittedFunctions(): EmittedFunction[] { return structuredClone(this.functionRecords); }
   private declarations: string[] = [];
   private serial = 0;
   private usesNat = false;
   private roots = new Set<string>();
-  constructor(private book: B.Book) {}
+  private sumEvidence: SumEvidence[] = [];
+  private sumRenderings: SumRendering[] = [];
+  constructor(private book: B.Book, private options: {nativeArithmetic?:boolean} = {}) {}
+
+  private renderingFunction(): string {
+    const active = [...this.functionBusy];
+    if (!active.length) return fail('Missing function context for constructor evidence');
+    return mangle(active[active.length - 1]);
+  }
 
   private bare(t: Term): Term {
     while (t.$ === 'Ann') t = t.x;
@@ -87,7 +127,7 @@ export class Backend {
     // Checker annotations can contain memo cells holding higher-order types.
     // Force only type terms; runtime expressions must retain their checked form.
     if (t.$ === 'Var' && t.v !== undefined)
-      t = this.bare(B.term_lower(B.term_wnf(this.book, t.v as B.HTerm)));
+      t = this.bare(B.term_lower(isolatedTypeWhnf(this.book, t.v as B.HTerm)));
     if (t.$ !== 'Ref' && t.$ !== 'ADT') return fail(`Unsupported runtime type: ${t.$}`);
     const sourceName = t.k;
     const parameters = t.$ === 'ADT' ? t.x : [];
@@ -110,8 +150,8 @@ export class Backend {
     const variants = tld.c.map((c, tag) => {
       let specialized = c.T;
       for (const parameter of parameters) {
-        const head = B.term_wnf(this.book, specialized);
-        if (head.$ !== 'All' || head.q.$ !== 'None' || B.term_wnf(this.book, head.A).$ !== 'Typ')
+        const head = isolatedTypeWhnf(this.book, specialized);
+        if (head.$ !== 'All' || head.q.$ !== 'None' || isolatedTypeWhnf(this.book, head.A).$ !== 'Typ')
           fail(`Only erased type parameters are supported: ${sourceName}`);
         specialized = head.B(B.term_higher(parameter));
       }
@@ -181,6 +221,11 @@ export class Backend {
   private assertType(v: Value, expected: string) {
     if (v.type !== expected) fail(`Backend type mismatch: ${v.type} vs ${expected}`);
   }
+  private sumFamily(name: string): SumFamily {
+    const variants = this.types.get(name) ?? fail(`Unknown tagged-sum family ${name}`);
+    return {name, variants: variants.map(v => ({name: v.name, sourceName: v.sourceName,
+      tag: v.tag, maker: mangle(v.name) + '_make', fields: v.fields}))};
+  }
   private expr(term: Term, env: Map<number, Value>, lines: string[]): Value {
     const t = this.bare(term);
     if (t.$ === 'Var') return env.get(t.i) ?? fail(`Unbound runtime variable ${t.k}`);
@@ -208,8 +253,14 @@ export class Backend {
       if (t.x.length !== variant.fields.length) fail(`Constructor arity: ${t.k}`);
       const args = t.x.map(x => this.expr(x, env, lines));
       args.forEach((v, i) => this.assertType(v, variant.fields[i].type));
-      return { type: variant.type, code: variant.type === 'Bool' ? `${variant.tag}u`
-        : `${mangle(variant.name)}_make(${args.map(v => v.code).join(', ')})` };
+      if (variant.type === 'Bool') return {type: 'Bool', code: `${variant.tag}u`};
+      const family = this.sumFamily(variant.type), source = {constructor: t.k, arguments: args.map(v => v.type)};
+      const ir = lowerConstruct(family, source);
+      const code = renderConstruct(family, source, ir, args.map(v => v.code));
+      const operation = this.sumEvidence.length;
+      this.sumEvidence.push({family, source, ir});
+      this.sumRenderings.push({operation, functionName:this.renderingFunction(), kind:'construct', inputs:args.map(v => v.code), expression:code});
+      return {type: variant.type, code};
     }
     if (t.$ === 'App' || t.$ === 'Ref') {
       const xs: Term[] = [];
@@ -259,6 +310,18 @@ export class Backend {
       }
       const v = this.variant(t.k, scrutinee.type);
       this.assertType(scrutinee, v.type);
+      if (v.type !== 'Bool') {
+        const family = this.sumFamily(v.type), source = {constructor: t.k, arguments: args.map(v => v.type)};
+        const ir = lowerCase(family, source), routed = renderCase(family, source, ir, args);
+        const operation = this.sumEvidence.length;
+        this.sumEvidence.push({family, source, ir});
+        const block = [`if (${routed.condition}) {`,
+          ...this.body(t.h, routed.hit, env, result, loop).map(l => '  ' + l),
+          '} else {', ...this.body(t.m, routed.miss, env, result, loop).map(l => '  ' + l), '}'];
+        this.sumRenderings.push({operation, functionName:mangle(loop.name), kind:'case', inputs:args.map(v => v.code),
+          condition:routed.condition, hit:routed.hit.map(v => v.code), miss:routed.miss.map(v => v.code), block:[...block]});
+        return block;
+      }
       const fields = v.fields.map((f, i) => ({ type: f.type,
         code: `(${scrutinee.code}).as.c${v.tag}.f${i}` }));
       const tag = v.type === 'Bool' ? scrutinee.code : `(${scrutinee.code}).tag`;
@@ -303,18 +366,23 @@ export class Backend {
       ...(type==='Nat'?{descent:{argument:i,depth:0}}:{}) }));
     const loop:Loop={name,fuel:sig.args.indexOf('Nat'),used:false};
     const primitive = primitives[name];
+    const nativeBody = this.options.nativeArithmetic === false ? undefined
+      : nativeArithmeticBody(name, sig, def.e, mangle);
     let body = primitive ? [`return (bend_u32)(${primitive.expression});`]
-      : this.body(def.e!, args, new Map(), sig.result, loop);
+      : nativeBody ?? this.body(def.e!, args, new Map(), sig.result, loop);
     if(loop.used) body=['for (;;) {',...body.map(l=>'  '+l),'}'];
     // Affine Bend functions may discard inputs. Keep freestanding -Werror
     // builds valid even when a parameter is absent from the lowered body.
     body.unshift(...args.map(a => `(void)${a.code};`));
-    this.definitions.push(`static ${loop.used || this.roots.has(name) ? '__attribute__((noinline))' : 'inline'} ${this.ctype(sig.result)} ${mangle(name)}(${args.map(a =>
-      `${this.ctype(a.type)} ${a.code}`).join(', ') || 'void'}) {\n${body.map(l => '  ' + l).join('\n')}\n}`);
+    const definition = `static ${loop.used || this.roots.has(name) ? '__attribute__((noinline))' : 'inline'} ${this.ctype(sig.result)} ${mangle(name)}(${args.map(a =>
+      `${this.ctype(a.type)} ${a.code}`).join(', ') || 'void'}) {\n${body.map(l => '  ' + l).join('\n')}\n}`;
+    this.definitions.push(definition);
+    this.functionRecords.push({name, cName: mangle(name), args: [...sig.args], result: sig.result, definition});
     this.functionBusy.delete(name); this.emitted.add(name);
     } catch(e) { if(e instanceof TargetDiagnostic)e.inFunction(name); throw e; }
   }
-  emit(roots: string[]): { c: string; functions: string[]; schema: RuntimeSchema } {
+  emit(roots: string[]): { c: string; functions: string[]; schema: RuntimeSchema;
+    taggedSumLowering: {version: 1; operations: SumEvidence[]; rendered: {version: 1; operations: SumRendering[]}} } {
     this.roots = new Set(roots);
     roots.forEach(name => this.emitFunction(name));
     const schema: RuntimeSchema = { version: 1, types: [
@@ -328,7 +396,9 @@ export class Backend {
     return { c: ['/* Generated from checked Bend terms. Do not edit. */',
       '#pragma once', 'typedef unsigned int bend_u32;',
       '_Static_assert(sizeof(bend_u32) == 4, "Requires 32-bit unsigned int");',
-      ...this.declarations, ...this.definitions, ''].join('\n\n'), functions: [...this.emitted], schema };
+      ...this.declarations, ...this.definitions, ''].join('\n\n'), functions: [...this.emitted], schema,
+      taggedSumLowering: {version: 1, operations: structuredClone(this.sumEvidence),
+        rendered: {version: 1, operations: structuredClone(this.sumRenderings).sort((a,b) => a.operation-b.operation)}} };
   }
 }
 

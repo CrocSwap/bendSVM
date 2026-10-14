@@ -4,7 +4,19 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { build, run } from './build.ts';
 
+// Run Bun's test runner explicitly: these tests use bun:test.
+run(process.execPath, ['test', './tests/sbf-call-depth.ts']);
+
 await build();
+await (await import('../tests/sbf-call-depth-build.ts')).testSbfCallDepthBuild(true);
+await (await import('../tests/sbf-call-depth-runtime.ts')).testSbfCallDepthRuntime();
+await import('../tests/checked-module-map.ts');
+await import('../tests/checked-module-names.ts');
+await import('../tests/checked-source-paths.ts');
+await import('../tests/type-evaluation.ts');
+await import('../tests/checked-runtime-identity.ts');
+await import('../tests/checked-graph-names.ts');
+await import('../tests/type-evaluation-applications.ts');
 const B = await import('../.deps/bend/bend2/bend.ts');
 const { checkedBook, Backend, describeError } = await import('../compiler/backend.ts');
 const book = await checkedBook('examples/escrow/PROOF.bend');
@@ -98,8 +110,12 @@ assert.doesNotMatch(fs.readFileSync('build/escrow.h', 'utf8'), /Laws|pthread|mal
 console.log(`${rejects.length} negative proof/backend tests passed`);
 fs.writeFileSync('build/checks.json', JSON.stringify({ reference_native_cases: vectors.length, rejected: rejects,
   imports, mutable_program_data: false }, null, 2) + '\n');
+(await import('../tests/bend-reference-cache-controls.ts')).testBendReferenceCacheControls();
 await (await import('../tests/batch.ts')).testBatch();
 await (await import('../tests/fold.ts')).testFold();
+await (await import('../tests/zip-fold.ts')).testZipFold();
+await (await import('../tests/tree-fold.ts')).testTreeFold();
+await (await import('../tests/tree-fold-controls.ts')).testTreeFoldControls();
 await (await import('../tests/effect-buffer.ts')).testEffectBuffer();
 await (await import('../tests/iteration.ts')).testIteration();
 await (await import('../tests/buffer.ts')).testBuffer();
@@ -112,9 +128,21 @@ run(process.env.CC??'clang',['-std=c17','-O1','-Wall','-Wextra','-Werror','-fsan
 run('build/collection-runtime',[]);
 await (await import('../tests/generics.ts')).testGenerics();
 await (await import('../tests/codecs.ts')).testCodecs();
+await (await import('../tests/codec-structures.ts')).testCodecStructures();
+await import('../tests/large-codec.ts');
 await (await import('../tests/storage.ts')).testStorage();
+(await import('../tests/refinement-suite.ts')).testRefinementSuite();
+await (await import('../tests/adapter-template.ts')).testAdapterTemplate();
+await (await import('../tests/adapter-semantics.ts')).testAdapterSemantics();
+await (await import('../tests/effect-extraction.ts')).testEffectExtraction();
+await (await import('../tests/external-layout.ts')).testExternalLayout();
+await (await import('../tests/cpi-helpers.ts')).testCpiHelpers();
+await (await import('../tests/token-helpers.ts')).testTokenHelpers();
 await (await import('../tests/multi-storage.ts')).testMultiStorage();
+await (await import('../tests/multi-adapter-semantics.ts')).testMultiAdapterSemantics();
+await (await import('../tests/token-composition.ts')).testTokenComposition();
 await (await import('../tests/cpi.ts')).testCpi();
+await (await import('../tests/cpi-frame.ts')).testCpiFrame();
 await (await import('../tests/token-three.ts')).testTokenThree();
 await (await import('../tests/token-issuance.ts')).testTokenIssuance();
 await (await import('../tests/vault.ts')).testVault();
@@ -125,6 +153,10 @@ await (await import('../tests/amm-pricing.ts')).testAmmPricing();
 await (await import('../tests/amm.ts')).testAmm();
 await (await import('../tests/sqrt.ts')).testSqrt();
 await (await import('../tests/arithmetic.ts')).testArithmetic();
+await (await import('../tests/native-arithmetic.ts')).testNativeArithmeticGuard();
 await (await import('../tests/builds.ts')).testBuilds();
+await import('../tests/tagged-sum-ir.ts');
+await import('../tests/sha256.ts');
+await import('../tests/sha256-receipt.ts');
 await import('./test-lowering.ts');
 run('cargo', ['test', '--locked', '--test', 'sbf', '--', '--nocapture']);

@@ -89,15 +89,59 @@ npm ci
 npm test
 ```
 
-`npm test` runs source-law mutations, Bend/reference/native/SBF comparisons,
+`npm test` reuses content-addressed [Bend reference results](docs/reference-cache.md)
+when sources are unchanged. It runs source-law mutations, Bend/reference/native/SBF comparisons,
 canonical codec checks, application lifecycles, adversarial transactions, CPI
 integration, a compiler lowering mutation gate and reproducible builds.
 `npm run benchmark:arithmetic-probe` measures selected arithmetic operations
 against an independent Rust SBF program; see [arithmetic semantics](docs/arithmetic.md).
-`verify:all` runs all seventeen separate source
-refinement commands and writes `build/refinement-suite.json`; it is optional and
+`npm run benchmark:rmsnorm` compares a bounded, signed integer RMSNorm kernel
+against independent Rust SBF; see the [RMSNorm benchmark](docs/rmsnorm-benchmark.md).
+`npm run benchmark:linear` compares a bounded signed-byte dot-product tile
+from Basanos against independent Rust SBF; see the [linear benchmark](docs/linear-benchmark.md).
+`verify:all` runs 55 source refinement, arithmetic-lowering and emitted-C bridge
+commands and writes `build/refinement-suite.json` with report snapshots; it is optional and
 requires the pinned Z3 virtualenv described above. See
 [refinement.md](docs/refinement.md) for their assumptions and negative checks.
+
+An experimental pure-library build supports calling checked Bend code from
+Rust in the same SBF image, using generated C and Rust bindings and canonical
+byte arguments. Run `npm run test:mixed-library` for the host and LiteSVM gate,
+or build a library with
+`npm run build:library -- tests/mixed-library/PROOF.bend mixed.evaluate build/library`.
+The [library fixture contract](tests/mixed-library/fixture.md) documents the
+versioned ABI, pointer preconditions, error codes, link/load checks and receipt
+scope. This is a generic library boundary; it does not implement a DCG handler.
+Libraries take `--target fogo-v0|solana-v3` (both platform-tools v1.57, macOS
+arm64 only; `--json` reports the manifest) and pass `npm run test:target-profiles`
+for Rust consumers; the historical command without `--target` stays v0 on v1.53. See the
+[library artifact contract](docs/library-artifact-contract.md). Full programs and
+the project CLI remain SBPFv0.
+
+The [bounded SHA-256 foundation](docs/sha256.md) provides a C syscall wrapper
+and TypeScript reference for at most 16 slices and 1,024 total bytes. An explicit,
+source-qualified SBF program path is documented in
+[qualified SHA builds](docs/sha256-qualified-build.md); ordinary program and
+library builds remain source-generated. Run
+`npm run test:sha256` for native sanitizer and LiteSVM checks, then
+`npm run test:sha256-receipt` for failed-run evidence checks. These also run in
+`npm test`. A callable Bend intrinsic still requires checked source integration.
+
+The separate `build:sha256-library` command selects source-qualified short SHA
+for a library's SBF object while retaining the ordinary host implementation.
+See [qualified SHA libraries](docs/sha256-qualified-library.md) for generation
+selection, publication receipts and the required final Rust-linked image checks.
+Run `npm run test:sha256-qualified-library` for its focused acceptance.
+
+The [packed multiblock SHA qualification](docs/sha256-packed-qualification.md)
+binds a checked 0–151-byte reference and its explicit intermediate SBF
+substitution, including 138-byte inputs. `build:sha256-packed-library` publishes
+that profile through the qualified-library lifecycle;
+`test:sha256-packed-qualified-library` checks failures, preservation, restoration
+and the final Rust-linked images.
+Both publication profiles passed their focused acceptance, integrated
+`npm test` and subsequent ordered client checks; see the
+[recorded acceptance](docs/sha256-packed-qualification.md#recorded-acceptance--2026-10-05).
 
 For the external-alpha setup, run `npm run bootstrap:alpha` followed by
 `npm run doctor`; `npm run acceptance:alpha` reproduces the isolated staged

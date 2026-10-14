@@ -49,6 +49,8 @@ jobs:
           npm exec -- bun tests/process-lifecycle.ts
       - name: Generate fixtures and run complete regression suite
         run: npm test
+      - name: Run mixed Rust and Bend acceptance with call-depth refusal control
+        run: npm run test:mixed-library
       - name: Run generated-client and packaging checks after fixture generation
         run: |
           npm exec -- bun tests/program-client.ts
@@ -72,4 +74,8 @@ jobs:
             build/*.stack.json
             build/*.client.js
             build/*.client.d.ts
+            build/mixed-library/acceptance.json
+            build/sha256/run-*/report.json
+            build/sha256-receipt/report.json
+            build/tagged-sum-ir/report.json
           if-no-files-found: ignore

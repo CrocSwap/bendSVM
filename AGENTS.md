@@ -96,8 +96,11 @@ compiler suite.
 - `npm test` builds fixtures and runs proof-rejection, reference/native,
   sanitizer, codec, application, reproducibility and Rust SBF checks. Shared
   compiler/runtime/ABI changes warrant this broader regression suite.
+- `npm test` reuses cached Bend interpreter results keyed by exact inputs
+  (`docs/reference-cache.md`). Set `BEND_REFERENCE_CACHE=verify` when a record
+  must claim fresh interpreter evidence.
 - Focused scripts include `npm run test:amm`, `test:queue`, `test:batch`,
-  `test:collection`, `test:buffer`, `test:iteration` and `test:generics`.
+  `test:collection`, `test:buffer`, `test:iteration`, `test:zip-fold` and `test:generics`.
   Inspect their entrypoints for fixture and tool prerequisites.
 - After fixture generation, a Rust subset can be run with
   `cargo test --locked --test sbf <filter> -- --nocapture`. Running Cargo alone
@@ -110,11 +113,12 @@ compiler suite.
 - `npm run acceptance:developer` exercises the changed source/law/proof/test in a
   staged source copy. With an explicitly started local validator on port 18899,
   `npm run acceptance:developer:local` validates the same artifact over RPC.
-- `npm run verify:all` runs 17 separate source refinement commands and writes
+- `npm run verify:all` runs 55 source refinement, arithmetic-lowering, emitted-C bridge and conditional SBF artifact commands and writes
   `build/refinement-suite.json`. Use focused `verify:*` commands for relevant
   proof changes; these checks are separate from ordinary regression tests.
-- Benchmark commands are `npm run benchmark:amm`, `benchmark:batch`, and
-  `benchmark:queue`; consult their documents for matched comparison conditions.
+- Benchmark commands include `npm run benchmark:amm`, `benchmark:batch`,
+  `benchmark:queue`, `benchmark:rmsnorm`, and `benchmark:linear`; consult their
+  documents for matched comparison conditions.
 
 Preserve meaningful negative tests: unsupported inputs must reject, faulty source
 mutations must fail for the expected semantic reason, and failed transactions

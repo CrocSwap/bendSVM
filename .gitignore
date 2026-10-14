@@ -13,3 +13,9 @@ target/
 build/devnet-alpha-payer.json
 build/live-queue-*/
 build/live-validator-ledger/
+
+# Generated Python bytecode is not verification source.
+__pycache__/
+
+# Symlink to the staged SBF build used by tests-modern (managed by tests/sbpf-v3-programs.ts).
+tests-modern/build
