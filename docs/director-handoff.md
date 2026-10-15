@@ -302,5 +302,50 @@ scratchpad; no library code changed).
   `tests/sha256-qualified-program.ts` and `tests/sha256-short-sbf/prerequisite-hashes.json`;
   both gates then passed.
 
+## CI, local v3 deployment and Stage C — 2026-10-15 (user-requested)
+
+- **First Linux CI runs.** Run `38662634003` (pushed `bc161ff`): installer with
+  Linux pins matching, doctor, both acceptance gates (both targets) and the
+  local deployment gates passed on Ubuntu. `npm test` then failed in
+  `tests/generics.ts` (no `z3`), as it had on 2026-09-22. `48a5ba5` installs
+  `z3-solver==5.1.0` into `.deps/refinement-venv` and exports `PYTHON`. Run
+  `38739428855` passed that check and then failed in `tests/adapter-semantics.ts`:
+  Ubuntu 22.04 clang 14 requires an opt-in flag for `-ftrivial-auto-var-init=zero`.
+  The test now probes the host compiler and adds that flag only when needed.
+  It is unverified on Linux until the next CI run.
+- **Local SBPFv3 deployment.** `scripts/live-queue --program STEM` (default
+  `build/queue`; refuses a stem whose client/interface differs) deployed the
+  queue built with `--target solana-v3` to a local Agave 4.0.3 validator and
+  passed the full live flow: `build/live-queue-1792069882706/report.json`.
+  Solana CLI 3.0.15 (the user's install) refuses to parse the v3 ELF. Agave
+  v4.0.3 (`solana-sbpf` 0.14.4, matching LiteSVM 0.13.0) was unpacked to
+  `~/.cache/solana/agave-v4.0.3/` and used through `PATH` only. The SBPFv3
+  feature is now `5cC3foj77…` (SIMD-0178/0189/0377); its feature account is
+  activated on devnet, testnet and mainnet. Public clusters run Agave 4.3/4.4
+  (`solana-sbpf` 0.23); whether our v3 ELF loads there is unverified. No devnet
+  deployment was made (the user chose local).
+- **Stage C: Fogo on v1.57.** `build:program --target fogo-v0` compiles with
+  the v1.57 tools (content-pinned via `checkLibraryTools`) through the ordinary
+  v0 pipeline (`compileSbf` gained an optional toolchain), keeping the v0
+  import allowlist and call-depth gate; its manifest records `platformTools:
+  v1.57`, `targetProfile: fogo-v0` and tool hashes. The `fogo` project target
+  uses it. Untargeted builds, `npm test` fixtures and the qualified SHA paths
+  stay v1.53. Doctor requires v1.57 (`sbf-v1.57-*`). `npm run test:fogo-v157`
+  (new; in CI) builds the six applications plus the settlement probe on v1.57
+  and runs their Rust tests on classic LiteSVM 0.7.1 from a staged directory:
+  40 passed, 4 ignored (`build/fogo-v157/2026-10-15T13-17-22-743Z-0f5e6f37/acceptance.json`).
+  ELF sizes are within 3% of v1.53. Max CU: vault 13,107 → 11,606, vesting
+  13,075 → 13,075, exchange 22,574 → 22,568. GoSVM needs nothing: its `fogo`
+  target is already v1.57, and it accepts v1.57 fogo-v0 bundles (it still
+  marks that pairing untested until it qualifies ours).
+- Regression `build/regression/20261015T133000Z-stage-c/exits.tsv`, CI order:
+  all 11 steps exited 0 (doctor, installer controls, `npm test` 541 s with 89
+  Rust SBF tests passed and 4 ignored, mixed-library, target-profiles,
+  fogo-v157, sbpf-v3, project-targets, program-client, project-commands,
+  client-packaging). Focused: `build/regression/20261015T132700Z-stage-c-focused/`
+  (project-commands, workflow-sbf, target-profiles, acceptance:alpha, whose new
+  staging built fogo with v1.57). `acceptance:developer` stages only tracked
+  files, so it runs after commit (and in CI).
+
 Hundreds of paths are dirty/untracked; ignored `build/` holds required
 evidence. Do not reset, git-clean or broadly delete outputs/caches.
