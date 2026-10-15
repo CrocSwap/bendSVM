@@ -22,6 +22,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes clang
+      - name: Install pinned Z3 binding for proof checks in the regression suite
+        run: |
+          python3 -m venv .deps/refinement-venv
+          .deps/refinement-venv/bin/python -m pip install z3-solver==5.1.0
+          echo "PYTHON=$PWD/.deps/refinement-venv/bin/python" >> "$GITHUB_ENV"
       - name: Install pinned Anza platform-tools
         env:
           TOOLS_ROOT: ${{ runner.temp }}/platform-tools-v1.53
