@@ -59,21 +59,21 @@ if(fs.existsSync(path.join(tools,'clang'))){
   add('sbf-clang-version',true,result.ok&&/20\.1\.7/.test(result.output)&&/anza-xyz/.test(result.output),result.output.split('\n')[0]??result.error??'not found',toolReuse);
 }
 
-// Solana (SBPFv3) target: platform-tools v1.57, content-pinned per host
-// (install with npm run install:platform-tools).
-// Optional: projects that only target Fogo do not need it.
+// Project targets (fogo SBPFv0 and solana SBPFv3) and explicit library targets:
+// platform-tools v1.57, content-pinned per host (install with npm run install:platform-tools).
+// Required: bend new writes both targets. v1.53 above remains for untargeted builds.
 {
   const {libraryTarget,libraryTools,MODERN_TOOL_HASHES,v157Host,SUPPORTED_V157_HOSTS}=await import('../compiler/target-profile.ts');
-  const modern=libraryTools(libraryTarget('solana-v3'));
+  const modern=libraryTools(libraryTarget('fogo-v0'));
   const modernReuse=process.env.SBF_V157_TOOLS||process.env.SBF_V3_TOOLS?`SBF_V157_TOOLS=${modern}`:`default cache ${modern}`;
   const supportedHost=v157Host()!==undefined;
   for(const name of ['clang','ld.lld','llvm-readelf']){
     const executable=path.join(modern,name);
-    if(!fs.existsSync(executable)){add(`solana-v1.57-${name}`,false,false,`missing ${executable} (needed only for the solana target; run npm run install:platform-tools)`,modernReuse);continue;}
+    if(!fs.existsSync(executable)){add(`sbf-v1.57-${name}`,true,false,`missing ${executable} (needed for the fogo and solana project targets; run npm run install:platform-tools)`,modernReuse);continue;}
     const digest=crypto.createHash('sha256').update(fs.readFileSync(executable)).digest('hex');
     const result=command(executable,['--version']);
     const ok=supportedHost&&result.ok&&/22\.1\.2/.test(result.output)&&digest===MODERN_TOOL_HASHES[name];
-    add(`solana-v1.57-${name}`,false,ok,supportedHost
+    add(`sbf-v1.57-${name}`,true,ok,supportedHost
       ?`${result.output.split('\n')[0]??''}; content ${digest===MODERN_TOOL_HASHES[name]?'matches':'differs from'} pin`
       :`platform-tools v1.57 is pinned for ${SUPPORTED_V157_HOSTS} (host ${process.platform}/${process.arch})`,modernReuse);
   }

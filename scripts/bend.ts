@@ -6,9 +6,12 @@ import {prepareBend} from './build.ts';
 export const repository=path.resolve(import.meta.dir,'..');
 export const LOCAL_RPC_ENDPOINT='http://127.0.0.1:18899';
 export type ProjectTarget='fogo'|'solana';
-/** Network targets: fogo -> SBPFv0 (platform-tools v1.53), solana -> SBPFv3 (v1.57). */
-export const PROJECT_TARGETS:Record<ProjectTarget,{program?:'solana-v3';runner:'classic'|'modern';description:string}>={
-  fogo:{runner:'classic',description:'SBPFv0 for Fogo (platform-tools v1.53, LiteSVM 0.7.1)'},
+/**
+ * Network targets, both on platform-tools v1.57: fogo -> SBPFv0, solana -> SBPFv3.
+ * A project without "targets" keeps the historical single v1.53 SBPFv0 output.
+ */
+export const PROJECT_TARGETS:Record<ProjectTarget,{program:'fogo-v0'|'solana-v3';runner:'classic'|'modern';description:string}>={
+  fogo:{program:'fogo-v0',runner:'classic',description:'SBPFv0 for Fogo (platform-tools v1.57, LiteSVM 0.7.1)'},
   solana:{program:'solana-v3',runner:'modern',description:'SBPFv3 for Solana (platform-tools v1.57, LiteSVM 0.13.0)'},
 };
 export type Project={version:1;source:string;root:string;layout:string|null;output:string;targets?:ProjectTarget[]};
@@ -51,10 +54,9 @@ async function buildTarget(project:ReturnType<typeof loadProject>,target:Project
     return {stem,manifest:await buildProgram(project.source,project.config.root,stem,project.layout,target?PROJECT_TARGETS[target].program:undefined)};
   }catch(e){
     const message=e instanceof Error?e.message:String(e);
-    if(target==='solana'&&/platform-tools|pinned for macOS|content pin|ENOENT|Cannot locate|spawn/.test(message))
-      throw new Error(`Target solana needs Anza platform-tools v1.57 (macOS arm64, Linux x86_64 or Linux aarch64). `+
-        `Install it with: npm run install:platform-tools (default ~/.cache/solana/v1.57/platform-tools; override with SBF_V157_TOOLS), `+
-        `or build only Fogo with --target fogo or "targets": ["fogo"] in bend.json.\n${message}`);
+    if(target&&/platform-tools|pinned for macOS|content pin|ENOENT|Cannot locate|spawn/.test(message))
+      throw new Error(`Target ${target} needs Anza platform-tools v1.57 (macOS arm64, Linux x86_64 or Linux aarch64). `+
+        `Install it with: npm run install:platform-tools (default ~/.cache/solana/v1.57/platform-tools; override with SBF_V157_TOOLS).\n${message}`);
     throw e;
   }
 }

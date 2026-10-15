@@ -74,15 +74,20 @@ type QualifiedSbfCompileResult = {
   toolchain: Record<string,{path:string;invokedAs:string;sha256:string;version:string}>;
 };
 
-function compileSbfProfile(source: string, stem: string, profile: 'ordinary'): {tools:string;version:string};
+/** An explicitly selected toolchain for the ordinary profile; its pins are checked by the caller. */
+export type SbfToolchain = {tools:string;llvm:string;platformTools:string};
+function compileSbfProfile(source: string, stem: string, profile: 'ordinary', toolchain?: SbfToolchain): {tools:string;version:string};
 function compileSbfProfile(source: string, stem: string, profile: 'qualified-sha256'): QualifiedSbfCompileResult;
-function compileSbfProfile(source: string, stem: string, profile: SbfCompileProfile) {
-  const tools = sbfTools();
+function compileSbfProfile(source: string, stem: string, profile: SbfCompileProfile, selected?: SbfToolchain) {
+  const tools = selected?.tools ?? sbfTools();
   const clang = path.join(tools, 'clang');
   const linker = path.join(tools, 'ld.lld');
   const readelf = path.join(tools, 'llvm-readelf');
   const version = run(clang, ['--version'], true);
-  if (!version.includes('20.1.7') || !version.includes('anza-xyz')) {
+  if (selected && (!version.includes(selected.llvm) || !version.includes('anza-xyz'))) {
+    throw new Error(`Expected Anza platform-tools ${selected.platformTools} clang ${selected.llvm} in ${tools}`);
+  }
+  if (!selected && (!version.includes('20.1.7') || !version.includes('anza-xyz'))) {
     throw new Error('Expected Anza platform-tools v1.53 clang 20.1.7; set SBF_TOOLS to its llvm/bin');
   }
   const linkerVersion = profile === 'qualified-sha256' ? run(linker,['--version'],true) : undefined;
@@ -172,9 +177,12 @@ function compileSbfProfile(source: string, stem: string, profile: SbfCompileProf
   return { tools, version, imports, elfSha256:checkedElfSha256After, stack:stackReport, toolchain };
 }
 
-/** Ordinary SBF profile. Its import allowlist and stack-report behavior stay unchanged. */
-export function compileSbf(source: string, stem: string) {
-  return compileSbfProfile(source, stem, 'ordinary');
+/**
+ * Ordinary SBF profile. Its import allowlist and stack-report behavior stay
+ * unchanged; without a toolchain it uses the v1.53 tools from sbfTools().
+ */
+export function compileSbf(source: string, stem: string, toolchain?: SbfToolchain) {
+  return compileSbfProfile(source, stem, 'ordinary', toolchain);
 }
 
 /** Fixed internal profile used only after the source-qualified SHA build path. */

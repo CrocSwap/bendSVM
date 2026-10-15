@@ -64,6 +64,13 @@ refuses v3; it must not be used as evidence of network state.
 - Local Solana tests use all-enabled features for now; a pinned live-cluster list later.
 - 2026-10-14: `bend new` defaults to `"targets": ["fogo", "solana"]`. With the Linux
   v1.57 pins and installer, CI and acceptance build and test both targets.
+- 2026-10-15 (Stage C, implemented): the `fogo` project target builds with
+  `build:program --target fogo-v0` on v1.57 (ordinary SBPFv0 import checks and
+  call-depth gate, classic LiteSVM 0.7.1). The untargeted command, `npm test`
+  fixtures and the qualified SHA paths stay v1.53 until re-qualified.
+  `npm run test:fogo-v157` re-baselines the six applications on v1.57 v0 ELFs
+  (40 passed, 4 ignored; `build/fogo-v157/<run>/acceptance.json`, which also
+  records ELF sizes and CU against v1.53). Doctor now requires v1.57.
 
 ## Options that were presented
 

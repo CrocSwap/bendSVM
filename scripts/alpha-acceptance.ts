@@ -133,7 +133,7 @@ const report={
     bun:'node_modules/bun@1.4.2 via the current Bun process',
     typescript:'node_modules/typescript@5.2.2 (packaged lockfile dependency; no host cache)',
     bend:`.deps/bend at pinned commit ${BEND_COMMIT}`,
-    sbf:'SBF_TOOLS or ~/.cache/solana/v1.53/platform-tools/llvm/bin; reported by doctor',
+    sbf:'platform-tools v1.57 for both project targets: SBF_V157_TOOLS or ~/.cache/solana/v1.57/platform-tools/llvm/bin; reported by doctor',
     rust:'Cargo registry/git caches and target/debug/bend-test-runner, explicitly rebuilt by this gate',
     python:'not required by the ordinary alpha gate; PYTHON with z3-solver==5.1.0 is an explicit refinement-only dependency',
   },

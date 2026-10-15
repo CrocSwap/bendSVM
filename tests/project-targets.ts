@@ -35,7 +35,8 @@ try {
   assert.equal(solanaManifest.targetProfile,'solana-v3');
   assert.equal(solanaManifest.sbpfV3FinalImage.status,'accepted');
   const fogoManifest=JSON.parse(fs.readFileSync(path.join(dir,'dist/fogo/program.manifest.json'),'utf8'));
-  assert.equal(fogoManifest.platformTools,'v1.53');assert.equal(fogoManifest.sbfCallDepth.status,'accepted');
+  assert.equal(fogoManifest.platformTools,'v1.57');assert.equal(fogoManifest.targetProfile,'fogo-v0');
+  assert.equal(fogoManifest.sbfCallDepth.status,'accepted');assert.match(fogoManifest.compiler,/22\.1\.2/);
   for(const suffix of ['.client.ts','.client.js']){
     const shared=fs.readFileSync(path.join(dir,`dist/program${suffix}`));
     assert(shared.equals(fs.readFileSync(path.join(dir,`dist/fogo/program${suffix}`))),`shared ${suffix} equals fogo`);
@@ -67,12 +68,14 @@ try {
   assert(!fs.existsSync(path.join(dir,'dist/solana/program.test-report.json')));
   fs.writeFileSync(path.join(dir,'test.ts'),test);
 
-  // Missing v1.57 toolchain: actionable refusal naming the fix; no Solana manifest.
-  fs.rmSync(path.join(dir,'dist/solana'),{recursive:true,force:true});
-  const missing=cli(['build',dir,'--target','solana'],false,{SBF_V157_TOOLS:path.join(parent,'no-such-tools')});
-  assert.match(missing.stderr,/Target solana needs Anza platform-tools v1\.57/);
-  assert.match(missing.stderr,/--target fogo/);
-  assert(!fs.existsSync(path.join(dir,'dist/solana/program.manifest.json')));
+  // Missing v1.57 toolchain: actionable refusal naming the fix, for either target; no manifest.
+  for(const target of ['fogo','solana']){
+    fs.rmSync(path.join(dir,`dist/${target}`),{recursive:true,force:true});
+    const missing=cli(['build',dir,'--target',target],false,{SBF_V157_TOOLS:path.join(parent,'no-such-tools')});
+    assert.match(missing.stderr,new RegExp(`Target ${target} needs Anza platform-tools v1\\.57`));
+    assert.match(missing.stderr,/npm run install:platform-tools/);
+    assert(!fs.existsSync(path.join(dir,`dist/${target}/program.manifest.json`)));
+  }
 
   // Configuration and argument refusals.
   for(const [targets,label] of [[[],'empty'],[['fogo','fogo'],'duplicate'],[['ethereum'],'unknown'],['fogo','not a list']] as const){
@@ -84,10 +87,15 @@ try {
   const untargeted={...config()};delete untargeted.targets;
   fs.writeFileSync(path.join(dir,'bend.json'),JSON.stringify(untargeted,null,2)+'\n');
   assert.match(cli(['build',dir,'--target','fogo'],false).stderr,/--target requires "targets" in bend\.json/);
+  // A project without "targets" keeps the historical single v1.53 SBPFv0 output.
+  cli(['build',dir],true);
+  const legacy=JSON.parse(fs.readFileSync(path.join(dir,'dist/program.manifest.json'),'utf8'));
+  assert.equal(legacy.platformTools,'v1.53');assert.equal(legacy.targetProfile,undefined);
+  assert.equal(fs.readFileSync(path.join(dir,'dist/program.so')).readUInt32LE(48),0);
   assert.throws(()=>parseBendArgs(['check',dir,'--target','fogo']),/only with new, build and test/);
   assert.throws(()=>parseBendArgs(['build',dir,'--target','ethereum']),/Unknown target ethereum/);
   assert.throws(()=>parseBendArgs(['test',dir,'--target','fogo','--target','solana']),/Usage/);
   setTargets(['fogo','solana']);
   assert.match(cli(['test',dir,'--local-rpc','http://127.0.0.1:18899'],false).stderr,/runs one target/);
-  console.log('Project targets: bend new defaults to both targets (new --target selects one); fogo SBPFv0 and solana SBPFv3 build and test with no flags; shared client, per-target reports, --target selection, missing-toolchain, configuration and argument refusals passed');
+  console.log('Project targets: bend new defaults to both targets (new --target selects one); fogo SBPFv0 and solana SBPFv3 (both platform-tools v1.57) build and test with no flags; untargeted projects keep v1.53; shared client, per-target reports, --target selection, missing-toolchain, configuration and argument refusals passed');
 }finally{fs.rmSync(parent,{recursive:true,force:true});}

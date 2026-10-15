@@ -186,6 +186,7 @@
     "test:sha256-packed-qualified-library": "bun tests/sha256-packed-qualified-library.ts",
     "test:target-profiles": "bun tests/target-profiles.ts",
     "test:sbpf-v3": "bun tests/sbpf-v3-programs.ts",
+    "test:fogo-v157": "bun tests/fogo-v157-programs.ts",
     "test:project-targets": "bun tests/project-targets.ts"
   },
   "devDependencies": {

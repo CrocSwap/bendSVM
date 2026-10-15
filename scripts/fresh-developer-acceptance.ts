@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
+import {libraryTarget,libraryTools} from '../compiler/target-profile.ts';
 
 const repository=path.resolve(import.meta.dir,'..');
 const evidence=path.resolve(process.env.FRESH_DEVELOPER_EVIDENCE??path.join(repository,'build/fresh-developer-acceptance'));
@@ -207,7 +208,8 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
   assertFile(runnerBinary);
   const bentHead=hostVersion('git',['-C',bendCache,'rev-parse','HEAD']);
   const bentStatus=spawnSync('git',['-C',bendCache,'status','--porcelain'],{encoding:'utf8'});
-  const platformTools=process.env.SBF_TOOLS??path.join(os.homedir(),'.cache/solana/v1.53/platform-tools/llvm/bin');
+  // Both project targets build with platform-tools v1.57.
+  const platformTools=libraryTools(libraryTarget('fogo-v0'));
   const sbfClang=hostVersion(path.join(platformTools,'clang'),['--version']);
   const report:Record<string,unknown>={
     version:1,
@@ -241,7 +243,7 @@ export async function runFreshDeveloperAcceptance():Promise<FreshDeveloperAccept
     prerequisites:{doctor:doctorReport},
     provenance:{
       host:{platform:os.platform(),architecture:os.arch(),node:hostVersion('node',['--version']),bun:hostVersion(bun,['--version']),cargo:hostVersion('cargo',['--version']),rustc:hostVersion('rustc',['--version']),hostClang:hostVersion('clang',['--version'])},
-      pinned:{bun:'1.4.2',typescript:'5.2.2',rust:'1.92.0',anzaPlatformTools:'v1.53 / clang 20.1.7',bendCommit:BEND_COMMIT},
+      pinned:{bun:'1.4.2',typescript:'5.2.2',rust:'1.92.0',anzaPlatformTools:'v1.57 / clang 22.1.2',bendCommit:BEND_COMMIT},
       caches:{
         npm:{path:nodeModules,source:path.join(repository,'node_modules'),reused:true},
         bend:{path:bendCache,source:path.join(repository,'.deps/bend'),commit:bentHead.version,clean:bentStatus.status===0&&(bentStatus.stdout??'').trim()==='',reused:true},

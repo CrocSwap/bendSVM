@@ -78,7 +78,11 @@ Prerequisites:
 - Node/npm and Git; `npm ci` installs Bun **1.4.2** and TypeScript **5.2.2**.
 - Rust/Cargo, tested with **1.92.0**, for LiteSVM tests.
 - Host Clang for native sanitizer/differential tests (`CC` overrides it).
-- [Anza platform-tools v1.53](https://github.com/anza-xyz/platform-tools/releases/tag/v1.53),
+- Anza platform-tools v1.57 for project targets (Fogo and Solana) and explicit
+  `--target` builds: `npm run install:platform-tools` installs a hash-checked copy at
+  `~/.cache/solana/v1.57/platform-tools`; `SBF_V157_TOOLS` overrides its `llvm/bin`.
+- [Anza platform-tools v1.53](https://github.com/anza-xyz/platform-tools/releases/tag/v1.53)
+  for untargeted historical builds, `npm test` fixtures and the qualified SHA paths,
   normally at `~/.cache/solana/v1.53/platform-tools/llvm/bin`; `SBF_TOOLS` overrides it.
 - Python/Z3 is optional for the ordinary alpha workflow. Refinement checks use
   `PYTHON` and a binding reporting **5.1.0**; provision it in a virtualenv as
@@ -115,8 +119,9 @@ scope. This is a generic library boundary; it does not implement a DCG handler.
 Libraries take `--target fogo-v0|solana-v3` (both platform-tools v1.57, installed by
 `npm run install:platform-tools`; `--json` reports the manifest) and pass `npm run test:target-profiles`
 for Rust consumers; the historical command without `--target` stays v0 on v1.53. See the
-[library artifact contract](docs/library-artifact-contract.md). Full programs and
-the project CLI remain SBPFv0.
+[library artifact contract](docs/library-artifact-contract.md). Full programs take
+`--target fogo-v0|solana-v3` the same way, and project targets use them
+([targets](docs/developer-workflow.md#fogo-and-solana-targets)).
 
 The [bounded SHA-256 foundation](docs/sha256.md) provides a C syscall wrapper
 and TypeScript reference for at most 16 slices and 1,024 total bytes. An explicit,

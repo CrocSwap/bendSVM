@@ -231,9 +231,15 @@ export async function buildQualifiedShaProgram(
   }
 }
 
-export type ProgramTarget = 'solana-v3';
+/**
+ * Explicit program targets use platform-tools v1.57: fogo-v0 (SBPFv0, the
+ * ordinary v0 pipeline and call-depth gate) and solana-v3. Without a target
+ * the historical v1.53 SBPFv0 build is unchanged.
+ */
+export type ProgramTarget = 'fogo-v0' | 'solana-v3';
+export const PROGRAM_TARGETS: readonly ProgramTarget[] = ['fogo-v0', 'solana-v3'];
 export async function buildProgram(source: string, root: string, stem: string, layoutPath?: string, target?: ProgramTarget) {
-  if (target !== undefined && target !== 'solana-v3') throw new Error(`Unknown program target ${target}; choose solana-v3`);
+  if (target !== undefined && !PROGRAM_TARGETS.includes(target)) throw new Error(`Unknown program target ${target}; choose ${PROGRAM_TARGETS.join(' or ')}`);
   const buildRunId = runId();
   prepareBend();
   fs.mkdirSync(path.dirname(path.resolve(stem)), { recursive: true });
@@ -295,11 +301,27 @@ export async function buildProgram(source: string, root: string, stem: string, l
       console.log(`Built SBPFv3 ${stem}.so (${manifest.elfBytes} bytes), interface and source manifest`);
       return manifest;
     }
-    const {version} = compileSbf(stem+'.c',stem);
+    let selected: {profile:'fogo-v0';platformTools:string;toolchain:Record<string,{path:string;invokedAs:string;sha256:string}>} | undefined;
+    let compiledVersion: string;
+    if (target === 'fogo-v0') {
+      const {checkLibraryTools,libraryTarget,libraryTools} = await import('../compiler/target-profile.ts');
+      const profile = libraryTarget('fogo-v0');
+      const tools = libraryTools(profile);
+      checkLibraryTools(profile, tools, ['clang', 'ld.lld', 'llvm-readelf']);
+      compiledVersion = compileSbf(stem+'.c',stem,{tools,llvm:profile.llvm,platformTools:profile.platformTools}).version;
+      selected = {profile:'fogo-v0',platformTools:profile.platformTools,toolchain:Object.fromEntries(['clang','ld.lld','llvm-readelf'].map(name => {
+        const file = path.join(tools, name), resolved = fs.realpathSync(file);
+        return [name, {path:resolved,invokedAs:path.resolve(file),sha256:hash(resolved)}];
+      }))};
+    } else {
+      compiledVersion = compileSbf(stem+'.c',stem).version;
+    }
     const manifestBase={version:1,source:path.relative(process.cwd(),path.resolve(source)),root,
       priorEvidenceArchive,
-      bendCommit:BEND_COMMIT,bun:process.versions.bun,compiler:version.split('\n')[0],platformTools:'v1.53',
-      target:'sbf',cpu:'generic',sbpfVersion:0,emittedFunctions:emitted.functions,
+      bendCommit:BEND_COMMIT,bun:process.versions.bun,compiler:compiledVersion.split('\n')[0],platformTools:selected?.platformTools??'v1.53',
+      target:'sbf',cpu:'generic',sbpfVersion:0,
+      ...(selected?{targetProfile:selected.profile,toolchain:selected.toolchain}:{}),
+      emittedFunctions:emitted.functions,
       inputs:Object.fromEntries(inputs.map(file=>[file,hash(file)])),
       artifacts:Object.fromEntries(outputs.map(suffix=>[suffix,hash(stem+suffix)])),elfBytes:fs.statSync(stem+'.so').size};
     const resources=JSON.parse(fs.readFileSync(stem+'.resources.json','utf8')),
@@ -337,8 +359,8 @@ if(import.meta.main) {
   const target=targetIndex<0?undefined:args[targetIndex+1];
   if(targetIndex>=0)args.splice(targetIndex,2);
   const [source,root,stem,layout,...extra]=args;
-  if(!source||!root||!stem||extra.length||(targetIndex>=0&&target!=='solana-v3')) {
-    console.error('Usage: bun scripts/program.ts PROOF.bend namespace.function output-stem [storage-layout.json] [--target solana-v3]');process.exit(1);
+  if(!source||!root||!stem||extra.length||(targetIndex>=0&&!PROGRAM_TARGETS.includes(target as ProgramTarget))) {
+    console.error('Usage: bun scripts/program.ts PROOF.bend namespace.function output-stem [storage-layout.json] [--target fogo-v0|solana-v3]');process.exit(1);
   }
   try {await buildProgram(source,root,stem,layout,target as ProgramTarget|undefined);} catch(e) {console.error(e instanceof Error?e.message:e);process.exit(1);}
 }

@@ -63,10 +63,11 @@ jobs:
         run: npm test
       - name: Run mixed Rust and Bend acceptance with call-depth refusal control
         run: npm run test:mixed-library
-      - name: Run Fogo and Solana target checks (library profiles, SBPFv3 programs, project targets)
+      - name: Run Fogo and Solana target checks (library profiles, v1.57 Fogo and SBPFv3 programs, project targets)
         run: |
           npm exec -- bun tests/install-platform-tools.ts
           npm run test:target-profiles
+          npm run test:fogo-v157
           npm run test:sbpf-v3
           npm run test:project-targets
       - name: Run generated-client and packaging checks after fixture generation

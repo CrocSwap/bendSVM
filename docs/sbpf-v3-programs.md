@@ -8,7 +8,8 @@ npm run build:program -- examples/vault/PROOF.bend vault.process build/v3/vault 
 
 The generated C, codecs, interfaces and clients are the same as for SBPFv0;
 only the compile, link and final-image gate differ. Without `--target` the
-command still builds SBPFv0 with platform-tools v1.53 exactly as before.
+command still builds SBPFv0 with platform-tools v1.53 exactly as before;
+`--target fogo-v0` builds SBPFv0 with v1.57 (the Fogo project target).
 Projects created by `npm run bend -- new` list both `fogo` and `solana` targets
 and select the build and test runner per target
 ([targets](developer-workflow.md#fogo-and-solana-targets)).
@@ -97,7 +98,12 @@ needs a deterministic per-operation benchmark on one runtime.
 
 ## Limits
 
-- Local LiteSVM only; no devnet/mainnet deployment yet. The all-enabled
+- No devnet/mainnet deployment yet. On 2026-10-15 the queue built for
+  `solana-v3` deployed to a local Agave 4.0.3 validator (`solana-sbpf` 0.14.4,
+  the same as LiteSVM 0.13.0) and passed the full live flow
+  (`build/live-queue-1792069882706/report.json`; `scripts/live-queue --program`).
+  Solana CLI/validator 3.0.15 cannot parse the v3 ELF. Public clusters run Agave
+  4.3/4.4 (`solana-sbpf` 0.23); loading there is unverified. The all-enabled
   feature set is a local choice, not observed cluster state.
 - Recorded execution results are from macOS arm64. Linux pins match the release
   archives; CI (Ubuntu x86_64) runs these checks there.

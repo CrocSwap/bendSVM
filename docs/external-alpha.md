@@ -10,15 +10,18 @@ evidence.
 ## Supported setup
 
 The checked-in CI workflow targets Ubuntu 22.04, Node 22, Bun 1.4.2 from the npm
-lockfile, Rust/Cargo 1.92.0, and Anza platform-tools v1.53. This validation was
+lockfile, Rust/Cargo 1.92.0, and Anza platform-tools v1.53 and v1.57. This validation was
 run from a clean source copy on macOS arm64; it does not claim a GitHub Actions
 or Linux execution. Live validation additionally needs Solana CLI and
 `solana-test-validator`; ordinary project creation, checking, building and
 LiteSVM tests do not need a wallet or RPC endpoint.
 
 Install the OS tools (Node/npm, Git, Rust/Cargo, curl and a host Clang), then
-install Anza platform-tools v1.53. Python 3 is only needed for the optional
-refinement suite. On macOS arm64:
+install Anza platform-tools. Project targets (Fogo and Solana) use v1.57:
+`npm ci && npm run install:platform-tools` installs it (macOS arm64, Linux
+x86_64/aarch64; `npm run bootstrap:alpha` does this too). Untargeted historical
+builds and `npm test` fixtures use v1.53. Python 3 is only needed for the
+optional refinement suite. For v1.53 on macOS arm64:
 
 ```sh
 TOOLS_ROOT="$HOME/.cache/solana/v1.53/platform-tools"

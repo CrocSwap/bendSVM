@@ -56,11 +56,15 @@ Run commands from the repository root. `package.json` is the command inventory;
 there is no generic lint or TypeScript-check script. TypeScript runs under the
 pinned Bun installed by `npm ci`.
 
-Toolchain pins are Bun 1.4.2, TypeScript 5.2.2, Anza platform-tools v1.53
-(Clang 20.1.7), and LiteSVM 0.7.1. Rust 1.92.0 is the documented/CI version.
+Toolchain pins are Bun 1.4.2, TypeScript 5.2.2, Anza platform-tools v1.57
+(Clang 22.1.2; project targets, explicit program/library targets) and v1.53
+(Clang 20.1.7; untargeted historical builds and the qualified SHA paths),
+LiteSVM 0.7.1 (Fogo/SBPFv0) and 0.13.0 (Solana/SBPFv3). Rust 1.92.0 is the
+documented/CI version, pinned by `rust-toolchain.toml`.
 The build requires a clean `.deps/bend` checkout at
 `7561656155a4285c1e4ccfcb3505ab59524de973`; do not bypass this check.
-`SBF_TOOLS` overrides the Anza `llvm/bin` directory, `CC` selects host Clang,
+`SBF_TOOLS` overrides the v1.53 `llvm/bin` directory and `SBF_V157_TOOLS` the
+v1.57 one (`npm run install:platform-tools` installs it), `CC` selects host Clang,
 and `PYTHON` selects the interpreter for optional refinements. Those refinements
 require the Z3 binding reporting 5.1.0; follow the virtualenv instructions in
 `docs/external-alpha.md`, without installing global Python packages.
