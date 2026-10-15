@@ -33,7 +33,10 @@ const LOCAL_URL: &str = "http://127.0.0.1:18899";
 struct Cli {
     url: String,
     payer: Option<PathBuf>,
+    program: String,
 }
+
+const DEFAULT_PROGRAM: &str = "build/queue";
 
 fn parse_args<I, S>(args: I) -> Result<Cli, String>
 where
@@ -42,6 +45,7 @@ where
 {
     let mut positional = None;
     let mut payer = None;
+    let mut program: Option<String> = None;
     let mut args = args.into_iter().map(Into::into);
     while let Some(arg) = args.next() {
         if arg == "--payer" {
@@ -63,6 +67,19 @@ where
                 return Err("--payer requires a keypair path".into());
             }
             payer = Some(PathBuf::from(path));
+        } else if arg == "--program" || arg.starts_with("--program=") {
+            let stem = match arg.strip_prefix("--program=") {
+                Some(stem) => stem.to_string(),
+                None => args
+                    .next()
+                    .ok_or_else(|| "--program requires a build stem".to_string())?,
+            };
+            if stem.is_empty() || stem.starts_with('-') {
+                return Err("--program requires a build stem, not an option".into());
+            }
+            if program.replace(stem).is_some() {
+                return Err("--program may be supplied only once".into());
+            }
         } else if arg.starts_with('-') {
             return Err(format!("unknown option {arg}"));
         } else if positional.replace(arg).is_some() {
@@ -70,12 +87,16 @@ where
         }
     }
     let url = positional.ok_or_else(|| {
-        format!("Usage: bend-live-queue [{DEVNET_URL}|{LOCAL_URL}] [--payer PATH]")
+        format!("Usage: bend-live-queue [{DEVNET_URL}|{LOCAL_URL}] [--payer PATH] [--program STEM]")
     })?;
     if url != DEVNET_URL && url != LOCAL_URL {
         return Err("Only explicit test endpoints are supported".into());
     }
-    Ok(Cli { url, payer })
+    Ok(Cli {
+        url,
+        payer,
+        program: program.unwrap_or_else(|| DEFAULT_PROGRAM.into()),
+    })
 }
 
 struct Rpc {
@@ -493,7 +514,18 @@ fn main() {
     fs::create_dir(&dir).unwrap();
     rpc.receipt_path = Some(dir.join("receipts.json"));
     rpc.flush_receipts();
-    fs::copy("build/queue.manifest.json", dir.join("build.manifest.json")).unwrap();
+    let stem = cli.program.clone();
+    let elf_path = format!("{stem}.so");
+    // Instruction plans come from build/queue.client.js; the client is
+    // target-independent, so another build stem must carry the same bytes.
+    for suffix in ["client.js", "interface.json"] {
+        assert_eq!(
+            fs::read(format!("{stem}.{suffix}")).unwrap(),
+            fs::read(format!("{DEFAULT_PROGRAM}.{suffix}")).unwrap(),
+            "{stem}.{suffix} differs from {DEFAULT_PROGRAM}.{suffix}"
+        );
+    }
+    fs::copy(format!("{stem}.manifest.json"), dir.join("build.manifest.json")).unwrap();
     let fresh_payer = Keypair::new();
     let program = Keypair::new();
     let state = Keypair::new();
@@ -555,7 +587,7 @@ fn main() {
             "program",
             "deploy",
             "--use-rpc",
-            "build/queue.so",
+            &elf_path,
             "--program-id",
             dir.join("program.json").to_str().unwrap(),
             "--output",
@@ -590,7 +622,7 @@ fn main() {
         .status()
         .unwrap()
         .success());
-    let elf = fs::read("build/queue.so").unwrap();
+    let elf = fs::read(&elf_path).unwrap();
     let actual = fs::read(&dumped).unwrap();
     assert!(
         actual.starts_with(&elf) && actual[elf.len()..].iter().all(|b| *b == 0),
@@ -659,7 +691,7 @@ fn main() {
         Value::Null,
     );
     let interface: Value =
-        serde_json::from_slice(&fs::read("build/queue.interface.json").unwrap()).unwrap();
+        serde_json::from_slice(&fs::read(format!("{stem}.interface.json")).unwrap()).unwrap();
     assert_eq!(interface["instructionBytes"], 68);
     assert_eq!(interface["collection"]["stride"], 43);
     let state_size = interface["stateBytes"].as_u64().unwrap() as usize;
@@ -837,7 +869,7 @@ fn main() {
         "deployment":{"signature":deployment_sig,"stdout":"deployment.stdout","stderr":"deployment.stderr"},
         "generatedClient":"build/queue.client.js","generatedClientBridge":"scripts/live-queue/generated-client.ts",
         "state":state.pubkey().to_string(),"collection":collection.pubkey().to_string(),"collectionBytes":11064,
-        "elfBytesMatched":elf.len(),"recipientBalances":[36,18],"custodyBalance":0,"receipts":rpc.receipts});
+        "programElf":elf_path,"elfBytesMatched":elf.len(),"recipientBalances":[36,18],"custodyBalance":0,"receipts":rpc.receipts});
     fs::write(
         dir.join("report.json"),
         serde_json::to_vec_pretty(&report).unwrap(),
@@ -860,6 +892,7 @@ mod tests {
             Ok(Cli {
                 url: DEVNET_URL.into(),
                 payer: None,
+                program: DEFAULT_PROGRAM.into(),
             })
         );
         assert_eq!(
@@ -867,6 +900,15 @@ mod tests {
             Ok(Cli {
                 url: LOCAL_URL.into(),
                 payer: Some("build/test-payer.json".into()),
+                program: DEFAULT_PROGRAM.into(),
+            })
+        );
+        assert_eq!(
+            parse_args([LOCAL_URL, "--program", "build/v3/queue"]),
+            Ok(Cli {
+                url: LOCAL_URL.into(),
+                payer: None,
+                program: "build/v3/queue".into(),
             })
         );
         assert!(parse_args(["https://api.mainnet-beta.solana.com"]).is_err());
@@ -881,6 +923,10 @@ mod tests {
         assert!(parse_args([DEVNET_URL, "--payer="]).is_err());
         assert!(parse_args([DEVNET_URL, "--payer", "a", "--payer", "b"]).is_err());
         assert!(parse_args([DEVNET_URL, "--unknown"]).is_err());
+        assert!(parse_args([DEVNET_URL, "--program"]).is_err());
+        assert!(parse_args([DEVNET_URL, "--program="]).is_err());
+        assert!(parse_args([DEVNET_URL, "--program", "--payer"]).is_err());
+        assert!(parse_args([DEVNET_URL, "--program", "a", "--program=b"]).is_err());
         assert!(parse_args([DEVNET_URL, LOCAL_URL]).is_err());
         assert!(parse_args(std::iter::empty::<String>()).is_err());
     }

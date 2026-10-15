@@ -32,6 +32,13 @@ Build the Bend program:
 npm run build:program -- examples/queue/PROOF.bend queue.process build/queue examples/queue/storage.json
 ```
 
+`--program STEM` deploys `STEM.so` instead of `build/queue.so` (for example a
+`--target solana-v3` build). The runner refuses a stem whose `client.js` or
+`interface.json` differs from `build/queue`'s, because instruction plans come
+from `build/queue.client.js`. SBPFv3 needs a validator and CLI that parse it:
+Solana CLI 3.0.15 cannot; Agave 4.0.3 (`solana-sbpf` 0.14.4) passed locally on
+2026-10-15.
+
 For a local validator, first run this in a separate terminal (use a fresh ledger
 directory if that path already belongs to another validator):
 
