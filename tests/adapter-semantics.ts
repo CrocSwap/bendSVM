@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { execFile, execFileSync } from 'node:child_process';
+import { execFile, execFileSync, spawnSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import { Backend, checkedBook, mangle } from '../compiler/backend.ts';
 import { emitCodecs } from '../compiler/codecs.ts';
@@ -489,8 +489,19 @@ function firstFailure(l: Layout, list: Scenario[], results: Map<number, Result>)
   return undefined;
 }
 
+/** -ftrivial-auto-var-init=zero, plus the opt-in flag Clang 14/15 require for it. */
+function zeroInitFlags(cc: string): string[] {
+  const flag = '-ftrivial-auto-var-init=zero';
+  const probe = spawnSync(cc, [flag, '-x', 'c', '-fsyntax-only', '-'], { input: 'int main(void){return 0;}\n', encoding: 'utf8' });
+  if (probe.status === 0) return [flag];
+  if (/enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang/.test(probe.stderr))
+    return [flag, '-enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang'];
+  throw new Error(`${cc} does not support ${flag}: ${probe.stderr}`);
+}
+
 export async function testAdapterSemantics() {
   const cc = process.env.CC ?? 'clang';
+  const zeroInit = zeroInitFlags(cc);
   const out = 'build/adapter-semantics';
   fs.rmSync(path.join(out, 'report.json'), {force:true});
   fs.mkdirSync(out, { recursive: true });
@@ -607,7 +618,7 @@ ${f.effects === 'none' ? '' : `#define ${f.effects === 'cpi' ? 'bend_invoke_cust
       assert.notEqual(c, storage.c, `${f.name}: mutation did not change the adapter: ${m.name}`);
       const stem = `mutant-${String(n).padStart(2, '0')}`;
       // Zero automatic storage so a removed decode is a defined, comparable run.
-      await build(stem, c, ['-ftrivial-auto-var-init=zero', '-Wno-unused-variable', '-Wno-unused-but-set-variable',
+      await build(stem, c, [...zeroInit, '-Wno-unused-variable', '-Wno-unused-but-set-variable',
         '-Wno-uninitialized', '-Wno-sometimes-uninitialized', '-Wno-unused-parameter']);
       const r = await execute(stem);
       const failure = firstFailure(l, list, r.results);
